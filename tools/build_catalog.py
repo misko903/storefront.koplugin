@@ -14,6 +14,7 @@ import time
 import urllib.request
 import urllib.parse
 from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
 BASE_URL = "https://api.github.com"
@@ -76,8 +77,6 @@ def make_request(url):
 
 def search_repositories(base_query):
     all_items = []
-    # Run each query twice: once for all repos (includes non-forks by default),
-    # and once with fork:true to also capture fork-only repos (including 0-star forks).
     sub_queries = [
         (base_query, 10),
         (base_query + " fork:true", 10),
@@ -144,7 +143,7 @@ def parse_release_dict(rel):
     }
 
 def get_releases(owner, repo):
-    url = f"{BASE_URL}/repos/{owner}/{repo}/releases?per_page=5"
+    url = f"{BASE_URL}/repos/{owner}/{repo}/releases?per_page=10"
     return make_request(url)
 
 def get_latest_release(owner, repo):
@@ -177,20 +176,13 @@ def fetch_patch_files(owner, repo, default_branch="main"):
             return patch_files
     return []
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
 def check_wiki_content(owner, repo):
-    """
-    Checks if the wiki actually has a Home page, filtering out repos 
-    that just have the wiki feature enabled but no content.
-    """
     urls_to_try = [
         f"https://raw.githubusercontent.com/wiki/{owner}/{repo}/Home.md",
         f"https://raw.githubusercontent.com/wiki/{owner}/{repo}/Home"
     ]
     for url in urls_to_try:
         try:
-            # Use HEAD request to save bandwidth and time
             req = urllib.request.Request(url, method="HEAD")
             req.add_header("User-Agent", USER_AGENT)
             with urllib.request.urlopen(req, timeout=3) as resp:
@@ -208,14 +200,17 @@ def process_single_repo(repo_item, is_patch):
     stars = repo_item.get("stargazers_count", 0)
     is_fork = repo_item.get("fork", False)
     repo_id = repo_item.get("id", 0)
-    
-    # Check if the feature is on, and if so, verify it actually has content
+
+    # Exclude 0-star forks completely
+    if is_fork and stars == 0:
+        return None
+
+    # Check wiki content
     has_wiki_feature = repo_item.get("has_wiki", False)
     actual_wiki_exists = False
     if has_wiki_feature:
         actual_wiki_exists = check_wiki_content(owner, repo_name)
 
-    # Prepare normalized record
     record = {
         "id": repo_id,
         "repo_id": repo_id,
@@ -234,42 +229,52 @@ def process_single_repo(repo_item, is_patch):
         "updated_at": repo_item.get("updated_at") or "",
         "html_url": repo_item.get("html_url") or f"https://github.com/{full_name}",
     }
-    
-    # Fetch latest release & pre-release only for non-forks or starred forks
-    if not is_fork or stars > 0:
-        releases = get_releases(owner, repo_name)
-        stable_rel = None
-        prerelease_rel = None
-        if releases and isinstance(releases, list) and len(releases) > 0:
-            for r in releases:
-                if not r or not isinstance(r, dict) or r.get("draft"):
-                    continue
-                is_pre = r.get("prerelease") or is_prerelease_tag(r.get("tag_name"))
-                if is_pre:
-                    if not prerelease_rel:
-                        prerelease_rel = r
-                else:
-                    if not stable_rel:
-                        stable_rel = r
-                if stable_rel and prerelease_rel:
-                    break
-        else:
-            stable_rel = get_latest_release(owner, repo_name)
 
-        if stable_rel:
-            parsed_stable = parse_release_dict(stable_rel)
-            if parsed_stable:
-                record["latest_release"] = parsed_stable
+    releases = get_releases(owner, repo_name)
+    stable_rel = None
+    prerelease_rel = None
 
-        if prerelease_rel:
-            parsed_pre = parse_release_dict(prerelease_rel)
-            if parsed_pre and (not parsed_stable or parsed_pre.get("tag_name") != parsed_stable.get("tag_name")):
-                record["latest_prerelease"] = parsed_pre
-    
+    if releases and isinstance(releases, list) and len(releases) > 0:
+        for r in releases:
+            if not r or not isinstance(r, dict) or r.get("draft"):
+                continue
+            is_pre = r.get("prerelease") or is_prerelease_tag(r.get("tag_name"))
+            if is_pre:
+                if not prerelease_rel:
+                    prerelease_rel = r
+            else:
+                if not stable_rel:
+                    stable_rel = r
+            if stable_rel and prerelease_rel:
+                break
+
+    # Fall back to latest release endpoint if no stable release was found in releases list
+    if not stable_rel:
+        latest = get_latest_release(owner, repo_name)
+        if latest and not latest.get("draft") and not latest.get("prerelease") and not is_prerelease_tag(latest.get("tag_name")):
+            stable_rel = latest
+
+    parsed_stable = None
+    if stable_rel:
+        parsed_stable = parse_release_dict(stable_rel)
+        if parsed_stable:
+            record["latest_release"] = parsed_stable
+
+    if prerelease_rel:
+        parsed_pre = parse_release_dict(prerelease_rel)
+        if parsed_pre and (not parsed_stable or parsed_pre.get("tag_name") != parsed_stable.get("tag_name")):
+            record["latest_prerelease"] = parsed_pre
+
     if is_patch:
         patch_files = fetch_patch_files(owner, repo_name, default_branch)
-        record["patch_files"] = patch_files or []
-        
+        if not patch_files:
+            return None  # Drop empty patch repos
+        record["patch_files"] = patch_files
+    else:
+        # Require plugins to have at least one usable release or pre-release
+        if "latest_release" not in record and "latest_prerelease" not in record:
+            return None
+
     return record
 
 def process_repos(queries, is_patch=False):
@@ -304,7 +309,6 @@ def main():
     plugins = process_repos(PLUGIN_QUERIES, is_patch=False)
     patches = process_repos(PATCH_QUERIES, is_patch=True)
     
-    # Fetch live ratings and bake into catalog items
     try:
         from ratings_tally import fetch_all_ratings
         ratings_data = fetch_all_ratings() or {}
@@ -344,7 +348,6 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
     output_path = os.path.abspath(os.path.join(script_dir, "..", "catalog.json"))
     
-    # Preserve fonts array if it exists in the current catalog.json
     existing_fonts = []
     if os.path.exists(output_path):
         try:
