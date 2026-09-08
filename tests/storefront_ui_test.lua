@@ -213,9 +213,19 @@ package.loaded["luasettings"] = dummy_widget
 
 for _, w in ipairs(widgets) do
     if w ~= "storefront_plugin_paths" and w ~= "libs/libkoreader-lfs" then
-        package.loaded[w] = dummy_widget
+        package.loaded[w] = dummy_widget:extend{}
     end
 end
+
+package.loaded["ui/event"] = {
+    new = function(self, action, args)
+        local ev = { action = action }
+        if type(args) == "table" then
+            for k, v in pairs(args) do ev[k] = v end
+        end
+        return ev
+    end
+}
 
 package.loaded["libs/libkoreader-lfs"] = {
     attributes = function(path, req)
@@ -1365,6 +1375,43 @@ if ok_browser then
         end
         check("localized restart button uses a white label on its black background", restart_now_button and restart_now_button.text_font_color, package.loaded["ffi/blitbuffer"].COLOR_WHITE)
         check("localized restart button reserves height for two lines", restart_now_button and restart_now_button.height, 58)
+
+        -- Test clicking "Restart now" closes Storefront menus and broadcasts Restart event
+        local closed_browser = false
+        local closed_updates = false
+        local broadcasted_event = nil
+        local direct_restart_called = false
+
+        MainStorefront.closeBrowserMenu = function() closed_browser = true end
+        MainStorefront.closeUpdatesDialog = function() closed_updates = true end
+
+        local orig_broadcast = UIManager.broadcastEvent
+        local orig_restart_ko = UIManager.restartKOReader
+        UIManager.broadcastEvent = function(self, ev) broadcasted_event = ev end
+        UIManager.restartKOReader = function(self) direct_restart_called = true end
+
+        if restart_now_button and restart_now_button.callback then
+            restart_now_button.callback()
+        end
+
+        check("Restart button closes Storefront browser menu", closed_browser, true)
+        check("Restart button closes Storefront updates dialog", closed_updates, true)
+        check("Restart button broadcasts Restart event", broadcasted_event and broadcasted_event.action, "Restart")
+        check("Restart button does NOT call UIManager:restartKOReader directly", direct_restart_called, false)
+
+        UIManager.broadcastEvent = orig_broadcast
+        UIManager.restartKOReader = orig_restart_ko
+        MainStorefront.closeBrowserMenu = nil
+        MainStorefront.closeUpdatesDialog = nil
+
+        -- Test Device:canRestart() == false shows only single OK button
+        local Device = package.loaded["device"]
+        Device.canRestart = function() return false end
+        restart_buttons = {}
+        MainStorefront:showRestartConfirmation("No restart support")
+        check("canRestart == false produces exactly 1 button", #restart_buttons, 1)
+        check("canRestart == false button is OK", restart_buttons[1] and restart_buttons[1].text, "OK")
+        Device.canRestart = nil
 
         Button.new = orig_button_new
         Localization.t = orig_localization_t

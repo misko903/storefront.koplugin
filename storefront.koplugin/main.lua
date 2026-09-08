@@ -276,9 +276,14 @@ local function showRestartConfirmation(message, force)
 
     local overlay
 
+    local can_restart = true
+    if Device and type(Device.canRestart) == "function" then
+        can_restart = Device:canRestart()
+    end
+
     local cancel_text = _("Restart later")
-    local ok_text = _("Restart now")
-    local btn_texts = { cancel_text, ok_text }
+    local ok_text = can_restart and _("Restart now") or _("OK")
+    local btn_texts = can_restart and { cancel_text, ok_text } or { ok_text }
 
     local btn_gap = sc(8)
     local padding_per_btn = sc(12)
@@ -360,20 +365,23 @@ local function showRestartConfirmation(message, force)
     local btn_widths = calcProportionalWidths(btn_texts, inner_w, btn_gap, btn_font_size, padding_per_btn)
     local btn_h = sc(58)
 
-    local cancel_btn = Button:new{
-        text = cancel_text,
-        text_font_size = btn_font_size,
-        text_font_bold = true,
-        bordersize = sc(1),
-        border_color = Blitbuffer.COLOR_BLACK,
-        radius = storefront_theme.radius_btn or sc(4),
-        padding = 0,
-        height = btn_h,
-        width = btn_widths[1],
-        callback = function()
-            if overlay then UIManager:close(overlay, "ui") end
-        end,
-    }
+    local cancel_btn
+    if can_restart then
+        cancel_btn = Button:new{
+            text = cancel_text,
+            text_font_size = btn_font_size,
+            text_font_bold = true,
+            bordersize = sc(1),
+            border_color = Blitbuffer.COLOR_BLACK,
+            radius = storefront_theme.radius_btn or sc(4),
+            padding = 0,
+            height = btn_h,
+            width = btn_widths[1],
+            callback = function()
+                if overlay then UIManager:close(overlay, "ui") end
+            end,
+        }
+    end
 
     local ok_btn = Button:new{
         text = ok_text,
@@ -387,22 +395,48 @@ local function showRestartConfirmation(message, force)
         radius = storefront_theme.radius_btn or sc(4),
         padding = 0,
         height = btn_h,
-        width = btn_widths[2],
+        width = can_restart and btn_widths[2] or btn_widths[1],
         callback = function()
             if overlay then UIManager:close(overlay, "ui") end
-            UIManager:restartKOReader()
+            if not can_restart then
+                return
+            end
+
+            local sf = Storefront.instance or Storefront
+            if sf then
+                if sf.closeBrowserMenu then pcall(function() sf:closeBrowserMenu() end) end
+                if sf.closeUpdatesDialog then pcall(function() sf:closeUpdatesDialog(true) end) end
+                if sf.closePatchUpdatesDialog then pcall(function() sf:closePatchUpdatesDialog(true) end) end
+            end
+
+            local Event = require("ui/event")
+            UIManager:nextTick(function()
+                if UIManager.broadcastEvent then
+                    UIManager:broadcastEvent(Event:new("Restart"))
+                elseif UIManager.restartKOReader then
+                    UIManager:restartKOReader()
+                end
+            end)
         end,
     }
     if ok_btn.label_widget then
         ok_btn.label_widget.fgcolor = Blitbuffer.COLOR_WHITE
     end
 
-    local btn_row = HorizontalGroup:new{
-        align = "center",
-        cancel_btn,
-        HorizontalSpan:new{ width = btn_gap },
-        ok_btn,
-    }
+    local btn_row
+    if can_restart then
+        btn_row = HorizontalGroup:new{
+            align = "center",
+            cancel_btn,
+            HorizontalSpan:new{ width = btn_gap },
+            ok_btn,
+        }
+    else
+        btn_row = HorizontalGroup:new{
+            align = "center",
+            ok_btn,
+        }
+    end
 
     local content_vg = VerticalGroup:new{
         align = "center",
@@ -436,10 +470,13 @@ local function showRestartConfirmation(message, force)
         table.insert(key_events.Close, { Input.group.Back })
     end
 
+    local layout = can_restart and { { cancel_btn, ok_btn } } or { { ok_btn } }
+    local selected = can_restart and { x = 2, y = 1 } or { x = 1, y = 1 }
+
     overlay = R.FocusManager:new{
         dimen = Geom:new{ w = sw, h = sh },
-        layout = { { cancel_btn, ok_btn } },
-        selected = { x = 2, y = 1 },
+        layout = layout,
+        selected = selected,
         key_events = key_events,
         CenterContainer:new{
             dimen = Geom:new{ w = sw, h = sh },
@@ -447,7 +484,9 @@ local function showRestartConfirmation(message, force)
         },
     }
 
-    cancel_btn.show_parent = overlay
+    if cancel_btn then
+        cancel_btn.show_parent = overlay
+    end
     ok_btn.show_parent     = overlay
 
     overlay.onClose = function()
@@ -705,6 +744,7 @@ local function showFetchingProgress(message)
 end
 
 function Storefront:showRestartConfirmation(message)
+    Storefront.instance = self
     return showRestartConfirmation(message, true)
 end
 
