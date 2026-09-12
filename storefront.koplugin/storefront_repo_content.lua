@@ -787,10 +787,19 @@ function RepoContent.fetchReleaseNotesHtml(owner, repo, release_override)
     local clean_tag = tag_name and tag_name:gsub("^[vV]", "") or ""
     local clean_rel = rel_name and rel_name:gsub("^[vV]", "") or ""
 
-    local tag_fmt = clean_tag ~= "" and ("v" .. clean_tag) or ""
+    local tag_fmt = ""
+    if clean_tag ~= "" then
+        if clean_tag:match("^%d") then
+            tag_fmt = "v" .. clean_tag
+        else
+            tag_fmt = clean_tag
+        end
+    end
     local header_title = ""
 
-    if clean_rel == "" or clean_rel:lower() == clean_tag:lower() then
+    if tag_name and tag_name:find("@") then
+        header_title = (rel_name and rel_name ~= "") and rel_name or _("Latest Release")
+    elseif clean_rel == "" or clean_rel:lower() == clean_tag:lower() then
         header_title = tag_fmt ~= "" and tag_fmt or _("Latest Release")
     elseif rel_name and (rel_name:lower():find(clean_tag:lower(), 1, true) or (tag_fmt ~= "" and rel_name:lower():find(tag_fmt:lower(), 1, true))) then
         header_title = rel_name

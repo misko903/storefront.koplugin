@@ -386,6 +386,72 @@ function GitHubClient.fetchCompareCommits(owner, repo, base, head)
     return parsed, nil
 end
 
+-- Fetch the branches of a repository.
+-- Pagination is performed transparently up to `max_pages`.
+function GitHubClient.fetchBranches(owner, repo, opts)
+    if not owner or not repo then
+        return nil, "missing owner/repo"
+    end
+    opts = opts or {}
+    local per_page = tonumber(opts.per_page) or 100
+    local max_pages = tonumber(opts.max_pages) or 3
+    local results = {}
+    for page = 1, max_pages do
+        local path = string.format("/repos/%s/%s/branches", owner, repo)
+        local query = string.format("per_page=%d&page=%d", per_page, page)
+        local code, body = request(path, query)
+        if code ~= 200 then
+            logger.warn("GitHub fetch branches error", owner .. "/" .. repo, code, body)
+            if #results > 0 then
+                return results, nil
+            end
+            return nil, { code = code, body = body }
+        end
+        local ok, parsed = safeJsonDecode(body)
+        if not ok or type(parsed) ~= "table" then
+            logger.warn("GitHub fetch branches decode error", parsed)
+            if #results > 0 then
+                return results, nil
+            end
+            return nil, "decode"
+        end
+        if #parsed == 0 then
+            break
+        end
+        for _, branch_obj in ipairs(parsed) do
+            table.insert(results, branch_obj)
+        end
+        if #parsed < per_page then
+            break
+        end
+    end
+    return results, nil
+end
+
+-- Fetch latest commit SHA for a specific branch or ref.
+-- Returns SHA string or nil + err.
+function GitHubClient.fetchBranchSHA(owner, repo, branch)
+    if not owner or not repo or not branch then
+        return nil, "missing parameters"
+    end
+    local path = string.format("/repos/%s/%s/commits/%s", owner, repo, branch)
+    local code, body = request(path)
+    if code ~= 200 then
+        logger.warn("GitHub fetch branch SHA error", owner .. "/" .. repo, branch, code, body)
+        return nil, { code = code, body = body }
+    end
+    local ok, parsed = safeJsonDecode(body)
+    if not ok or type(parsed) ~= "table" then
+        logger.warn("GitHub fetch branch SHA decode error", parsed)
+        return nil, "decode"
+    end
+    local sha = parsed.sha
+    if sha and type(sha) == "string" and sha ~= "" then
+        return sha, nil
+    end
+    return nil, "missing sha in response"
+end
+
 local function markdownToHtml(md, owner, repo, is_wiki)
     if type(md) ~= "string" or md == "" or md == json.null then
         return "<div class=\"markdown-body\"><p>No release notes or README content provided.</p></div>"

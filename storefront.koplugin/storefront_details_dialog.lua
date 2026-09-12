@@ -224,15 +224,36 @@ function StorefrontDetailsDialog:init()
     -- 2. Title & Metadata
     -- -----------------------------------------------------------------------
     local function getInstallRecord()
+        if self.update_item and self.update_item.record then
+            return self.update_item.record
+        end
         if self.patch then
             local patch_records = InstallStore.listPatches() or {}
             local fn = self.patch.filename or ""
             local clean_fn = fn:gsub("%.disabled$", "")
             return patch_records[fn] or patch_records[clean_fn] or patch_records[clean_fn .. ".disabled"]
         else
-            local repo_name_lower = (self.repo.name or ""):lower()
             local install_records = InstallStore.list() or {}
-            return install_records[repo_name_lower]
+            local repo_name_lower = (self.repo and self.repo.name or ""):lower()
+            local full_name_lower = (self.repo and (self.repo.full_name or "") or ""):lower()
+            local id_key = self.repo and self.repo.id and ("id:" .. tostring(self.repo.id))
+
+            if self.update_item and self.update_item.plugin and self.update_item.plugin.dirname then
+                local dn = self.update_item.plugin.dirname:lower()
+                if install_records[dn] then return install_records[dn] end
+            end
+            if install_records[repo_name_lower] then return install_records[repo_name_lower] end
+            if install_records[repo_name_lower .. ".koplugin"] then return install_records[repo_name_lower .. ".koplugin"] end
+            for _, r in pairs(install_records) do
+                if (r.repo and r.repo:lower() == repo_name_lower)
+                   or (r.dirname and r.dirname:lower() == repo_name_lower)
+                   or (r.dirname and r.dirname:lower() == repo_name_lower .. ".koplugin")
+                   or (full_name_lower ~= "" and r.owner and r.repo and (r.owner:lower() .. "/" .. r.repo:lower() == full_name_lower))
+                   or (id_key and r.repo_id and ("id:" .. tostring(r.repo_id) == id_key)) then
+                    return r
+                end
+            end
+            return nil
         end
     end
 
@@ -240,15 +261,23 @@ function StorefrontDetailsDialog:init()
     local meta_text  = ""
     local desc_text  = ""
 
-    local owner = self.repo.owner
-        or (type(self.repo.full_name) == "string" and self.repo.full_name:match("^([^/]+)/"))
-        or (self.repo.data and self.repo.data.owner and (type(self.repo.data.owner) == "string" and self.repo.data.owner or self.repo.data.owner.login))
-        or (self.update_item and self.update_item.record and self.update_item.record.owner)
+    local owner = (self.repo and self.repo.owner and self.repo.owner ~= "" and self.repo.owner)
+        or (type(self.repo and self.repo.full_name) == "string" and self.repo.full_name:match("^([^/]+)/"))
+        or (self.repo and self.repo.data and self.repo.data.owner and (type(self.repo.data.owner) == "string" and self.repo.data.owner ~= "" and self.repo.data.owner or (type(self.repo.data.owner) == "table" and self.repo.data.owner.login)))
+        or (self.update_item and self.update_item.record and self.update_item.record.owner and self.update_item.record.owner ~= "" and self.update_item.record.owner)
         or ""
-    local repo_name = self.repo.name
-        or (type(self.repo.full_name) == "string" and self.repo.full_name:match("^[^/]+/(.+)$"))
-        or (self.update_item and self.update_item.record and self.update_item.record.repo)
+    local repo_name = (self.repo and self.repo.name and self.repo.name ~= "" and self.repo.name)
+        or (type(self.repo and self.repo.full_name) == "string" and self.repo.full_name:match("^[^/]+/(.+)$"))
+        or (self.update_item and self.update_item.record and self.update_item.record.repo and self.update_item.record.repo ~= "" and self.update_item.record.repo)
         or ""
+
+    if owner == "" or repo_name == "" then
+        local rec = getInstallRecord()
+        if rec then
+            if owner == "" and rec.owner and rec.owner ~= "" then owner = rec.owner end
+            if repo_name == "" and rec.repo and rec.repo ~= "" then repo_name = rec.repo end
+        end
+    end
 
     local item_key
     if self.patch then
@@ -313,6 +342,18 @@ function StorefrontDetailsDialog:init()
     if not version_str and self.patch then
         version_str = self.patch.sha and ("sha:" .. self.patch.sha:sub(1, 7)) or self.patch.version
     end
+    local rec = getInstallRecord()
+    local is_branch_tracked = rec and rec.source == "branch" and rec.branch
+
+    if is_branch_tracked then
+        local short_sha = rec.sha and rec.sha:sub(1, 7)
+        if short_sha and short_sha ~= "" then
+            version_str = string.format(_("branch: %s (%s)"), rec.branch, short_sha)
+        else
+            version_str = string.format(_("branch: %s"), rec.branch)
+        end
+    end
+
     if not version_str and self.repo then
         version_str = self.repo.latest_version or self.repo.version or self.repo.tag_name or self.repo.release_tag
         if not version_str and self.repo.latest_release and type(self.repo.latest_release) == "table" then
@@ -328,7 +369,6 @@ function StorefrontDetailsDialog:init()
         end
     end
 
-    local rec = getInstallRecord()
     if not version_str and rec then
         version_str = rec.version or rec.installed_version or rec.installed_tag or rec.tag_name or rec.release_tag_name or (rec.sha and ("sha:" .. rec.sha:sub(1, 7)))
     end
@@ -363,12 +403,14 @@ function StorefrontDetailsDialog:init()
     end
 
     if version_str and type(version_str) == "string" and version_str ~= "" then
-        if version_str:find("^sha:") then
-            -- keep sha:xxxxxxx format
+        if is_branch_tracked or version_str:find("^branch:") or version_str:find("^sha:") then
+            -- keep as-is; never prepend "v" to branch or sha
         else
             version_str = version_str:gsub("^[vV]", "")
             if version_str ~= "" then
-                version_str = "v" .. version_str
+                if version_str:match("^%d") then
+                    version_str = "v" .. version_str
+                end
             else
                 version_str = nil
             end
@@ -402,25 +444,65 @@ function StorefrontDetailsDialog:init()
         local meta_parts = {}
         if owner and owner ~= "" then table.insert(meta_parts, owner) end
         if stars > 0 then table.insert(meta_parts, "★ " .. stars_fmt) end
-        if updated ~= "" and version_str then
+        if updated ~= "" and version_str and not is_branch_tracked then
             table.insert(meta_parts, string.format(_("updated %s (%s)"), updated, version_str))
         elseif updated ~= "" then
             table.insert(meta_parts, string.format(_("updated %s"), updated))
-        elseif version_str then
+        elseif version_str and not is_branch_tracked then
             table.insert(meta_parts, version_str)
         end
         desc_text = (self.repo and self.repo.description) or (self.update_item and self.update_item.description) or ""
     end
 
+    local available_pills_w = self.screen_w - sc(24)
+    local branch_pill_widget = nil
+    if is_branch_tracked then
+        local short_sha = rec.sha and rec.sha:sub(1, 7)
+        local branch_disp = (short_sha and short_sha ~= "")
+            and string.format(_("Tracking branch: %s (%s)"), rec.branch, short_sha)
+            or string.format(_("Tracking branch: %s"), rec.branch)
+        local branch_icon = ImageWidget:new{
+            file = getAssetPath("git-branch.svg"),
+            width = sc(14),
+            height = sc(14),
+            scale_factor = 0,
+            is_icon = true,
+            alpha = true,
+        }
+        local branch_text = TextWidget:new{
+            text = branch_disp,
+            face = Font:getFace("cfont", 14),
+            bold = true,
+            fgcolor = Blitbuffer.COLOR_BLACK,
+            max_width = available_pills_w - sc(20) - sc(14) - sc(6),
+        }
+        local branch_inner = HorizontalGroup:new{
+            align = "center",
+            branch_icon,
+            HorizontalSpan:new{ width = sc(6) },
+            branch_text,
+        }
+        branch_pill_widget = FrameContainer:new{
+            background = Blitbuffer.COLOR_WHITE,
+            bordersize = sc(1),
+            color = Blitbuffer.COLOR_BLACK,
+            radius = sc(4),
+            padding = sc(4),
+            padding_h = sc(10),
+            branch_inner,
+        }
+    end
+
     local folder_pill_widget = nil
     if self.update_item and self.update_item.plugin and self.update_item.plugin.dirname then
-        if self.update_item.plugin.dirname ~= self.repo.name then
+        if self.update_item.plugin.dirname ~= (self.repo and self.repo.name) then
             local folder_name = self.update_item.plugin.dirname
             local folder_text = TextWidget:new{
                 text = string.format("folder: %s", folder_name),
                 face = Font:getFace("cfont", 14),
                 bold = true,
                 fgcolor = Blitbuffer.COLOR_WHITE,
+                max_width = available_pills_w - sc(28),
             }
             folder_pill_widget = FrameContainer:new{
                 background = Blitbuffer.COLOR_DARK_GRAY,
@@ -431,6 +513,29 @@ function StorefrontDetailsDialog:init()
                 folder_text,
             }
         end
+    end
+
+    local pills_row_widget = nil
+    if branch_pill_widget and folder_pill_widget then
+        local combined_w = branch_pill_widget:getSize().w + sc(8) + folder_pill_widget:getSize().w
+        if combined_w <= available_pills_w then
+            pills_row_widget = HorizontalGroup:new{
+                branch_pill_widget,
+                HorizontalSpan:new{ width = sc(8) },
+                folder_pill_widget,
+            }
+        else
+            pills_row_widget = VerticalGroup:new{
+                align = "left",
+                branch_pill_widget,
+                VerticalSpan:new{ width = sc(4) },
+                folder_pill_widget,
+            }
+        end
+    elseif branch_pill_widget then
+        pills_row_widget = branch_pill_widget
+    elseif folder_pill_widget then
+        pills_row_widget = folder_pill_widget
     end
 
     local is_font = false
@@ -650,7 +755,7 @@ function StorefrontDetailsDialog:init()
         end
     end
 
-    if updated ~= "" or version_str or (self.patch and self.patch.branch) then
+    if updated ~= "" or (version_str and not is_branch_tracked) or (self.patch and self.patch.branch) then
         if #meta_group_items > 0 then
             table.insert(meta_group_items, TextWidget:new{
                 text = "  ·  ",
@@ -659,11 +764,11 @@ function StorefrontDetailsDialog:init()
             })
         end
         local updated_parts = {}
-        if updated ~= "" and version_str then
+        if updated ~= "" and version_str and not is_branch_tracked then
             table.insert(updated_parts, string.format(_("updated %s (%s)"), updated, version_str))
         elseif updated ~= "" then
             table.insert(updated_parts, string.format(_("updated %s"), updated))
-        elseif version_str then
+        elseif version_str and not is_branch_tracked then
             table.insert(updated_parts, version_str)
         end
         if self.patch and self.patch.branch then
@@ -914,7 +1019,9 @@ function StorefrontDetailsDialog:init()
         end
 
         local is_updates_ignored = isItemIgnored()
-        local primary_text = _("Update")
+        local record_item = (self.update_item and self.update_item.record) or getInstallRecord()
+        local is_branch_tracked = record_item and record_item.source == "branch" and record_item.branch
+        local primary_text = is_branch_tracked and _("repull_from_branch") or _("Update")
         local toggle_text = is_item_disabled and _("Enable") or _("Disable")
         local ignore_text = is_updates_ignored and _("Updates Ignored") or _("Ignore Updates")
         local remove_text = _("Remove")
@@ -942,6 +1049,12 @@ function StorefrontDetailsDialog:init()
                 self:onClose()
                 if self.patch then
                     self.Storefront:installPatchFromRepo(self.repo, self.patch)
+                elseif is_branch_tracked and self.Storefront and type(self.Storefront.installPluginFromBranch) == "function" then
+                    self.Storefront.pending_install_context = {
+                        mode = "update",
+                        plugin = self.update_item and self.update_item.plugin,
+                    }
+                    self.Storefront:installPluginFromBranch(self.repo, record_item.branch)
                 else
                     local rel = (self.update_item and (self.update_item.remote or self.update_item.remote_entry)) or (self.repo and (self.repo.latest_release or (self.repo.data and self.repo.data.latest_release)))
                     if self.Storefront and type(self.Storefront.promptPluginInstallOptions) == "function" then
@@ -1525,7 +1638,7 @@ function StorefrontDetailsDialog:init()
                    + title_label:getSize().h
                    + sc(4)
                    + meta_label:getSize().h
-                   + (folder_pill_widget and (sc(6) + folder_pill_widget:getSize().h) or 0)
+                   + (pills_row_widget and (sc(6) + pills_row_widget:getSize().h) or 0)
                    + sc(12)
                    + desc_label:getSize().h
                    + sc(16)
@@ -1914,19 +2027,23 @@ tr:nth-child(even) td { background-color: #f5f5f5 !important; }
 
                 local raw_releases = self.cached_releases
                 if not raw_releases or force_refresh then
-                    local cached = getReleasesFromCache(self.repo)
-                    if cached and #cached > 1 then
-                        self.cached_releases = cached
-                        raw_releases = cached
-                    else
+                    local explicit_releases = (self.repo and self.repo.releases and type(self.repo.releases) == "table" and #self.repo.releases > 0 and self.repo.releases)
+                        or (self.repo and self.repo.data and type(self.repo.data) == "table" and self.repo.data.releases and type(self.repo.data.releases) == "table" and #self.repo.data.releases > 0 and self.repo.data.releases)
+
+                    if explicit_releases then
+                        self.cached_releases = explicit_releases
+                        raw_releases = explicit_releases
+                    elseif owner and owner ~= "" and repo_name and repo_name ~= "" then
                         local fetched, err = GitHubClient.fetchReleases(owner, repo_name)
                         if fetched and #fetched > 0 then
                             self.cached_releases = fetched
                             raw_releases = fetched
                         else
                             -- Fall back to cached release for display without poisoning self.cached_releases permanently
-                            raw_releases = cached
+                            raw_releases = getReleasesFromCache(self.repo)
                         end
+                    else
+                        raw_releases = getReleasesFromCache(self.repo)
                     end
                 end
 
@@ -1946,7 +2063,8 @@ tr:nth-child(even) td { background-color: #f5f5f5 !important; }
                 self.versions_page = self.versions_page or 1
 
                 local toggle_h = sc(46)
-                local avail_h = readme_h - toggle_h
+                local branch_row_h = (not self.patch) and sc(46) or 0
+                local avail_h = readme_h - toggle_h - branch_row_h
                 local row_h = sc(72)
                 local per_page = math.max(1, math.floor(avail_h / row_h))
                 local total_rels = #releases
@@ -2043,6 +2161,131 @@ tr:nth-child(even) td { background-color: #f5f5f5 !important; }
                 table.insert(list_items, VerticalSpan:new{ width = sc(6) })
 
                 local tab_focus_items = { toggle_btn }
+
+                -- Pinned "Install from branch…" row (for plugins)
+                if not self.patch then
+                    local record_item = (self.update_item and self.update_item.record) or getInstallRecord()
+                    local is_branch_tracked = record_item and record_item.source == "branch" and record_item.branch
+                    local branch_icon_prefix = ImageWidget:new{
+                        file = getAssetPath("git-branch.svg"),
+                        width = sc(18),
+                        height = sc(18),
+                        scale_factor = 0,
+                        is_icon = true,
+                        alpha = true,
+                    }
+                    local branch_title = is_branch_tracked
+                        and string.format(_("tracking_branch"), record_item.branch)
+                        or _("install_from_branch")
+                    local branch_label_w = TextWidget:new{
+                        text = branch_title,
+                        face = Font:getFace("cfont", 16),
+                        bold = true,
+                        fgcolor = Blitbuffer.COLOR_BLACK,
+                    }
+                    local branch_icon_w = ImageWidget:new{
+                        file = getAssetPath("chevron-right.svg"),
+                        width = sc(22),
+                        height = sc(22),
+                        scale_factor = 0,
+                        is_icon = true,
+                        alpha = true,
+                    }
+                    local branch_left_hg = HorizontalGroup:new{
+                        align = "center",
+                        branch_icon_prefix,
+                        HorizontalSpan:new{ width = sc(8) },
+                        branch_label_w,
+                    }
+                    local branch_right_hg_items = {}
+                    if is_branch_tracked then
+                        local tracked_badge_w = TextWidget:new{
+                            text = _("tracked_badge") or "TRACKED",
+                            face = Font:getFace("smallinfofont", 12),
+                            bold = true,
+                            fgcolor = Blitbuffer.COLOR_WHITE,
+                        }
+                        local tracked_chip = FrameContainer:new{
+                            padding_top = sc(2),
+                            padding_bottom = sc(2),
+                            padding_left = sc(6),
+                            padding_right = sc(6),
+                            background = Blitbuffer.COLOR_BLACK,
+                            radius = sc(4),
+                            bordersize = 0,
+                            tracked_badge_w,
+                        }
+                        table.insert(branch_right_hg_items, tracked_chip)
+                        table.insert(branch_right_hg_items, HorizontalSpan:new{ width = sc(8) })
+                    end
+                    table.insert(branch_right_hg_items, branch_icon_w)
+                    local branch_right_hg = HorizontalGroup:new{
+                        align = "center",
+                        table.unpack(branch_right_hg_items)
+                    }
+                    local branch_row = OverlapGroup:new{
+                        dimen = Geom:new{ w = readme_w - sc(24), h = sc(28) },
+                        LeftContainer:new{
+                            dimen = Geom:new{ w = readme_w - sc(24), h = sc(28) },
+                            branch_left_hg,
+                        },
+                        RightContainer:new{
+                            dimen = Geom:new{ w = readme_w - sc(24), h = sc(28) },
+                            branch_right_hg,
+                        },
+                    }
+                    local branch_frame = FrameContainer:new{
+                        padding = sc(6),
+                        padding_h = sc(12),
+                        bordersize = sc(1),
+                        radius = sc(4),
+                        background = Blitbuffer.COLOR_WHITE,
+                        branch_row,
+                    }
+                    local branch_btn = InputContainer:new{
+                        branch_frame,
+                    }
+                    branch_btn.show_parent = self
+                    branch_btn.isFocusable = function() return true end
+                    branch_btn.onFocus = function()
+                        branch_frame.bordersize = sc(2)
+                        branch_frame.color = Blitbuffer.COLOR_BLACK
+                        branch_frame.background = Blitbuffer.Color8(230)
+                        UIManager:setDirty(self.show_parent or self, "fast")
+                        return true
+                    end
+                    branch_btn.onUnfocus = function()
+                        branch_frame.bordersize = sc(1)
+                        branch_frame.color = nil
+                        branch_frame.background = Blitbuffer.COLOR_WHITE
+                        UIManager:setDirty(self.show_parent or self, "fast")
+                        return true
+                    end
+                    branch_btn.onTapSelect = function()
+                        return branch_btn:onStorefrontBranchTap()
+                    end
+                    branch_btn.ges_events = {
+                        StorefrontBranchTap = {
+                            GestureRange:new{
+                                ges = "tap",
+                                range = function()
+                                    local d = branch_btn.dimen or branch_frame:getSize()
+                                    return Geom:new{ x = d.x or 0, y = d.y or 0, w = d.w or 0, h = d.h or 0 }
+                                end,
+                            },
+                        },
+                    }
+                    function branch_btn:onStorefrontBranchTap()
+                        if dialog_self.Storefront and dialog_self.Storefront.showBranchPickerDialog then
+                            dialog_self.Storefront:showBranchPickerDialog(dialog_self.repo)
+                        end
+                        return true
+                    end
+
+                    table.insert(list_items, branch_btn)
+                    table.insert(list_items, VerticalSpan:new{ width = sc(6) })
+                    table.insert(tab_focus_items, branch_btn)
+                end
 
                 if #releases == 0 then
                     table.insert(list_items, TextWidget:new{
@@ -2483,9 +2726,9 @@ tr:nth-child(even) td { background-color: #f5f5f5 !important; }
         meta_label,
     }
 
-    if folder_pill_widget then
+    if pills_row_widget then
         table.insert(content_group_items, VerticalSpan:new{ width = sc(6) })
-        table.insert(content_group_items, folder_pill_widget)
+        table.insert(content_group_items, pills_row_widget)
     end
 
     table.insert(content_group_items, VerticalSpan:new{ width = sc(12) })

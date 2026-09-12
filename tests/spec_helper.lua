@@ -575,6 +575,14 @@ package.loaded["socketutil"] = {}
 package.loaded["ffi/archiver"] = {}
 package.loaded["ffi/sha2"] = {}
 package.loaded["util"] = {
+    trim = function(str) return str and str:gsub("^%s*(.-)%s*$", "%1") or "" end,
+    split = function(str, sep)
+        local t = {}
+        for s in string.gmatch(str, "([^" .. (sep or "%s") .. "]+)") do
+            table.insert(t, s)
+        end
+        return t
+    end,
     splitToChars = function(text)
         local chars = {}
         for c in text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do

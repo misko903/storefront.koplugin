@@ -50,6 +50,25 @@ do
     check("StorefrontListItem onTapSelect invokes entry callback", called == true)
 end
 
+-- 1b. StorefrontListItem versions item layout (no empty meta_w)
+do
+    local v_item = StorefrontListItem:new{
+        entry = {
+            is_entry = true,
+            name = "v1.0.0",
+            description = "Published: 2026-09-07",
+            badge = "LATEST",
+        },
+        width = 500,
+    }
+    local frame = v_item.frame or v_item[1]
+    local row_widget = (frame and frame.args and frame.args[1]) or (frame and frame[1])
+    local left_c = (row_widget and row_widget.args and row_widget.args[1]) or (row_widget and row_widget[1])
+    local hgroup = (left_c and left_c.args and left_c.args[1]) or (left_c and left_c[1])
+    local group = (hgroup and hgroup.args and hgroup.args[1]) or (hgroup and hgroup[1])
+    check("Version list item group has 3 children (no empty meta_w)", group and #group == 3)
+end
+
 -- 2. Confirmation Dialogs (StorefrontUtils)
 do
     _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }

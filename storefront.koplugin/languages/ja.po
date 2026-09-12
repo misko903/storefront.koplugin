@@ -313,17 +313,13 @@ msgstr "保存先ファイルに書き込めません。"
 msgid "Catalog & Cache"
 msgstr "カタログとキャッシュ"
 
-# en-hash: cca9b8e583b2870d117efee0c14b97ad
-msgid "Catalog refresh failed: "
-msgstr "カタログの更新に失敗しました: "
+# en-hash: d31b6ab3c216a7f4c21b8c9bdae226e9
+msgid "Catalog refresh cancelled."
+msgstr "カタログの更新がキャンセルされました。"
 
 # en-hash: d08b63f6583dcd5bb36142564f1b3ff4
 msgid "Catalog refresh is already in progress in the background."
 msgstr "カタログの更新はすでにバックグラウンドで進行中です。"
-
-# en-hash: 5f83265800ab3a842101d5d67ea875ce
-msgid "Catalog refreshed successfully."
-msgstr "カタログが正常に更新されました。"
 
 # en-hash: 646e1f1324e200b3910e35ea3f015960
 msgid "Catalog source"
@@ -400,6 +396,10 @@ msgstr "パッチの更新を確認中…"
 # en-hash: 010600e4b0c20b08887a141c471a517f
 msgid "Checking plugin updates…"
 msgstr "プラグインの更新を確認中…"
+
+# en-hash: 687b7dfc45c5765421d4ff52183093fd
+msgid "Choose Branch — %s"
+msgstr "ブランチを選択 — %s"
 
 # en-hash: 118d059b31b7c7d0fafb1c9e3372df83
 msgid "Choose Build — %s"
@@ -532,6 +532,10 @@ msgstr "アーカイブ内に .koplugin フォルダを検出できませんで�
 # en-hash: 8b4f90cf7829bf588a67afa2dbcd691b
 msgid "Could not detect plugin inside archive."
 msgstr "アーカイブ内にプラグインを検出できませんでした。"
+
+# en-hash: b00149f5c175fcc7f481d40a27a4bf0f
+msgid "Could not fetch branch SHA."
+msgstr "ブランチのSHAを取得できませんでした。"
 
 # en-hash: 72ae81f8bda1220d8b574180c62788fc
 msgid "Could not fetch commit comparison."
@@ -693,6 +697,10 @@ msgstr "ダウンロードオプション — %s"
 msgid "Download options — %s (%s)"
 msgstr "ダウンロードオプション — %s (%s)"
 
+# en-hash: 50e6982dae572d95c62dcf2796614e5f
+msgid "Downloading %s (%s)…\nTap screen to cancel."
+msgstr "ダウンロード中 %s (%s)…\n画面をタップするとキャンセルします。"
+
 # en-hash: 8108a1e1d020224c8b28fe992bfd63ee
 msgid "Downloading %s%s…\nTap screen to cancel."
 msgstr "%s%s をダウンロード中…\n画面をタップでキャンセル。"
@@ -793,6 +801,10 @@ msgstr "削除に失敗しました: %s"
 msgid "Failed to disable patch '%s'."
 msgstr "パッチ '%s' の無効化に失敗しました。"
 
+# en-hash: 313cfbeaf69faf0cd64559afdc97320a
+msgid "Failed to display branch list."
+msgstr "ブランチリストを表示できませんでした。"
+
 # en-hash: f0ebe26dcf9d6fa44cde188e40a589e7
 msgid "Failed to download patch: %s"
 msgstr "パッチのダウンロードに失敗しました: %s"
@@ -828,6 +840,10 @@ msgstr "ダウンロードしたファイルの保存に失敗しました"
 # en-hash: b2b70bea56298693ab867c3578f69689
 msgid "Failed to toggle patch status."
 msgstr "パッチ状態の切り替えに失敗しました。"
+
+# en-hash: d4478c7c3ecd901d07cc947b819a69df
+msgid "Fetching branch information…"
+msgstr "ブランチ情報を取得中…"
 
 # en-hash: eebc29b3e7e2c6769ebff642798b1404
 msgid "Fetching changelog…"
@@ -1081,6 +1097,18 @@ msgstr "フォントファミリー「%s」全体をインストールしまし�
 msgid "Installed patch \"%s\"."
 msgstr "パッチ「%s」をインストールしました。"
 
+# en-hash: 4bd81b06cd959054d5f7ffcda00b205a
+msgid "Installed plugin \"%s\" (%s)."
+msgstr "プラグイン「%s」(%s) をインストールしました。"
+
+# en-hash: 1ea8b0189bc054c587a78d1b13f5dc9d
+msgid "Installed plugin \"%s\" (version %s)."
+msgstr "プラグイン「%s」(バージョン %s) をインストールしました。"
+
+# en-hash: ea7009546a19031e6fddcf0ad7e2d5a9
+msgid "Installed plugin \"%s\"."
+msgstr "プラグイン「%s」をインストールしました。"
+
 # en-hash: c98f920c29f4d2f367f11f8aad8c6b98
 msgid "Installing %s…"
 msgstr "%s をインストール中…"
@@ -1300,6 +1328,10 @@ msgstr "リリースに必要なリポジトリのメタデータが見つかり
 # en-hash: 0c69cf64725f51a7e4efab7b4d293b33
 msgid "Missing repository metadata for remote fetch."
 msgstr "リモート取得用のリポジトリメタデータがありません。"
+
+# en-hash: 81008b533ffec1a6dec86966526d2194
+msgid "Missing repository metadata."
+msgstr "リポジトリのメタデータが見つかりません。"
 
 # en-hash: 8dfff041fcd598a7a41df55b9e8ea076
 msgid "Missing target path"
@@ -1761,9 +1793,9 @@ msgstr "カタログを更新"
 msgid "Refreshing catalog via Direct GitHub API…"
 msgstr "Direct GitHub API経由でカタログを更新中…"
 
-# en-hash: d79adaec4b83cfc1e3cb44ded7689888
-msgid "Refreshing catalog..."
-msgstr "カタログを更新中..."
+# en-hash: 3177625a0f340b8e4af8dfd90e538697
+msgid "Refreshing catalog via Direct GitHub API…\nTap screen to cancel."
+msgstr "Direct GitHub API経由でカタログを更新中…\n画面をタップするとキャンセルします。"
 
 # en-hash: 0cb1e25c68defbaa1b6fcb7a10f9932f
 msgid "Refreshing catalog…"
@@ -2365,6 +2397,10 @@ msgstr "%d/%d件の項目を更新しました（失敗: %d件）。"
 msgid "Updated patch \"%s\"."
 msgstr "パッチ「%s」を更新しました。"
 
+# en-hash: f880f1649aab716c5a93877127a74c3b
+msgid "Updated plugin \"%s\" to %s."
+msgstr "プラグイン「%s」を %s に更新しました。"
+
 # en-hash: ea03cc9fdc791c9e882185f9871e2d19
 msgid "Updated plugin \"%s\" to version %s."
 msgstr "プラグイン「%s」をバージョン %s に更新しました。"
@@ -2557,6 +2593,14 @@ msgstr "更新"
 msgid "btn_view_details"
 msgstr "詳細を表示"
 
+# en-hash: 334af2789e69c8fc39aa4b9238c68a9c
+msgid "confirm_branch_install_body"
+msgstr "これは開発者/貢献者向けのビルドであり、不安定な可能性があります。内容を理解している場合のみインストールしてください。"
+
+# en-hash: 483d7d4cd34c8827b262a06626d554f9
+msgid "confirm_branch_install_title"
+msgstr "ブランチ「%s」からインストールしますか？"
+
 # en-hash: bbdb1b84c8613a1be1923b11899bcc8c
 msgid "confirm_install"
 msgstr "'%s' をインストールしますか？"
@@ -2593,6 +2637,10 @@ msgstr "ネットワークエラー: カタログをダウンロードできま�
 msgid "err_uninstall_failed"
 msgstr "'%s' のアンインストールに失敗しました。"
 
+# en-hash: 4d2405b58cce01613812d5938bf492e6
+msgid "fetching_branches"
+msgstr "ブランチを取得中…"
+
 # en-hash: a6a2a55bea8760389dfca77132905b7c
 msgid "filter_all"
 msgstr "全カテゴリ"
@@ -2620,6 +2668,10 @@ msgstr "概要"
 # en-hash: 608900ed06f424f6830232f2c2080b42
 msgid "header_updates"
 msgstr "アップデート"
+
+# en-hash: b4a63ad3de9a22e2ce7c43b1678477d0
+msgid "install_from_branch"
+msgstr "ブランチからインストール…"
 
 # en-hash: a517747c3d12f99244ae598910d979c5
 msgid "label_author"
@@ -2693,6 +2745,14 @@ msgstr "一致する項目が見つかりません。"
 msgid "new"
 msgstr "新規"
 
+# en-hash: b0f3f2e2e91f82331788271556582cf2
+msgid "new_commit_on_branch"
+msgstr "「%s」に新しいコミットがあります"
+
+# en-hash: df1635b0a9033ae6e2f6acded2a3a84a
+msgid "no_branches_found"
+msgstr "このリポジトリのブランチが見つかりません。"
+
 # en-hash: d8f4a1993546cc4b850cde3599e27aec
 msgid "not found"
 msgstr "見つかりません"
@@ -2728,6 +2788,10 @@ msgstr "日付によりリモートの方が新しい"
 # en-hash: b3f2035551f6e48c67489ace9f588f94
 msgid "repository"
 msgstr "リポジトリ"
+
+# en-hash: 116f6125d1c7dc42ae6ba28eab61f898
+msgid "repull_from_branch"
+msgstr "ブランチから再プル"
 
 # en-hash: fe1cf176acd521dda7c2ef219171a5da
 msgid "search_hint"
@@ -2796,6 +2860,10 @@ msgstr "壁紙"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "tab_versions"
 msgstr "バージョン"
+
+# en-hash: be9026abbba62fdf36ac5706fcb0b76b
+msgid "tracking_branch"
+msgstr "追跡ブランチ: %s"
 
 # en-hash: ad921d60486366258809553a3db49a4a
 msgid "unknown"

@@ -18,6 +18,7 @@ local InfoMessage = require("ui/widget/infomessage")
 local InputContainer = require("ui/widget/container/inputcontainer")
 local InputDialog = require("ui/widget/inputdialog")
 local InstallStore = require("storefront_installs")
+local LeftContainer = require("ui/widget/container/leftcontainer")
 local LineWidget = require("ui/widget/linewidget")
 local NetworkMgr = require("ui/network/manager")
 local PluginPaths = require("storefront_plugin_paths")
@@ -406,21 +407,31 @@ function M:init(Storefront)
 
         local sw = Device.screen:getWidth()
         local sh = Device.screen:getHeight()
-        local dialog_w = math.min(sw - sc(20), sc(420))
+        local dialog_w = math.min(sw - sc(20), sc(440))
 
         local ui_font_size = storefront_theme.face_label_size or 18
         local title_font_size = storefront_theme.title_font_size or 22
 
-        local title_label = TextWidget:new{
-            text = string.format(_("Choose Build — %s"), repo and repo.name or "Plugin"),
-            face = Font:getFace("NotoSerif-Regular.ttf", title_font_size),
+        local StorefrontUtils = require("storefront_utils")
+        local card_padding = sc(14)
+        local card_border = storefront_theme.border_window or sc(2)
+        local inner_w = dialog_w - (card_padding * 2) - (card_border * 2)
+
+        local title_text = string.format(_("Choose Build — %s"), repo and repo.name or "Plugin")
+        local dynamic_title_size = StorefrontUtils.calcDynamicFontSize(title_text, inner_w, "cfont", title_font_size, 12, true)
+        local title_label = TextBoxWidget:new{
+            text = title_text,
+            face = Font:getFace("cfont", dynamic_title_size),
             bold = true,
             fgcolor = Blitbuffer.COLOR_BLACK,
+            width = inner_w,
+            alignment = "center",
         }
 
         local title_container = FrameContainer:new{
-            padding = sc(12),
+            padding = 0,
             bordersize = 0,
+            width = inner_w,
             title_label,
         }
 
@@ -441,9 +452,7 @@ function M:init(Storefront)
             UIManager:setDirty(overlay, "ui")
         end
 
-        local card_padding = sc(6)
-        local card_border = storefront_theme.border_window or sc(2)
-        local inner_w = dialog_w - (card_padding * 2) - (card_border * 2)
+        local text_avail_w = inner_w - sc(24)
 
         for _, asset in ipairs(custom_assets) do
             local is_selected = selected_asset and asset.name == selected_asset.name
@@ -451,29 +460,31 @@ function M:init(Storefront)
             local size_fmt = asset.size and string.format(" (%d KB)", math.floor(asset.size / 1024)) or ""
             local display_text = indicator .. asset.name .. size_fmt
 
-            local text_w = TextBoxWidget:new{
+            local dynamic_font_size = StorefrontUtils.calcDynamicFontSize(display_text, text_avail_w, "cfont", ui_font_size, 12, true)
+            local text_w = TextWidget:new{
                 text = display_text,
-                face = Font:getFace("NotoSerif-Regular.ttf", ui_font_size),
+                face = Font:getFace("cfont", dynamic_font_size),
+                bold = is_selected,
                 fgcolor = Blitbuffer.COLOR_BLACK,
-                width = inner_w - sc(32),
-                alignment = "left",
             }
 
             local row_frame = FrameContainer:new{
-                padding = sc(10),
+                padding = sc(8),
+                padding_left = sc(12),
+                padding_right = sc(12),
                 bordersize = is_selected and (storefront_theme.border_btn or sc(2)) or sc(1),
                 radius = sc(8),
                 background = Blitbuffer.COLOR_WHITE,
                 color = Blitbuffer.COLOR_BLACK,
-                width = inner_w - sc(12),
-                text_w,
+                width = inner_w,
+                LeftContainer:new{
+                    dimen = Geom:new{ w = text_avail_w, h = sc(22) },
+                    text_w,
+                },
             }
 
             local asset_ref = asset
-            local item = InputContainer:new{
-                align = "center",
-                row_frame
-            }
+            local item = InputContainer:new{ row_frame }
             item.frame = row_frame
             item.asset = asset_ref
             table.insert(row_widgets, {
@@ -493,8 +504,8 @@ function M:init(Storefront)
                             return Geom:new{
                                 x = dim.x or 0,
                                 y = dim.y or 0,
-                                w = row_frame:getSize().w or (inner_w - sc(12)),
-                                h = row_frame:getSize().h or 0,
+                                w = inner_w,
+                                h = row_frame:getSize().h or sc(38),
                             }
                         end
                     }
@@ -533,6 +544,9 @@ function M:init(Storefront)
             table.insert(list_vg, VerticalSpan:new{ width = sc(6) })
         end
 
+        local btn_gap = sc(10)
+        local btn_w = math.floor((inner_w - btn_gap) / 2)
+
         local install_btn = Button:new{
             text = _("Install"),
             text_font_color = Blitbuffer.COLOR_WHITE,
@@ -540,7 +554,7 @@ function M:init(Storefront)
             bordersize = 0,
             radius = storefront_theme.radius_btn or sc(18),
             padding = sc(10),
-            width = math.floor((inner_w - sc(12)) / 2),
+            width = btn_w,
             callback = function()
                 UIManager:close(overlay, "ui")
                 self.pending_install_context = saved_ctx
@@ -560,7 +574,7 @@ function M:init(Storefront)
             bordersize = sc(1),
             radius = storefront_theme.radius_btn or sc(18),
             padding = sc(10),
-            width = math.floor((inner_w - sc(12)) / 2),
+            width = btn_w,
             callback = function()
                 UIManager:close(overlay, "ui")
                 if saved_ctx and saved_ctx.batch_callback then
@@ -576,30 +590,37 @@ function M:init(Storefront)
         local btn_row = HorizontalGroup:new{
             align = "center",
             install_btn,
-            HorizontalSpan:new{ width = sc(8) },
+            HorizontalSpan:new{ width = btn_gap },
             cancel_btn,
+        }
+
+        local btn_container = FrameContainer:new{
+            padding = 0,
+            bordersize = 0,
+            width = inner_w,
+            btn_row,
         }
 
         local content_vg = VerticalGroup:new{
             align = "center",
             title_container,
+            VerticalSpan:new{ width = sc(10) },
             LineWidget:new{
                 dimen = Geom:new{ w = inner_w, h = sc(1) },
                 background = Blitbuffer.COLOR_BLACK,
             },
-            VerticalSpan:new{ width = sc(8) },
+            VerticalSpan:new{ width = sc(12) },
             list_vg,
-            VerticalSpan:new{ width = sc(8) },
-            FrameContainer:new{ padding = sc(4), bordersize = 0, btn_row },
+            VerticalSpan:new{ width = sc(6) },
+            btn_container,
         }
 
         local card = FrameContainer:new{
-            padding = sc(6),
+            padding = card_padding,
             radius = storefront_theme.radius_window or sc(12),
-            bordersize = storefront_theme.border_window or sc(2),
+            bordersize = card_border,
             color = Blitbuffer.COLOR_BLACK,
             background = storefront_theme.color_bg or Blitbuffer.COLOR_WHITE,
-            width = dialog_w,
             content_vg,
         }
 
@@ -619,14 +640,13 @@ function M:init(Storefront)
         end
 
         overlay = FocusManager:new{
+            align = "center",
+            vertical_align = "center",
             dimen = Geom:new{ w = sw, h = sh },
             layout = layout,
             selected = { x = 1, y = 1 },
             key_events = key_events,
-            CenterContainer:new{
-                dimen = Geom:new{ w = sw, h = sh },
-                card,
-            },
+            card,
         }
 
         for _, rw in ipairs(row_widgets) do
@@ -648,6 +668,480 @@ function M:init(Storefront)
         end
 
         UIManager:show(overlay, "ui")
+    end
+
+    function Storefront:renderBranchPickerModal(repo, branches, default_branch)
+        local storefront_theme = require("storefront_theme")
+        local sc = function(val) return (Device and Device.screen and Device.screen.scaleBySize and Device.screen:scaleBySize(val)) or val end
+        local sw = Device.screen:getWidth()
+        local sh = Device.screen:getHeight()
+        local dialog_w = math.min(sw - sc(20), sc(440))
+
+        local ui_font_size = storefront_theme.face_label_size or 18
+        local title_font_size = storefront_theme.title_font_size or 22
+
+        local selected_branch = (branches and branches[1] and branches[1].name) or default_branch
+        local current_page = 1
+        local all_branches = branches or {}
+        local total_items = #all_branches
+
+        local card_padding = sc(14)
+        local card_border = storefront_theme.border_window or sc(2)
+        local inner_w = dialog_w - (card_padding * 2) - (card_border * 2)
+
+        -- Determine items per page based on available screen height
+        local max_dialog_h = sh - sc(40)
+        local fixed_header_h = sc(60)
+        local fixed_footer_h = sc(55)
+        local pagination_h = sc(40)
+        local row_h = sc(46)
+        local available_list_h = max_dialog_h - fixed_header_h - fixed_footer_h - pagination_h
+        local items_per_page = math.max(3, math.min(6, math.floor(available_list_h / row_h)))
+        local total_pages = math.max(1, math.ceil(total_items / items_per_page))
+
+        local overlay
+        local refreshModal
+
+        refreshModal = function()
+            if overlay then
+                local old_overlay = overlay
+                overlay = nil
+                old_overlay.onClose = nil
+                UIManager:close(old_overlay, "ui")
+            end
+
+            if current_page > total_pages then current_page = total_pages end
+            if current_page < 1 then current_page = 1 end
+
+            local StorefrontUtils = require("storefront_utils")
+            local title_text = string.format(_("Choose Branch — %s"), repo and repo.name or "Plugin")
+            local dynamic_title_size = StorefrontUtils.calcDynamicFontSize(title_text, inner_w, "cfont", title_font_size, 12, true)
+            local title_label = TextBoxWidget:new{
+                text = title_text,
+                face = Font:getFace("cfont", dynamic_title_size),
+                bold = true,
+                fgcolor = Blitbuffer.COLOR_BLACK,
+                width = inner_w,
+                alignment = "center",
+            }
+
+            local title_container = FrameContainer:new{
+                padding = 0,
+                bordersize = 0,
+                width = inner_w,
+                title_label,
+            }
+
+            local list_vg = VerticalGroup:new{ align = "left" }
+            local row_widgets = {}
+
+            local function update_rows()
+                for _, rw in ipairs(row_widgets) do
+                    local is_selected = selected_branch and rw.branch_name == selected_branch
+                    local indicator = is_selected and "● " or "○ "
+                    local is_def = rw.branch_name == default_branch
+                    local def_fmt = is_def and " ★" or ""
+                    local display_text = indicator .. rw.branch_name .. def_fmt
+
+                    rw.text_widget:setText(display_text)
+                    rw.frame.bordersize = is_selected and (storefront_theme.border_btn or sc(2)) or sc(1)
+                end
+                if overlay then
+                    UIManager:setDirty(overlay, "ui")
+                end
+            end
+
+            local text_avail_w = inner_w - sc(24)
+            local start_idx = (current_page - 1) * items_per_page + 1
+            local end_idx = math.min(total_items, current_page * items_per_page)
+
+            for i = start_idx, end_idx do
+                local branch_obj = all_branches[i]
+                local bname = branch_obj.name or ""
+                local is_selected = selected_branch and bname == selected_branch
+                local indicator = is_selected and "● " or "○ "
+                local is_def = bname == default_branch
+                local def_fmt = is_def and " ★" or ""
+                local display_text = indicator .. bname .. def_fmt
+
+                local dynamic_font_size = StorefrontUtils.calcDynamicFontSize(display_text, text_avail_w, "cfont", ui_font_size, 12, true)
+                local text_w = TextWidget:new{
+                    text = display_text,
+                    face = Font:getFace("cfont", dynamic_font_size),
+                    bold = is_selected,
+                    fgcolor = Blitbuffer.COLOR_BLACK,
+                }
+
+                local row_frame = FrameContainer:new{
+                    padding = sc(8),
+                    padding_left = sc(12),
+                    padding_right = sc(12),
+                    bordersize = is_selected and (storefront_theme.border_btn or sc(2)) or sc(1),
+                    radius = sc(8),
+                    background = Blitbuffer.COLOR_WHITE,
+                    color = Blitbuffer.COLOR_BLACK,
+                    width = inner_w,
+                    LeftContainer:new{
+                        dimen = Geom:new{ w = text_avail_w, h = sc(22) },
+                        text_w,
+                    },
+                }
+
+                local branch_ref = bname
+                local item = InputContainer:new{ row_frame }
+                item.frame = row_frame
+                item.branch_name = branch_ref
+                table.insert(row_widgets, {
+                    branch_name = branch_ref,
+                    frame = row_frame,
+                    text_widget = text_w,
+                    item = item,
+                })
+
+                item.ges_events = {
+                    Tap = {
+                        GestureRange:new{
+                            ges = "tap",
+                            range = function()
+                                local dim = item.dimen
+                                if not dim then return Geom:new{ x = -1, y = -1, w = 1, h = 1 } end
+                                return Geom:new{
+                                    x = dim.x or 0,
+                                    y = dim.y or 0,
+                                    w = inner_w,
+                                    h = row_frame:getSize().h or sc(38),
+                                }
+                            end
+                        }
+                    }
+                }
+
+                item.onTap = function()
+                    selected_branch = branch_ref
+                    update_rows()
+                    return true
+                end
+                item.isFocusable = function(self)
+                    return true
+                end
+                item.onFocus = function(self)
+                    if self.frame then
+                        self.frame.invert = true
+                        UIManager:setDirty(self.show_parent or self, "fast")
+                    end
+                    return true
+                end
+                item.onUnfocus = function(self)
+                    if self.frame then
+                        self.frame.invert = false
+                        UIManager:setDirty(self.show_parent or self, "fast")
+                    end
+                    return true
+                end
+                item.onTapSelect = function(self)
+                    selected_branch = branch_ref
+                    update_rows()
+                    return true
+                end
+
+                table.insert(list_vg, item)
+                table.insert(list_vg, VerticalSpan:new{ width = sc(6) })
+            end
+
+            -- Pagination Row (when total_pages > 1)
+            local pagination_container
+            local prev_page_btn, next_page_btn
+            if total_pages > 1 then
+                local is_prev_active = current_page > 1
+                local is_next_active = current_page < total_pages
+                local pag_btn_w = sc(38)
+
+                prev_page_btn = Button:new{
+                    text = "‹",
+                    text_font_size = 18,
+                    bold = true,
+                    bordersize = sc(1),
+                    color = is_prev_active and Blitbuffer.COLOR_BLACK or Blitbuffer.COLOR_LIGHT_GRAY,
+                    radius = sc(3),
+                    padding = sc(3),
+                    width = pag_btn_w,
+                    background = is_prev_active and Blitbuffer.COLOR_WHITE or Blitbuffer.Color8(240),
+                    text_font_color = is_prev_active and Blitbuffer.COLOR_BLACK or Blitbuffer.Color8(160),
+                    callback = function()
+                        if current_page > 1 then
+                            current_page = current_page - 1
+                            refreshModal()
+                        end
+                    end,
+                }
+
+                local page_text = TextWidget:new{
+                    text = string.format(_("Page %d of %d"), current_page, total_pages),
+                    face = Font:getFace("cfont", 14),
+                    bold = true,
+                    fgcolor = Blitbuffer.COLOR_BLACK,
+                }
+
+                next_page_btn = Button:new{
+                    text = "›",
+                    text_font_size = 18,
+                    bold = true,
+                    bordersize = sc(1),
+                    color = is_next_active and Blitbuffer.COLOR_BLACK or Blitbuffer.COLOR_LIGHT_GRAY,
+                    radius = sc(3),
+                    padding = sc(3),
+                    width = pag_btn_w,
+                    background = is_next_active and Blitbuffer.COLOR_WHITE or Blitbuffer.Color8(240),
+                    text_font_color = is_next_active and Blitbuffer.COLOR_BLACK or Blitbuffer.Color8(160),
+                    callback = function()
+                        if current_page < total_pages then
+                            current_page = current_page + 1
+                            refreshModal()
+                        end
+                    end,
+                }
+
+                local pag_hg = HorizontalGroup:new{
+                    align = "center",
+                    prev_page_btn,
+                    HorizontalSpan:new{ width = sc(16) },
+                    page_text,
+                    HorizontalSpan:new{ width = sc(16) },
+                    next_page_btn,
+                }
+                pagination_container = FrameContainer:new{
+                    padding = 0,
+                    bordersize = 0,
+                    width = inner_w,
+                    CenterContainer:new{
+                        dimen = Geom:new{ w = inner_w, h = sc(32) },
+                        pag_hg,
+                    }
+                }
+            end
+
+            local btn_gap = sc(10)
+            local btn_w = math.floor((inner_w - btn_gap) / 2)
+            local install_btn = Button:new{
+                text = _("Install"),
+                text_font_color = Blitbuffer.COLOR_WHITE,
+                background = Blitbuffer.COLOR_BLACK,
+                bordersize = 0,
+                radius = storefront_theme.radius_btn or sc(18),
+                padding = sc(10),
+                width = btn_w,
+                callback = function()
+                    if not selected_branch then return end
+                    UIManager:close(overlay, "ui")
+
+                    self:showConfirmDialog{
+                        title = string.format(_("confirm_branch_install_title"), selected_branch),
+                        text = _("confirm_branch_install_body"),
+                        ok_text = _("Install"),
+                        cancel_text = _("Cancel"),
+                        ok_callback = function()
+                            self:installPluginFromBranch(repo, selected_branch)
+                        end,
+                    }
+                end,
+            }
+            if install_btn.label_widget then
+                install_btn.label_widget.fgcolor = Blitbuffer.COLOR_WHITE
+            end
+
+            local cancel_btn = Button:new{
+                text = _("Cancel"),
+                bordersize = sc(1),
+                radius = storefront_theme.radius_btn or sc(18),
+                padding = sc(10),
+                width = btn_w,
+                callback = function()
+                    UIManager:close(overlay, "ui")
+                end,
+            }
+
+            local btn_row = HorizontalGroup:new{
+                align = "center",
+                install_btn,
+                HorizontalSpan:new{ width = btn_gap },
+                cancel_btn,
+            }
+
+            local btn_container = FrameContainer:new{
+                padding = 0,
+                bordersize = 0,
+                width = inner_w,
+                btn_row,
+            }
+
+            local content_items = {
+                title_container,
+                VerticalSpan:new{ width = sc(10) },
+                LineWidget:new{
+                    dimen = Geom:new{ w = inner_w, h = sc(1) },
+                    background = Blitbuffer.COLOR_BLACK,
+                },
+                VerticalSpan:new{ width = sc(12) },
+                list_vg,
+            }
+            if pagination_container then
+                table.insert(content_items, pagination_container)
+                table.insert(content_items, VerticalSpan:new{ width = sc(6) })
+            else
+                table.insert(content_items, VerticalSpan:new{ width = sc(6) })
+            end
+            table.insert(content_items, btn_container)
+
+            local content_vg = VerticalGroup:new(content_items)
+            content_vg.align = "center"
+
+            local card = FrameContainer:new{
+                padding = card_padding,
+                radius = storefront_theme.radius_window or sc(12),
+                bordersize = card_border,
+                color = Blitbuffer.COLOR_BLACK,
+                background = storefront_theme.color_bg or Blitbuffer.COLOR_WHITE,
+                content_vg,
+            }
+
+            local FocusManager = require("ui/widget/focusmanager")
+            local layout = {}
+            for _, rw in ipairs(row_widgets) do
+                table.insert(layout, { rw.item })
+            end
+            if prev_page_btn and next_page_btn then
+                table.insert(layout, { prev_page_btn, next_page_btn })
+            end
+            table.insert(layout, { install_btn, cancel_btn })
+
+            local Input = Device and Device.input
+            local key_events = {
+                Close = { { "Back" }, { "Escape" } },
+            }
+            if total_pages > 1 then
+                key_events.NextPage = { { "PageDown" } }
+                key_events.PrevPage = { { "PageUp" } }
+            end
+            if Input and Input.group then
+                if Input.group.Back then
+                    table.insert(key_events.Close, { Input.group.Back })
+                end
+                if total_pages > 1 then
+                    if Input.group.PgFwd then
+                        table.insert(key_events.NextPage, { Input.group.PgFwd })
+                    end
+                    if Input.group.PgBack then
+                        table.insert(key_events.PrevPage, { Input.group.PgBack })
+                    end
+                end
+            end
+
+            overlay = FocusManager:new{
+                align = "center",
+                vertical_align = "center",
+                dimen = Geom:new{ w = sw, h = sh },
+                layout = layout,
+                selected = { x = 1, y = 1 },
+                key_events = key_events,
+                card,
+            }
+
+            for _, rw in ipairs(row_widgets) do
+                rw.item.show_parent = overlay
+            end
+            if prev_page_btn then prev_page_btn.show_parent = overlay end
+            if next_page_btn then next_page_btn.show_parent = overlay end
+            install_btn.show_parent = overlay
+            cancel_btn.show_parent = overlay
+
+            overlay.onNextPage = function()
+                if current_page < total_pages then
+                    current_page = current_page + 1
+                    refreshModal()
+                    return true
+                end
+            end
+
+            overlay.onPrevPage = function()
+                if current_page > 1 then
+                    current_page = current_page - 1
+                    refreshModal()
+                    return true
+                end
+            end
+
+            overlay.onClose = function()
+                UIManager:close(overlay, "ui")
+                return true
+            end
+
+            UIManager:show(overlay, "ui")
+        end
+
+        refreshModal()
+    end
+
+    function Storefront:showBranchPickerDialog(repo)
+        if not repo then return end
+        local owner = repo.owner or (repo.data and repo.data.owner and (type(repo.data.owner) == "string" and repo.data.owner or repo.data.owner.login))
+        local repo_name = repo.name or (repo.data and repo.data.name)
+        if not owner or not repo_name then
+            UIManager:show(InfoMessage:new{ text = _("Missing repository metadata."), timeout = 4 })
+            return
+        end
+
+        local default_branch = repo.default_branch or (repo.data and repo.data.default_branch) or "main"
+
+        NetworkMgr:runWhenOnline(function()
+            local Toast = require("storefront_toast")
+            local progress_toast = Toast.show(_("fetching_branches"), 0)
+            if UIManager.forceRePaint then UIManager:forceRePaint() end
+
+            local branches, err = GitHub.fetchBranches(owner, repo_name)
+            if progress_toast and progress_toast.close then progress_toast:close() end
+
+            if not branches or #branches == 0 then
+                -- If branches endpoint failed or returned empty, fallback to offering the default branch
+                branches = { { name = default_branch } }
+            else
+                -- Float default branch to the top
+                local reordered = {}
+                local seen = {}
+                for _, b in ipairs(branches) do
+                    if b.name == default_branch then
+                        table.insert(reordered, b)
+                        seen[b.name] = true
+                        break
+                    end
+                end
+                for _, b in ipairs(branches) do
+                    if not seen[b.name] then
+                        table.insert(reordered, b)
+                        seen[b.name] = true
+                    end
+                end
+                branches = reordered
+            end
+
+            local function openModal()
+                local ok_render, render_err = pcall(function()
+                    self:renderBranchPickerModal(repo, branches, default_branch)
+                end)
+                if not ok_render then
+                    logger.warn("Failed to render branch picker modal", render_err)
+                    UIManager:show(InfoMessage:new{
+                        text = _("Failed to display branch list.") .. "\n" .. tostring(render_err),
+                        timeout = 6,
+                    })
+                end
+            end
+
+            if UIManager.nextTick then
+                UIManager:nextTick(openModal)
+            else
+                openModal()
+            end
+        end)
     end
 
     function Storefront:promptPluginInstallOptions(repo, release_override, force_show_picker)
@@ -1285,6 +1779,234 @@ function M:init(Storefront)
                 return
             end
             doInstall(res and res.ok, res and res.err)
+        end)
+    end
+
+    function Storefront:installPluginFromBranch(repo, branch_name)
+        if not repo then return end
+        branch_name = branch_name or repo.default_branch or (repo.data and repo.data.default_branch) or "main"
+
+        local owner = repo.owner or (repo.data and repo.data.owner and (type(repo.data.owner) == "string" and repo.data.owner or repo.data.owner.login))
+        local repo_name = repo.name or (repo.data and repo.data.name)
+        if not owner or not repo_name then
+            UIManager:show(InfoMessage:new{ text = _("Missing repository metadata for installation."), timeout = 4 })
+            return
+        end
+
+        local is_batch = (_G.G_storefront_batch_updating == true) or (self.pending_install_context and self.pending_install_context.is_batch == true)
+        StorefrontLogger.action(string.format("INSTALL from branch starting: %s/%s@%s", owner, repo_name, branch_name))
+
+        NetworkMgr:runWhenOnline(function()
+            local fetch_toast
+            if not is_batch then
+                local Toast = require("storefront_toast")
+                fetch_toast = Toast.show(_("Fetching branch information…"), 0)
+                if UIManager.forceRePaint then UIManager:forceRePaint() end
+            end
+
+            local head_sha = GitHub.fetchBranchSHA(owner, repo_name, branch_name)
+            if fetch_toast and fetch_toast.close then fetch_toast:close() end
+
+            local url
+            if GitHub.isDirectApiEnabled() then
+                url = string.format("https://api.github.com/repos/%s/%s/zipball/%s", owner, repo_name, branch_name)
+            else
+                url = string.format("https://github.com/%s/%s/archive/refs/heads/%s.zip", owner, repo_name, branch_name)
+            end
+
+            local cache_dir = ensureCacheDir()
+            local downloads_dir = cache_dir .. "/downloads"
+            if lfs.attributes(downloads_dir, "mode") ~= "directory" then
+                lfs.mkdir(downloads_dir)
+            end
+            local zip_path = string.format("%s/%s-%s-%d.zip", downloads_dir, repo_name, branch_name, os.time())
+            local plugin_display_name = repo.name or repo.full_name or "plugin"
+
+            local function doInstall(ok, err)
+                if not ok then
+                    util.removeFile(zip_path)
+                    if not is_batch then
+                        UIManager:show(InfoMessage:new{
+                            text = _("Download failed: ") .. tostring(err),
+                            timeout = 6,
+                        })
+                    end
+                    if self.pending_install_context and self.pending_install_context.batch_callback then
+                        local cb = self.pending_install_context.batch_callback
+                        self.pending_install_context.batch_callback = nil
+                        cb(false, tostring(err))
+                    end
+                    return
+                end
+
+                local reader = Archiver.Reader:new()
+                if not reader:open(zip_path) then
+                    util.removeFile(zip_path)
+                    if not is_batch then
+                        UIManager:show(InfoMessage:new{
+                            text = _("Failed to open downloaded archive."),
+                            timeout = 6,
+                        })
+                    end
+                    if self.pending_install_context and self.pending_install_context.batch_callback then
+                        local cb = self.pending_install_context.batch_callback
+                        self.pending_install_context.batch_callback = nil
+                        cb(false, "Failed to open downloaded archive")
+                    end
+                    return
+                end
+
+                local info, detect_err = detectPluginFromArchive(reader, repo)
+                if not info then
+                    reader:close()
+                    util.removeFile(zip_path)
+                    if not is_batch then
+                        UIManager:show(InfoMessage:new{
+                            text = detect_err or _("Could not detect plugin inside archive."),
+                            timeout = 6,
+                        })
+                    end
+                    if self.pending_install_context and self.pending_install_context.batch_callback then
+                        local cb = self.pending_install_context.batch_callback
+                        self.pending_install_context.batch_callback = nil
+                        cb(false, detect_err or "Could not detect plugin inside archive")
+                    end
+                    return
+                end
+
+                info.source = "branch"
+                info.branch = branch_name
+                info.sha = head_sha
+                info.plugin_release_tag = branch_name
+
+                if self.pending_install_context and self.pending_install_context.mode == "update" then
+                    local ctx_plugin = self.pending_install_context.plugin
+                    if ctx_plugin and ctx_plugin.dirname and ctx_plugin.dirname ~= "" then
+                        info.plugin_dirname = ctx_plugin.dirname
+                    end
+                else
+                    local records = (InstallStore.list and InstallStore.list()) or {}
+                    for _, rec in pairs(records) do
+                        if rec.owner and rec.repo and owner and repo_name
+                           and rec.owner:lower() == owner:lower()
+                           and rec.repo:lower() == repo_name:lower() then
+                            if rec.dirname and rec.dirname ~= "" then
+                                info.plugin_dirname = rec.dirname
+                                break
+                            end
+                        end
+                    end
+                end
+
+                local function proceedWithInstall(dest_root)
+                    local install_display_name = info and info.plugin_name or (repo and repo.name) or "plugin"
+                    local batch_toast = self.pending_install_context and self.pending_install_context.batch_toast
+                    local install_progress
+                    if batch_toast then
+                        if batch_toast.setText then
+                            batch_toast:setText(string.format(_("Installing %s…"), install_display_name))
+                        end
+                    elseif not is_batch then
+                        local Toast = require("storefront_toast")
+                        install_progress = Toast.show(string.format(_("Installing %s…"), install_display_name), 0)
+                        if UIManager.forceRePaint then UIManager:forceRePaint() end
+                    end
+
+                    local ok_extract, dest_or_err = extractPluginToUserDir(reader, info, dest_root)
+                    reader:close()
+                    util.removeFile(zip_path)
+
+                    if install_progress and install_progress.close then install_progress:close() end
+
+                    if not ok_extract then
+                        if not is_batch then
+                            UIManager:show(InfoMessage:new{
+                                text = _("Installation failed: ") .. tostring(dest_or_err),
+                                timeout = 6,
+                            })
+                        end
+                        if self.pending_install_context and self.pending_install_context.batch_callback then
+                            local cb = self.pending_install_context.batch_callback
+                            self.pending_install_context.batch_callback = nil
+                            cb(false, tostring(dest_or_err))
+                        end
+                        return
+                    end
+
+                    info.plugin_name = info.plugin_name or ((info.plugin_dirname or "plugin"):gsub("%.koplugin$", ""))
+                    local short_sha = head_sha and head_sha:sub(1, 7) or ""
+                    local version_display = (short_sha ~= "") and (branch_name .. "@" .. short_sha) or branch_name
+                    local msg
+                    if self.pending_install_context and self.pending_install_context.mode == "update" then
+                        msg = string.format(_("Updated plugin \"%s\" to %s."), info.plugin_name, version_display)
+                    else
+                        msg = string.format(_("Installed plugin \"%s\" (%s)."), info.plugin_name, version_display)
+                    end
+
+                    StorefrontLogger.action(msg)
+                    if not is_batch and not _G.G_storefront_batch_updating then
+                        self:showRestartConfirmation(msg)
+                    end
+
+                    self:handlePostInstall(info, repo)
+                    if self.updates_menu then
+                        self:updateUpdatesDialog()
+                    end
+                end
+
+                if self.pending_install_context and self.pending_install_context.mode == "update" then
+                    proceedWithInstall(self.pending_install_context.plugin.root)
+                else
+                    self:resolveNewInstallDestination(proceedWithInstall, function()
+                        reader:close()
+                        util.removeFile(zip_path)
+                        if self.pending_install_context and self.pending_install_context.batch_callback then
+                            local cb = self.pending_install_context.batch_callback
+                            self.pending_install_context.batch_callback = nil
+                            cb(false, "Cancelled destination selection")
+                        end
+                    end)
+                end
+            end
+
+            local batch_toast = self.pending_install_context and self.pending_install_context.batch_toast
+            local dl_msg = string.format(_("Downloading %s (%s)…\nTap screen to cancel."), plugin_display_name, branch_name)
+
+            local trap_widget
+            if batch_toast then
+                if batch_toast.setText then
+                    batch_toast:setText(dl_msg)
+                end
+                trap_widget = batch_toast
+            else
+                local Toast = require("storefront_toast")
+                trap_widget = Toast.show(dl_msg, 0)
+            end
+
+            local Trapper = require("ui/trapper")
+            Trapper:wrap(function()
+                local completed, res = Trapper:dismissableRunInSubprocess(function()
+                    local dl_ok, dl_err = downloadToFile(url, zip_path)
+                    return { ok = dl_ok, err = dl_err }
+                end, trap_widget)
+
+                if trap_widget and trap_widget ~= batch_toast and trap_widget.close then
+                    trap_widget:close()
+                end
+
+                if not completed then
+                    util.removeFile(zip_path)
+                    local Toast = require("storefront_toast")
+                    Toast.show(_("Download cancelled."), 3)
+                    if self.pending_install_context and self.pending_install_context.batch_callback then
+                        local cb = self.pending_install_context.batch_callback
+                        self.pending_install_context.batch_callback = nil
+                        cb(false, "Cancelled by user")
+                    end
+                    return
+                end
+                doInstall(res and res.ok, res and res.err)
+            end)
         end)
     end
 end

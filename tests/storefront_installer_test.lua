@@ -17,10 +17,13 @@ describe("storefront_installer", function()
 
         assert.is_function(mockStorefront.resolveNewInstallDestination)
         assert.is_function(mockStorefront.renderAssetPickerModal)
+        assert.is_function(mockStorefront.renderBranchPickerModal)
+        assert.is_function(mockStorefront.showBranchPickerDialog)
         assert.is_function(mockStorefront.promptPluginInstallOptions)
         assert.is_function(mockStorefront.installPluginFromRepo)
         assert.is_function(mockStorefront._installPluginFromRepoInternal)
         assert.is_function(mockStorefront.installPluginFromReleaseAsset)
+        assert.is_function(mockStorefront.installPluginFromBranch)
     end)
 
     describe("downloadToFile validation", function()

@@ -611,6 +611,65 @@ if ok_browser then
             print("Versions fallback cache test error was:", fallback_test_err)
         end
 
+        -- Test versions tab fetches from GitHub even when repo has latest_release and latest_prerelease in cache
+        local prerelease_fetch_ok, prerelease_fetch_err = pcall(function()
+            local repo_with_pre = {
+                name = "test_pre_rel",
+                owner = "testowner",
+                latest_release = { tag_name = "v1.0.0", name = "v1.0.0", body = "Release 1", published_at = "2026-08-01" },
+                latest_prerelease = { tag_name = "v1.1.0-beta", name = "v1.1.0-beta", body = "Beta 1", published_at = "2026-08-02", prerelease = true },
+            }
+            local details = StorefrontDetailsDialog:new{
+                Storefront = full_dummy_storefront,
+                repo = repo_with_pre,
+                kind = "plugin",
+            }
+            details:init()
+            local GitHubClient = require("storefront_net_github")
+            local orig_fetch = GitHubClient.fetchReleases
+            local fetch_called = false
+            GitHubClient.fetchReleases = function(owner, repo)
+                fetch_called = true
+                return {
+                    { tag_name = "v1.1.0-beta", name = "v1.1.0-beta", prerelease = true },
+                    { tag_name = "v1.0.0", name = "v1.0.0", prerelease = false },
+                    { tag_name = "v0.9.0", name = "v0.9.0", prerelease = false },
+                    { tag_name = "v0.8.0", name = "v0.8.0", prerelease = false },
+                }
+            end
+
+            details.active_tab = "versions"
+            details.loadContent("versions")
+
+            check("fetchReleases is called when repo has latest_release and latest_prerelease", fetch_called, true)
+            check("cached_releases is populated with all fetched releases", details.cached_releases and #details.cached_releases == 4, true)
+
+            GitHubClient.fetchReleases = orig_fetch
+        end)
+        check("Versions tab fetch with pre-release test executed without error", prerelease_fetch_ok, true)
+        if not prerelease_fetch_ok then
+            print("Versions tab fetch with pre-release test error was:", prerelease_fetch_err)
+        end
+
+        -- Test version list item instantiates cleanly with version entry
+        local version_item_spacing_ok, version_item_spacing_err = pcall(function()
+            local StorefrontListItem = require("storefront_list_item")
+            local v_item = StorefrontListItem:new{
+                entry = {
+                    is_entry = true,
+                    name = "v1.0.0",
+                    description = "Published: 2026-09-07",
+                    badge = "LATEST",
+                },
+                width = 600,
+            }
+            check("Version list item instantiates without error", v_item ~= nil, true)
+        end)
+        check("Version list item spacing test executed without error", version_item_spacing_ok, true)
+        if not version_item_spacing_ok then
+            print("Version list item spacing test error was:", version_item_spacing_err)
+        end
+
         -- Test page_number reset when switching tabs in details dialog
         local page_reset_ok = pcall(function()
             local details = StorefrontDetailsDialog:new{

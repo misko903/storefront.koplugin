@@ -66,6 +66,7 @@ local normalizeMetaPath = StorefrontUtils.normalizeMetaPath
 local sanitizeMetaPath = StorefrontUtils.sanitizeMetaPath
 local firstNonEmpty = StorefrontUtils.firstNonEmpty
 local isVersionNewer = StorefrontUtils.isVersionNewer
+local isShaDifferent = StorefrontUtils.isShaDifferent
 local normalizeDescription = StorefrontUtils.normalizeDescription
 local parseGitHubTimestamp = StorefrontUtils.parseGitHubTimestamp
 local repoStarsValue = StorefrontUtils.repoStarsValue
@@ -1734,7 +1735,23 @@ function Storefront:populateRemoteInfoFromCatalog()
 
     for _, plugin in ipairs(installed) do
         local record = records[plugin.dirname]
-        if record and (record.repo_id or (record.owner and record.repo)) then
+        if record and record.source == "branch" then
+            -- Branch-tracked plugins should never have catalog release data in remote_info.
+            -- Clean up any stale release/catalog data.
+            if remote_info[plugin.dirname] and (remote_info[plugin.dirname].is_cached_fallback
+                or (remote_info[plugin.dirname].remote_version and not remote_info[plugin.dirname].remote_version:match("^%x%x%x%x%x%x%x+$"))) then
+                if record.sha and record.sha ~= "" then
+                    remote_info[plugin.dirname] = {
+                        remote_version = record.sha,
+                        release_tag_name = (record.branch or "branch") .. "@" .. record.sha:sub(1, 7),
+                        last_checked = os.time(),
+                    }
+                else
+                    remote_info[plugin.dirname] = nil
+                end
+                updated_count = updated_count + 1
+            end
+        elseif record and (record.repo_id or (record.owner and record.repo)) then
             local cached_repo
             if record.repo_id then
                 cached_repo = Cache.getRepo(record.repo_id)
@@ -1959,69 +1976,92 @@ function Storefront:collectUpdateSummary()
         StorefrontLogger.debug(string.format("UPDATE SCAN: checking %d installed plugins", #installed))
     end
 
-    local repo_map = {}
+    local repo_groups = {}
+    local untracked_plugins = {}
 
     for _, plugin in ipairs(installed) do
         local record = records[plugin.dirname]
         local tracked = record and record.owner and record.repo
         local repo_key = tracked and (record.owner:lower() .. "/" .. record.repo:lower()) or nil
-        local is_duplicate = false
-
         if repo_key then
-            if repo_map[repo_key] then
-                local existing_index = repo_map[repo_key]
-                local existing_item = data[existing_index]
-                local existing_plugin = existing_item.plugin
+            repo_groups[repo_key] = repo_groups[repo_key] or {}
+            table.insert(repo_groups[repo_key], { plugin = plugin, record = record })
+        else
+            table.insert(untracked_plugins, { plugin = plugin, record = record })
+        end
+    end
 
-                local current_matches_repo = (plugin.dirname:lower() == (record.repo:lower() .. ".koplugin"))
-                local existing_matches_repo = (existing_plugin.dirname:lower() == (existing_item.record.repo:lower() .. ".koplugin"))
+    local deduped_list = {}
+    for repo_key, group in pairs(repo_groups) do
+        if #group == 1 then
+            table.insert(deduped_list, group[1])
+        else
+            local primary = group[1]
+            local duplicates = {}
+            for i = 2, #group do
+                local cand = group[i]
+                local cand_is_branch = cand.record and cand.record.source == "branch"
+                local prim_is_branch = primary.record and primary.record.source == "branch"
 
-                local current_is_primary = false
-                if current_matches_repo and not existing_matches_repo then
-                    current_is_primary = true
-                elseif not current_matches_repo and existing_matches_repo then
-                    current_is_primary = false
+                local cand_matches_repo = (cand.plugin.dirname:lower() == (cand.record.repo:lower() .. ".koplugin"))
+                local prim_matches_repo = (primary.plugin.dirname:lower() == (primary.record.repo:lower() .. ".koplugin"))
+
+                local cand_better = false
+                if cand_is_branch and not prim_is_branch then
+                    cand_better = true
+                elseif not cand_is_branch and prim_is_branch then
+                    cand_better = false
+                elseif cand_matches_repo and not prim_matches_repo then
+                    cand_better = true
+                elseif not cand_matches_repo and prim_matches_repo then
+                    cand_better = false
                 else
-                    current_is_primary = (plugin.latest_mtime or 0) > (existing_plugin.latest_mtime or 0)
+                    cand_better = (cand.plugin.latest_mtime or 0) > (primary.plugin.latest_mtime or 0)
                 end
 
-                summary.total = summary.total - 1
-                if current_is_primary then
-                    existing_item.duplicates = existing_item.duplicates or {}
-                    table.insert(existing_item.duplicates, existing_plugin)
-
-                    existing_item.plugin = plugin
-                    existing_item.record = record
-                    existing_item.remote = remote_info[plugin.dirname]
+                if cand_better then
+                    table.insert(duplicates, primary.plugin)
+                    primary = cand
                 else
-                    existing_item.duplicates = existing_item.duplicates or {}
-                    table.insert(existing_item.duplicates, plugin)
-                    is_duplicate = true
+                    table.insert(duplicates, cand.plugin)
                 end
             end
+            primary.duplicates = duplicates
+            table.insert(deduped_list, primary)
+        end
+    end
+
+    for _, item in ipairs(untracked_plugins) do
+        table.insert(deduped_list, item)
+    end
+
+    summary.total = #deduped_list
+
+    for _, entry in ipairs(deduped_list) do
+        local plugin = entry.plugin
+        local record = entry.record
+        local tracked = record and record.owner and record.repo
+        if tracked then
+            summary.tracked = summary.tracked + 1
+        else
+            summary.unmatched = summary.unmatched + 1
         end
 
-        if not is_duplicate then
-            if tracked then
-                summary.tracked = summary.tracked + 1
-            else
-                summary.unmatched = summary.unmatched + 1
-            end
-
-            local remote = remote_info[plugin.dirname]
-            if not remote and record and record.repo then
-                remote = remote_info[record.repo]
-                    or remote_info[record.repo .. ".koplugin"]
-                    or remote_info[record.repo:lower()]
-                    or remote_info[record.repo:lower() .. ".koplugin"]
-            end
+        local remote = remote_info[plugin.dirname]
+        if not remote and record and record.repo and record.source ~= "branch" then
+            remote = remote_info[record.repo]
+                or remote_info[record.repo .. ".koplugin"]
+                or remote_info[record.repo:lower()]
+                or remote_info[record.repo:lower() .. ".koplugin"]
+        end
         -- A remote entry with an error is still usable if it has a release_tag_name.
         -- Only treat it as unchecked if it has NO version info at all.
         local has_checked_info = remote and (remote.release_tag_name or remote.remote_version) and not (remote.error and not remote.release_tag_name)
 
         -- Always check the catalog cache for a fresh release tag, and prefer it
         -- if it's newer than what's in the (possibly stale) remote_info.
-        if tracked then
+        -- Branch-tracked plugins bypass catalog release overrides.
+        if tracked and record and record.source ~= "branch" then
             local cached_repo
             if record.repo_id then
                 cached_repo = Cache.getRepo(record.repo_id)
@@ -2113,7 +2153,16 @@ function Storefront:collectUpdateSummary()
         
         local has_update = false
 
-        if tracked and remote then
+        if tracked and record and record.source == "branch" and remote then
+            local remote_sha = remote.remote_version
+            local installed_sha = record.sha
+            local is_valid_sha = remote_sha and type(remote_sha) == "string" and remote_sha:match("^%x%x%x%x%x%x%x+$")
+            if not remote.is_cached_fallback and is_valid_sha and installed_sha and installed_sha ~= "" then
+                has_update = isShaDifferent(remote_sha, installed_sha)
+            else
+                has_update = false
+            end
+        elseif tracked and remote then
             local release_tag = remote.release_tag_name
             local release_ts = remote.release_published_at or 0
 
@@ -2204,12 +2253,9 @@ function Storefront:collectUpdateSummary()
             record = record,
             remote = remote,
             has_update = has_update,
+            duplicates = entry.duplicates,
         }
-        if repo_key then
-            repo_map[repo_key] = #data
-        end
     end
-end
 
     summary.data = data
     summary.records = records
@@ -3286,6 +3332,16 @@ function Storefront:_scanUpdatesForDirectApi(tracked)
 
                 if not owner or not repo_name then
                     last_err = "Missing repository info."
+                elseif record.source == "branch" and record.branch then
+                    local branch_name = record.branch
+                    local head_sha = GitHub.fetchBranchSHA(owner, repo_name, branch_name)
+                    if head_sha and head_sha ~= "" then
+                        remote_version = head_sha
+                        release_tag_name = branch_name .. "@" .. head_sha:sub(1, 7)
+                        last_err = nil
+                    else
+                        last_err = "Could not fetch branch SHA."
+                    end
                 else
                     local is_storefront_worker = dirname == "storefront.koplugin"
                         or (repo_name and repo_name:lower():match("storefront%.koplugin"))
@@ -3572,6 +3628,16 @@ local function fetchRemoteVersionCore(record)
     local owner = record.owner
     local repo_name = record.repo
     local last_err
+
+    if record.source == "branch" and record.branch then
+        local branch_name = record.branch
+        local head_sha = GitHub.fetchBranchSHA(owner, repo_name, branch_name)
+        if head_sha and head_sha ~= "" then
+            return head_sha, 0, nil, branch_name .. "@" .. head_sha:sub(1, 7)
+        else
+            return nil, 0, _("Could not fetch branch SHA.")
+        end
+    end
 
     local is_storefront = record.dirname == "storefront.koplugin"
         or (record.repo and record.repo:lower():match("storefront%.koplugin"))
@@ -4599,6 +4665,14 @@ function Storefront:_checkSinglePluginInternal(record)
 
         if err then
             message = string.format(_("Failed to check %s: %s"), display_name, err)
+        elseif record.source == "branch" and record.branch then
+            local short_remote = remote_version and remote_version:sub(1, 7) or ""
+            local short_installed = record.sha and record.sha:sub(1, 7) or ""
+            if remote_version and record.sha and isShaDifferent(remote_version, record.sha) then
+                message = string.format(_("Update available for %s (%s): %s → %s."), display_name, record.branch, short_installed, short_remote)
+            else
+                message = string.format(_("%s is up to date on branch %s (%s)."), display_name, record.branch, short_installed)
+            end
         elseif remote_version and installed_version then
             if isVersionNewer(remote_version, installed_version) then
                 message = string.format(_("Update available for %s: remote %s, installed %s."), display_name, remote_version, installed_version)
@@ -4635,7 +4709,11 @@ function Storefront:updatePluginFromRecord(record)
         mode = "update",
         plugin = plugin,
     }
-    self:promptPluginInstallOptions(descriptor)
+    if record.source == "branch" and record.branch and self.installPluginFromBranch then
+        self:installPluginFromBranch(descriptor, record.branch)
+    else
+        self:promptPluginInstallOptions(descriptor)
+    end
 end
 
 
@@ -4739,6 +4817,15 @@ function Storefront:rememberInstall(info, repo)
         info.plugin_release_tag
     )
     if record then
+        if info.source then
+            record.source = info.source
+        end
+        if info.branch then
+            record.branch = info.branch
+        end
+        if info.sha then
+            record.sha = info.sha
+        end
         InstallStore.upsert(info.plugin_dirname, record)
         
         -- Clear ignored release if user installed the ignored version
@@ -5530,7 +5617,7 @@ local function truncateText(text, max_len)
     if not text or text == "" then
         return ""
     end
-    local trimmed = util.trim(text)
+    local trimmed = (util and util.trim and util.trim(text)) or (text:match("^%s*(.-)%s*$") or text)
     if #trimmed <= max_len then
         return trimmed
     end
@@ -6558,6 +6645,7 @@ end
 
 function Storefront:makeRepoMenuItem(repo, installed_lookup, installed_fonts_map)
     local is_installed = false
+    local installed_rec = nil
     local kind = repo.kind or (self.browser_state and self.browser_state.kind)
     if kind == "font" then
         if self.isFontInstalled then
@@ -6574,22 +6662,39 @@ function Storefront:makeRepoMenuItem(repo, installed_lookup, installed_fonts_map
                 end
             end
         end
-    elseif installed_lookup then
+    elseif installed_lookup and type(installed_lookup) == "table" then
+        local recs = installed_lookup.records or {}
         if repo.full_name and (installed_lookup[repo.full_name] or installed_lookup[repo.full_name:lower()]) then
             is_installed = true
+            installed_rec = recs[repo.full_name] or recs[repo.full_name:lower()]
         elseif repo.id and installed_lookup["id:" .. tostring(repo.id)] then
             is_installed = true
+            installed_rec = recs["id:" .. tostring(repo.id)]
         elseif installed_lookup.unmatched and repo.name then
             local low_name = repo.name:lower()
             local base_name = low_name:gsub("%.koplugin$", "")
             if installed_lookup.unmatched[low_name] or installed_lookup.unmatched[base_name] then
                 is_installed = true
+                installed_rec = recs[low_name] or recs[base_name] or recs[repo.name]
             end
+        end
+        if is_installed and not installed_rec and repo.name then
+            local low_name = repo.name:lower()
+            local base_name = low_name:gsub("%.koplugin$", "")
+            installed_rec = recs[repo.name] or recs[low_name] or recs[base_name]
         end
     end
     local stars = repoStarsValue(repo)
     local stars_fmt = stars >= 1000 and string.format("%.1fk", stars / 1000):gsub("%.0k", "k") or tostring(stars)
-    local badge = is_installed and _("Installed") or nil
+    local is_branch_inst = installed_rec and type(installed_rec) == "table" and installed_rec.source == "branch" and installed_rec.branch
+    local badge
+    if is_installed then
+        if is_branch_inst then
+            badge = string.format(_("branch: %s"), installed_rec.branch)
+        else
+            badge = _("Installed")
+        end
+    end
     local description = normalizeDescription(repo.description)
     local kind_label
     if (repo.kind or (self.browser_state and self.browser_state.kind)) == "font" then
@@ -7029,11 +7134,25 @@ function Storefront:buildInstalledEntries(available_list_height)
 
             if match_type and match_status and match_search then
                 local record = plugin_records[plugin.dirname]
+                local is_branch = record and record.source == "branch" and record.branch
                 local kind_parts = { _("Plugin") }
                 if is_default then
                     table.insert(kind_parts, _("Default"))
                 end
+                if is_branch then
+                    local short_sha = record.sha and record.sha:sub(1, 7)
+                    if short_sha and short_sha ~= "" then
+                        table.insert(kind_parts, string.format(_("branch: %s (%s)"), record.branch, short_sha))
+                    else
+                        table.insert(kind_parts, string.format(_("branch: %s"), record.branch))
+                    end
+                end
                 local meta_kind = table.concat(kind_parts, " · ")
+
+                local badge_text = nil
+                if has_update then
+                    badge_text = is_branch and _("repull_from_branch") or _("Update")
+                end
 
                 table.insert(items, {
                     name = display_name,
@@ -7044,7 +7163,7 @@ function Storefront:buildInstalledEntries(available_list_height)
                     kind_label = meta_kind,
                     description = record and record.repo_description or "",
                     badge_icon = getAssetPath(disabled and "square.svg" or "check-square.svg"),
-                    badge = has_update and _("Update") or nil,
+                    badge = badge_text,
                     is_entry = true,
                     is_installed_item = true,
                     is_plugin = true,
@@ -8785,8 +8904,8 @@ function Storefront:showBrowser(kind)
             end
 
             local current_generation = InstallStore.getGeneration and InstallStore.getGeneration() or 0
-            local remote_info_key = self.updates_state and self.updates_state.remote_info
-            local patch_remote_info_key = self.patch_updates_state and self.patch_updates_state.remote_info
+            local remote_info_key = self.updates_state and self.updates_state.last_checked
+            local patch_remote_info_key = self.patch_updates_state and self.patch_updates_state.last_checked
             
             if not self._cached_updates_count 
                or self._cached_updates_gen ~= current_generation
@@ -9402,7 +9521,7 @@ function Storefront:getInstalledLookup()
     if cache and cache.generation == generation then
         return cache.lookup
     end
-    local lookup = { exact = {}, unmatched = {} }
+    local lookup = { exact = {}, unmatched = {}, records = {} }
     for _, rec in pairs(getInstallRecordsMap()) do
         local full_name = rec.repo_full_name
         if not full_name and rec.owner and rec.repo then
@@ -9415,11 +9534,22 @@ function Storefront:getInstalledLookup()
             lookup[full_name:lower()] = true
             lookup.exact[full_name] = true
             lookup.exact[full_name:lower()] = true
+            lookup.records[full_name] = rec
+            lookup.records[full_name:lower()] = rec
         end
         if rec.repo_id then
             has_exact = true
             lookup["id:" .. tostring(rec.repo_id)] = true
             lookup.exact["id:" .. tostring(rec.repo_id)] = true
+            lookup.records["id:" .. tostring(rec.repo_id)] = rec
+        end
+
+        if rec.dirname then
+            local low = rec.dirname:lower()
+            local base = low:gsub("%.koplugin$", "")
+            lookup.records[rec.dirname] = lookup.records[rec.dirname] or rec
+            lookup.records[low] = lookup.records[low] or rec
+            lookup.records[base] = lookup.records[base] or rec
         end
 
         if not has_exact then
@@ -9917,14 +10047,26 @@ function Storefront:handlePostInstall(info, repo)
 
     self:rememberInstall(info, repo)
     self._cached_plugin_summary = nil
+    self._merged_updates_cache = nil
     UIManager:setDirty(nil, "full")
+
+    if info and info.plugin_dirname and info.source == "branch" then
+        self:ensureUpdatesState()
+        self.updates_state.remote_info[info.plugin_dirname] = {
+            remote_version = info.sha,
+            release_tag_name = (info.branch or "branch") .. "@" .. (info.sha and info.sha:sub(1, 7) or ""),
+            last_checked = os.time(),
+            error = nil,
+        }
+        self:saveUpdatesState()
+    end
 
     if not self.pending_install_context then
         return
     end
     local context = self.pending_install_context
     self.pending_install_context = nil
-    if context.mode == "update" then
+    if context.mode == "update" and info and info.source ~= "branch" then
         local plugin = context.plugin
         local record = plugin and getRecordedInstall(plugin.dirname)
         if plugin and record then

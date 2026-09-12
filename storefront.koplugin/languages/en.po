@@ -41,6 +41,9 @@ msgstr "%s and %s"
 msgid "%s is up to date (version %s)."
 msgstr "%s is up to date (version %s)."
 
+msgid "%s is up to date on branch %s (%s)."
+msgstr "%s is up to date on branch %s (%s)."
+
 msgid "%s is up to date."
 msgstr "%s is up to date."
 
@@ -236,14 +239,11 @@ msgstr "Cannot write destination file."
 msgid "Catalog & Cache"
 msgstr "Catalog & Cache"
 
-msgid "Catalog refresh failed: "
-msgstr "Catalog refresh failed: "
+msgid "Catalog refresh cancelled."
+msgstr "Catalog refresh cancelled."
 
 msgid "Catalog refresh is already in progress in the background."
 msgstr "Catalog refresh is already in progress in the background."
-
-msgid "Catalog refreshed successfully."
-msgstr "Catalog refreshed successfully."
 
 msgid "Catalog source"
 msgstr "Catalog source"
@@ -301,6 +301,9 @@ msgstr "Checking patch updates…"
 
 msgid "Checking plugin updates…"
 msgstr "Checking plugin updates…"
+
+msgid "Choose Branch — %s"
+msgstr "Choose Branch — %s"
 
 msgid "Choose Build — %s"
 msgstr "Choose Build — %s"
@@ -400,6 +403,9 @@ msgstr "Could not detect .koplugin folder in archive"
 
 msgid "Could not detect plugin inside archive."
 msgstr "Could not detect plugin inside archive."
+
+msgid "Could not fetch branch SHA."
+msgstr "Could not fetch branch SHA."
 
 msgid "Could not fetch commit comparison."
 msgstr "Could not fetch commit comparison."
@@ -521,6 +527,9 @@ msgstr "Download options — %s"
 msgid "Download options — %s (%s)"
 msgstr "Download options — %s (%s)"
 
+msgid "Downloading %s (%s)…\nTap screen to cancel."
+msgstr "Downloading %s (%s)…\nTap screen to cancel."
+
 msgid "Downloading %s%s…\nTap screen to cancel."
 msgstr "Downloading %s%s…\nTap screen to cancel."
 
@@ -596,6 +605,9 @@ msgstr "Failed to delete: %s"
 msgid "Failed to disable patch '%s'."
 msgstr "Failed to disable patch '%s'."
 
+msgid "Failed to display branch list."
+msgstr "Failed to display branch list."
+
 msgid "Failed to download patch: %s"
 msgstr "Failed to download patch: %s"
 
@@ -622,6 +634,9 @@ msgstr "Failed to save downloaded file"
 
 msgid "Failed to toggle patch status."
 msgstr "Failed to toggle patch status."
+
+msgid "Fetching branch information…"
+msgstr "Fetching branch information…"
 
 msgid "Fetching changelog…"
 msgstr "Fetching changelog…"
@@ -812,6 +827,15 @@ msgstr "Installed full font family \"%s\" (%d file(s))."
 msgid "Installed patch \"%s\"."
 msgstr "Installed patch \"%s\"."
 
+msgid "Installed plugin \"%s\" (%s)."
+msgstr "Installed plugin \"%s\" (%s)."
+
+msgid "Installed plugin \"%s\" (version %s)."
+msgstr "Installed plugin \"%s\" (version %s)."
+
+msgid "Installed plugin \"%s\"."
+msgstr "Installed plugin \"%s\"."
+
 msgid "Installing %s…"
 msgstr "Installing %s…"
 
@@ -976,6 +1000,9 @@ msgstr "Missing repository metadata for releases."
 
 msgid "Missing repository metadata for remote fetch."
 msgstr "Missing repository metadata for remote fetch."
+
+msgid "Missing repository metadata."
+msgstr "Missing repository metadata."
 
 msgid "Missing target path"
 msgstr "Missing target path"
@@ -1322,8 +1349,8 @@ msgstr "Refresh catalog"
 msgid "Refreshing catalog via Direct GitHub API…"
 msgstr "Refreshing catalog via Direct GitHub API…"
 
-msgid "Refreshing catalog..."
-msgstr "Refreshing catalog..."
+msgid "Refreshing catalog via Direct GitHub API…\nTap screen to cancel."
+msgstr "Refreshing catalog via Direct GitHub API…\nTap screen to cancel."
 
 msgid "Refreshing catalog…"
 msgstr "Refreshing catalog…"
@@ -1754,6 +1781,9 @@ msgstr "Update %s?"
 msgid "Update All"
 msgstr "Update All"
 
+msgid "Update available for %s (%s): %s → %s."
+msgstr "Update available for %s (%s): %s → %s."
+
 msgid "Update available for %s: remote %s, installed %s."
 msgstr "Update available for %s: remote %s, installed %s."
 
@@ -1774,6 +1804,9 @@ msgstr "Updated %d of %d item(s) (%d failed)."
 
 msgid "Updated patch \"%s\"."
 msgstr "Updated patch \"%s\"."
+
+msgid "Updated plugin \"%s\" to %s."
+msgstr "Updated plugin \"%s\" to %s."
 
 msgid "Updated plugin \"%s\" to version %s."
 msgstr "Updated plugin \"%s\" to version %s."
@@ -1874,6 +1907,9 @@ msgstr "Storefront is an in-app package manager for KOReader plugins, patches, a
 msgid "anyone"
 msgstr "anyone"
 
+msgid "branch_label"
+msgstr "branch: %s"
+
 msgid "btn_apply"
 msgstr "Apply"
 
@@ -1919,6 +1955,12 @@ msgstr "Update"
 msgid "btn_view_details"
 msgstr "View Details"
 
+msgid "confirm_branch_install_body"
+msgstr "This is a developer/contributor build and may be unstable. Only install if you know what you're doing."
+
+msgid "confirm_branch_install_title"
+msgstr "Install from branch '%s'?"
+
 msgid "confirm_install"
 msgstr "Install '%s'?"
 
@@ -1946,6 +1988,9 @@ msgstr "Network error: Unable to download catalog."
 msgid "err_uninstall_failed"
 msgstr "Uninstallation failed for '%s'."
 
+msgid "fetching_branches"
+msgstr "Fetching branches…"
+
 msgid "filter_all"
 msgstr "All Categories"
 
@@ -1966,6 +2011,9 @@ msgstr "header_about"
 
 msgid "header_updates"
 msgstr "header_updates"
+
+msgid "install_from_branch"
+msgstr "Install from branch…"
 
 msgid "label_author"
 msgstr "Author"
@@ -2021,6 +2069,12 @@ msgstr "No items found matching search."
 msgid "new"
 msgstr "new"
 
+msgid "new_commit_on_branch"
+msgstr "New commit on '%s'"
+
+msgid "no_branches_found"
+msgstr "No branches found for this repository."
+
 msgid "not found"
 msgstr "not found"
 
@@ -2047,6 +2101,9 @@ msgstr "remote is newer by date"
 
 msgid "repository"
 msgstr "repository"
+
+msgid "repull_from_branch"
+msgstr "Re-pull from branch"
 
 msgid "search_hint"
 msgstr "Search storefront..."
@@ -2098,6 +2155,12 @@ msgstr "Screensavers"
 
 msgid "tab_versions"
 msgstr "Versions"
+
+msgid "tracked_badge"
+msgstr "TRACKED"
+
+msgid "tracking_branch"
+msgstr "Tracking branch: %s"
 
 msgid "unknown"
 msgstr "unknown"

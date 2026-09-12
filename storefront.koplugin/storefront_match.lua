@@ -188,7 +188,9 @@ function Matcher:init(Storefront)
         local unmatched_plugins = {}
         for _, plugin in ipairs(installed_plugins) do
             local record = records[plugin.dirname]
-            if not (record and record.owner and record.repo) or record.is_auto_matched then
+            if record and record.source == "branch" then
+                -- Explicitly branch-tracked plugins must not be auto-matched/overwritten
+            elseif not (record and record.owner and record.repo) or record.is_auto_matched then
                 table.insert(unmatched_plugins, plugin)
             end
         end

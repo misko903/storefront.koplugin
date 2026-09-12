@@ -406,6 +406,18 @@ local FALLBACKS = {
     err_uninstall_failed = "Uninstallation failed for '%s'.",
     msg_catalog_updated = "Catalog updated successfully.",
     msg_no_results = "No items found matching search.",
+
+    -- Branch Installation
+    install_from_branch = "Install from branch…",
+    fetching_branches = "Fetching branches…",
+    no_branches_found = "No branches found for this repository.",
+    confirm_branch_install_title = "Install from branch '%s'?",
+    confirm_branch_install_body = "This is a developer/contributor build and may be unstable. Only install if you know what you're doing.",
+    tracking_branch = "Tracking branch: %s",
+    branch_label = "branch: %s",
+    tracked_badge = "TRACKED",
+    new_commit_on_branch = "New commit on '%s'",
+    repull_from_branch = "Re-pull from branch",
 }
 
 local KEY_ALIASES = {

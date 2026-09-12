@@ -107,6 +107,25 @@ local function parseVersionDescriptor(v_str)
     }
 end
 
+--- Compares two git commit/blob SHAs to determine if they refer to different commits.
+-- Handles short SHAs (7+ hex chars), case insensitivity, and surrounding whitespace.
+-- If either SHA is missing or empty, returns false (cannot determine difference).
+function storefront_utils.isShaDifferent(sha1, sha2)
+    if not sha1 or not sha2 then
+        return false
+    end
+    local s1 = tostring(sha1):lower():match("^%s*(%x+)%s*$")
+    local s2 = tostring(sha2):lower():match("^%s*(%x+)%s*$")
+    if not s1 or not s2 or s1 == "" or s2 == "" then
+        return false
+    end
+    if #s1 >= 7 and #s2 >= 7 then
+        local cmp_len = math.min(#s1, #s2)
+        return s1:sub(1, cmp_len) ~= s2:sub(1, cmp_len)
+    end
+    return s1 ~= s2
+end
+
 function storefront_utils.isVersionNewer(v1_str, v2_str)
     if not v1_str or not v2_str then
         return false

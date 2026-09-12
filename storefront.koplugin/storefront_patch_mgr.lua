@@ -15,6 +15,7 @@ local lfs = require("libs/libkoreader-lfs")
 local _ = require("gettext")
 local Blitbuffer = require("ffi/blitbuffer")
 local StorefrontInstaller = require("storefront_installer")
+local StorefrontUtils = require("storefront_utils")
 
 local M = {}
 
@@ -188,9 +189,9 @@ local function buildPatchSummary(remote_info)
         local needs_update = false
         if record and remote_sha then
             if installed_sha then
-                needs_update = remote_sha ~= installed_sha
+                needs_update = StorefrontUtils.isShaDifferent(remote_sha, installed_sha)
             elseif local_sha then
-                needs_update = remote_sha ~= local_sha
+                needs_update = StorefrontUtils.isShaDifferent(remote_sha, local_sha)
             else
                 needs_update = true
             end

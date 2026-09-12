@@ -282,7 +282,7 @@ def call_gemini(prompt):
                         return json.loads(cleaned2, strict=False)
         except urllib.error.HTTPError as e:
             if e.code in (429, 500, 502, 503, 504) and attempt < max_retries - 1:
-                sleep_time = 5 * (attempt + 1)
+                sleep_time = 10 * (attempt + 1)
                 print(f"  - HTTP {e.code}, waiting {sleep_time}s before retry {attempt + 1}/{max_retries - 1}...")
                 time.sleep(sleep_time)
             else:
@@ -299,7 +299,7 @@ def call_gemini(prompt):
             return None
     return None
 
-def translate_all_gemini(all_untranslated, lang_names, max_pairs=40):
+def translate_all_gemini(all_untranslated, lang_names, max_pairs=50):
     flat_pairs = []
     for lang_code, keys in all_untranslated.items():
         for key, en_val in keys.items():

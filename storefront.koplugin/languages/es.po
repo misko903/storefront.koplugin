@@ -19,7 +19,7 @@ msgstr "%d parches"
 
 # en-hash: c60876d1e8b218886df752b4fa8c7bad
 msgid "%d plugins"
-msgstr "%d plugins"
+msgstr "%d complementos"
 
 # en-hash: fa6eebde796e7a0cd580534b810334a7
 msgid "%d wallpapers"
@@ -71,7 +71,7 @@ msgstr "%s · 1 archivo"
 
 # en-hash: 83fd20d49deb849e4b9df60c50c9e67e
 msgid "(fork)"
-msgstr "(fork)"
+msgstr "(bifurcación)"
 
 # en-hash: a122476080135dddfadec5a2bc576873
 msgid "(showing %d of %d commits)"
@@ -313,17 +313,13 @@ msgstr "No se puede escribir el archivo de destino."
 msgid "Catalog & Cache"
 msgstr "Catálogo y caché"
 
-# en-hash: cca9b8e583b2870d117efee0c14b97ad
-msgid "Catalog refresh failed: "
-msgstr "Error al actualizar el catálogo: "
+# en-hash: d31b6ab3c216a7f4c21b8c9bdae226e9
+msgid "Catalog refresh cancelled."
+msgstr "Actualización de catálogo cancelada."
 
 # en-hash: d08b63f6583dcd5bb36142564f1b3ff4
 msgid "Catalog refresh is already in progress in the background."
 msgstr "La actualización del catálogo ya está en curso en segundo plano."
-
-# en-hash: 5f83265800ab3a842101d5d67ea875ce
-msgid "Catalog refreshed successfully."
-msgstr "Catálogo actualizado correctamente."
 
 # en-hash: 646e1f1324e200b3910e35ea3f015960
 msgid "Catalog source"
@@ -400,6 +396,10 @@ msgstr "Buscando actualizaciones de parches…"
 # en-hash: 010600e4b0c20b08887a141c471a517f
 msgid "Checking plugin updates…"
 msgstr "Buscando actualizaciones de complementos…"
+
+# en-hash: 687b7dfc45c5765421d4ff52183093fd
+msgid "Choose Branch — %s"
+msgstr "Elegir rama — %s"
 
 # en-hash: 118d059b31b7c7d0fafb1c9e3372df83
 msgid "Choose Build — %s"
@@ -532,6 +532,10 @@ msgstr "No se pudo detectar la carpeta .koplugin en el archivo"
 # en-hash: 8b4f90cf7829bf588a67afa2dbcd691b
 msgid "Could not detect plugin inside archive."
 msgstr "No se pudo detectar el plugin dentro del archivo."
+
+# en-hash: b00149f5c175fcc7f481d40a27a4bf0f
+msgid "Could not fetch branch SHA."
+msgstr "No se pudo obtener el SHA de la rama."
 
 # en-hash: 72ae81f8bda1220d8b574180c62788fc
 msgid "Could not fetch commit comparison."
@@ -693,6 +697,10 @@ msgstr "Opciones de descarga — %s"
 msgid "Download options — %s (%s)"
 msgstr "Opciones de descarga — %s (%s)"
 
+# en-hash: 50e6982dae572d95c62dcf2796614e5f
+msgid "Downloading %s (%s)…\nTap screen to cancel."
+msgstr "Descargando %s (%s)…\nToca la pantalla para cancelar."
+
 # en-hash: 8108a1e1d020224c8b28fe992bfd63ee
 msgid "Downloading %s%s…\nTap screen to cancel."
 msgstr "Descargando %s%s…\nToca la pantalla para cancelar."
@@ -793,6 +801,10 @@ msgstr "Error al eliminar: %s"
 msgid "Failed to disable patch '%s'."
 msgstr "No se pudo desactivar el parche '%s'."
 
+# en-hash: 313cfbeaf69faf0cd64559afdc97320a
+msgid "Failed to display branch list."
+msgstr "Error al mostrar la lista de ramas."
+
 # en-hash: f0ebe26dcf9d6fa44cde188e40a589e7
 msgid "Failed to download patch: %s"
 msgstr "Error al descargar el parche: %s"
@@ -828,6 +840,10 @@ msgstr "Error al guardar el archivo descargado"
 # en-hash: b2b70bea56298693ab867c3578f69689
 msgid "Failed to toggle patch status."
 msgstr "Error al cambiar el estado del parche."
+
+# en-hash: d4478c7c3ecd901d07cc947b819a69df
+msgid "Fetching branch information…"
+msgstr "Obteniendo información de la rama…"
 
 # en-hash: eebc29b3e7e2c6769ebff642798b1404
 msgid "Fetching changelog…"
@@ -1081,6 +1097,18 @@ msgstr "Se instaló la familia tipográfica completa \"%s\" (%d archivo(s))."
 msgid "Installed patch \"%s\"."
 msgstr "Se instaló el parche \"%s\"."
 
+# en-hash: 4bd81b06cd959054d5f7ffcda00b205a
+msgid "Installed plugin \"%s\" (%s)."
+msgstr "Complemento \"%s\" (%s) instalado."
+
+# en-hash: 1ea8b0189bc054c587a78d1b13f5dc9d
+msgid "Installed plugin \"%s\" (version %s)."
+msgstr "Complemento \"%s\" (versión %s) instalado."
+
+# en-hash: ea7009546a19031e6fddcf0ad7e2d5a9
+msgid "Installed plugin \"%s\"."
+msgstr "Complemento \"%s\" instalado."
+
 # en-hash: c98f920c29f4d2f367f11f8aad8c6b98
 msgid "Installing %s…"
 msgstr "Instalando %s…"
@@ -1300,6 +1328,10 @@ msgstr "Faltan los metadatos del repositorio para los lanzamientos."
 # en-hash: 0c69cf64725f51a7e4efab7b4d293b33
 msgid "Missing repository metadata for remote fetch."
 msgstr "Faltan los metadatos del repositorio para la obtención remota."
+
+# en-hash: 81008b533ffec1a6dec86966526d2194
+msgid "Missing repository metadata."
+msgstr "Faltan los metadatos del repositorio."
 
 # en-hash: 8dfff041fcd598a7a41df55b9e8ea076
 msgid "Missing target path"
@@ -1761,9 +1793,9 @@ msgstr "Actualizar catálogo"
 msgid "Refreshing catalog via Direct GitHub API…"
 msgstr "Actualizando catálogo mediante la API directa de GitHub…"
 
-# en-hash: d79adaec4b83cfc1e3cb44ded7689888
-msgid "Refreshing catalog..."
-msgstr "Actualizando catálogo..."
+# en-hash: 3177625a0f340b8e4af8dfd90e538697
+msgid "Refreshing catalog via Direct GitHub API…\nTap screen to cancel."
+msgstr "Actualizando catálogo mediante la API directa de GitHub…\nToca la pantalla para cancelar."
 
 # en-hash: 0cb1e25c68defbaa1b6fcb7a10f9932f
 msgid "Refreshing catalog…"
@@ -2365,6 +2397,10 @@ msgstr "Se actualizaron %d de %d elemento(s) (%d fallaron)."
 msgid "Updated patch \"%s\"."
 msgstr "Se actualizó el parche \"%s\"."
 
+# en-hash: f880f1649aab716c5a93877127a74c3b
+msgid "Updated plugin \"%s\" to %s."
+msgstr "Complemento \"%s\" actualizado a %s."
+
 # en-hash: ea03cc9fdc791c9e882185f9871e2d19
 msgid "Updated plugin \"%s\" to version %s."
 msgstr "Se actualizó el complemento \"%s\" a la versión %s."
@@ -2557,6 +2593,14 @@ msgstr "Actualizar"
 msgid "btn_view_details"
 msgstr "Ver detalles"
 
+# en-hash: 334af2789e69c8fc39aa4b9238c68a9c
+msgid "confirm_branch_install_body"
+msgstr "Esta es una versión de desarrollo/colaborador y puede ser inestable. Instálala solo si sabes lo que haces."
+
+# en-hash: 483d7d4cd34c8827b262a06626d554f9
+msgid "confirm_branch_install_title"
+msgstr "¿Instalar desde la rama '%s'?"
+
 # en-hash: bbdb1b84c8613a1be1923b11899bcc8c
 msgid "confirm_install"
 msgstr "¿Instalar '%s'?"
@@ -2593,6 +2637,10 @@ msgstr "Error de red: No se pudo descargar el catálogo."
 msgid "err_uninstall_failed"
 msgstr "Error al desinstalar '%s'."
 
+# en-hash: 4d2405b58cce01613812d5938bf492e6
+msgid "fetching_branches"
+msgstr "Obteniendo ramas…"
+
 # en-hash: a6a2a55bea8760389dfca77132905b7c
 msgid "filter_all"
 msgstr "Todas las categorías"
@@ -2620,6 +2668,10 @@ msgstr "Acerca de"
 # en-hash: 608900ed06f424f6830232f2c2080b42
 msgid "header_updates"
 msgstr "Actualizaciones"
+
+# en-hash: b4a63ad3de9a22e2ce7c43b1678477d0
+msgid "install_from_branch"
+msgstr "Instalar desde rama…"
 
 # en-hash: a517747c3d12f99244ae598910d979c5
 msgid "label_author"
@@ -2693,6 +2745,14 @@ msgstr "No se encontraron elementos coincidentes."
 msgid "new"
 msgstr "nuevo"
 
+# en-hash: b0f3f2e2e91f82331788271556582cf2
+msgid "new_commit_on_branch"
+msgstr "Nuevo commit en '%s'"
+
+# en-hash: df1635b0a9033ae6e2f6acded2a3a84a
+msgid "no_branches_found"
+msgstr "No se encontraron ramas para este repositorio."
+
 # en-hash: d8f4a1993546cc4b850cde3599e27aec
 msgid "not found"
 msgstr "no encontrado"
@@ -2728,6 +2788,10 @@ msgstr "la versión remota es más reciente por fecha"
 # en-hash: b3f2035551f6e48c67489ace9f588f94
 msgid "repository"
 msgstr "repositorio"
+
+# en-hash: 116f6125d1c7dc42ae6ba28eab61f898
+msgid "repull_from_branch"
+msgstr "Volver a descargar de la rama"
 
 # en-hash: fe1cf176acd521dda7c2ef219171a5da
 msgid "search_hint"
@@ -2796,6 +2860,10 @@ msgstr "Fondos"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "tab_versions"
 msgstr "Versiones"
+
+# en-hash: be9026abbba62fdf36ac5706fcb0b76b
+msgid "tracking_branch"
+msgstr "Rama en seguimiento: %s"
 
 # en-hash: ad921d60486366258809553a3db49a4a
 msgid "unknown"

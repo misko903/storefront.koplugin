@@ -223,8 +223,12 @@ function UpdatesMgr:init(Storefront)
                     description = record.repo_description,
                     default_branch = record.branch or "main",
                 }
-                local release_override = item.remote or (record.tag_name and { tag_name = record.tag_name })
-                sf:promptPluginInstallOptions(descriptor, release_override)
+                if record.source == "branch" and record.branch and sf.installPluginFromBranch then
+                    sf:installPluginFromBranch(descriptor, record.branch)
+                else
+                    local release_override = item.remote or (record.tag_name and { tag_name = record.tag_name })
+                    sf:promptPluginInstallOptions(descriptor, release_override)
+                end
             elseif item.kind == "patch" then
                 local record = item.record
                 local installed_patch = item.patch

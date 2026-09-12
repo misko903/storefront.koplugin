@@ -441,10 +441,28 @@ function StorefrontListItem:init()
             local user_up = live_r.up
             local user_down = live_r.down
             local net_score = user_up - user_down
-            if net_score ~= 0 or user_up > 0 or user_down > 0 then
-                add_sep()
-                
+            local has_ratings = (net_score ~= 0 or user_up > 0 or user_down > 0)
+
+            if not has_ratings then
+                local parts = {}
+                if owner_text ~= "" then table.insert(parts, owner_text) end
+                if stars_text ~= "" and stars_text ~= "0" then table.insert(parts, "★ " .. stars_text) end
+                if updated_text ~= "" then table.insert(parts, updated_text) end
+                if entry.kind_label then
+                    local label_txt = (entry.kind == "font" or entry.is_font) and entry.kind_label:lower() or entry.kind_label
+                    table.insert(parts, label_txt)
+                end
+                if #parts > 0 then
+                    meta_w = TextWidget:new{
+                        text = table.concat(parts, "  ·  "),
+                        face = meta_face,
+                        fgcolor = Blitbuffer.COLOR_BLACK,
+                        max_width = text_w,
+                    }
+                end
+            else
                 local icon_file = is_up_active and getAssetPath("thumbs-up-filled.svg") or getAssetPath("thumbs-up.svg")
+                add_sep()
                 table.insert(meta_items, ImageWidget:new{
                     file = icon_file,
                     width = sc(14),
@@ -461,20 +479,32 @@ function StorefrontListItem:init()
                     bold = is_up_active or is_down_active,
                     fgcolor = Blitbuffer.COLOR_BLACK,
                 })
-            end
 
-            if updated_text ~= "" then
-                add_sep()
-                table.insert(meta_items, TextWidget:new{ text = updated_text, face = meta_face, fgcolor = Blitbuffer.COLOR_BLACK })
-            end
+                if updated_text ~= "" then
+                    add_sep()
+                    table.insert(meta_items, TextWidget:new{ text = updated_text, face = meta_face, fgcolor = Blitbuffer.COLOR_BLACK })
+                end
 
-            if entry.kind_label then
-                add_sep()
-                local label_txt = (entry.kind == "font" or entry.is_font) and entry.kind_label:lower() or entry.kind_label
-                table.insert(meta_items, TextWidget:new{ text = label_txt, face = meta_face, fgcolor = Blitbuffer.COLOR_BLACK })
-            end
+                if entry.kind_label then
+                    add_sep()
+                    local label_txt = (entry.kind == "font" or entry.is_font) and entry.kind_label:lower() or entry.kind_label
+                    local current_w = 0
+                    for _, item in ipairs(meta_items) do
+                        if item.getSize then current_w = current_w + item:getSize().w end
+                    end
+                    local remain_w = math.max(sc(40), text_w - current_w)
+                    table.insert(meta_items, TextWidget:new{
+                        text = label_txt,
+                        face = meta_face,
+                        fgcolor = Blitbuffer.COLOR_BLACK,
+                        max_width = remain_w,
+                    })
+                end
 
-            meta_w = HorizontalGroup:new(meta_items)
+                if #meta_items > 0 then
+                    meta_w = HorizontalGroup:new(meta_items)
+                end
+            end
         end
 
         local group

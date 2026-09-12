@@ -313,17 +313,13 @@ msgstr "لا يمكن كتابة الملف الوجهة."
 msgid "Catalog & Cache"
 msgstr "الكتالوج والتخزين المؤقت"
 
-# en-hash: cca9b8e583b2870d117efee0c14b97ad
-msgid "Catalog refresh failed: "
-msgstr "فشل تحديث الفهرس: "
+# en-hash: d31b6ab3c216a7f4c21b8c9bdae226e9
+msgid "Catalog refresh cancelled."
+msgstr "تم إلغاء تحديث الفهرس."
 
 # en-hash: d08b63f6583dcd5bb36142564f1b3ff4
 msgid "Catalog refresh is already in progress in the background."
 msgstr "تحديث الكتالوج قيد التقدم بالفعل في الخلفية."
-
-# en-hash: 5f83265800ab3a842101d5d67ea875ce
-msgid "Catalog refreshed successfully."
-msgstr "تم تحديث الفهرس بنجاح."
 
 # en-hash: 646e1f1324e200b3910e35ea3f015960
 msgid "Catalog source"
@@ -400,6 +396,10 @@ msgstr "جاري فحص تحديثات التصحيحات…"
 # en-hash: 010600e4b0c20b08887a141c471a517f
 msgid "Checking plugin updates…"
 msgstr "التحقق من تحديثات الملحق…"
+
+# en-hash: 687b7dfc45c5765421d4ff52183093fd
+msgid "Choose Branch — %s"
+msgstr "اختر الفرع — %s"
 
 # en-hash: 118d059b31b7c7d0fafb1c9e3372df83
 msgid "Choose Build — %s"
@@ -532,6 +532,10 @@ msgstr "تعذر اكتشاف مجلد .koplugin في الأرشيف"
 # en-hash: 8b4f90cf7829bf588a67afa2dbcd691b
 msgid "Could not detect plugin inside archive."
 msgstr "تعذر اكتشاف إضافة داخل الأرشيف."
+
+# en-hash: b00149f5c175fcc7f481d40a27a4bf0f
+msgid "Could not fetch branch SHA."
+msgstr "تعذر جلب رمز SHA الخاص بالفرع."
 
 # en-hash: 72ae81f8bda1220d8b574180c62788fc
 msgid "Could not fetch commit comparison."
@@ -693,6 +697,10 @@ msgstr "خيارات التنزيل — %s"
 msgid "Download options — %s (%s)"
 msgstr "خيارات التنزيل — %s (%s)"
 
+# en-hash: 50e6982dae572d95c62dcf2796614e5f
+msgid "Downloading %s (%s)…\nTap screen to cancel."
+msgstr "جاري تنزيل %s (%s)…\nانقر على الشاشة للإلغاء."
+
 # en-hash: 8108a1e1d020224c8b28fe992bfd63ee
 msgid "Downloading %s%s…\nTap screen to cancel."
 msgstr "جاري تنزيل %s%s…\nالمس الشاشة للإلغاء."
@@ -793,6 +801,10 @@ msgstr "فشل الحذف: %s"
 msgid "Failed to disable patch '%s'."
 msgstr "فشل تعطيل التصحيح '%s'."
 
+# en-hash: 313cfbeaf69faf0cd64559afdc97320a
+msgid "Failed to display branch list."
+msgstr "فشل عرض قائمة الفروع."
+
 # en-hash: f0ebe26dcf9d6fa44cde188e40a589e7
 msgid "Failed to download patch: %s"
 msgstr "فشل تنزيل الرقعة: %s"
@@ -828,6 +840,10 @@ msgstr "فشل حفظ الملف المنزل"
 # en-hash: b2b70bea56298693ab867c3578f69689
 msgid "Failed to toggle patch status."
 msgstr "فشل تغيير حالة التصحيح."
+
+# en-hash: d4478c7c3ecd901d07cc947b819a69df
+msgid "Fetching branch information…"
+msgstr "جاري جلب معلومات الفرع…"
 
 # en-hash: eebc29b3e7e2c6769ebff642798b1404
 msgid "Fetching changelog…"
@@ -1081,6 +1097,18 @@ msgstr "تم تثبيت عائلة الخط الكاملة \"%s\" (%d ملفات
 msgid "Installed patch \"%s\"."
 msgstr "تم تثبيت التصحيح \"%s\"."
 
+# en-hash: 4bd81b06cd959054d5f7ffcda00b205a
+msgid "Installed plugin \"%s\" (%s)."
+msgstr "تم تثبيت الملحق \"%s\" (%s)."
+
+# en-hash: 1ea8b0189bc054c587a78d1b13f5dc9d
+msgid "Installed plugin \"%s\" (version %s)."
+msgstr "تم تثبيت الملحق \"%s\" (الإصدار %s)."
+
+# en-hash: ea7009546a19031e6fddcf0ad7e2d5a9
+msgid "Installed plugin \"%s\"."
+msgstr "تم تثبيت الملحق \"%s\"."
+
 # en-hash: c98f920c29f4d2f367f11f8aad8c6b98
 msgid "Installing %s…"
 msgstr "جاري تثبيت %s…"
@@ -1300,6 +1328,10 @@ msgstr "بيانات المستودع الوصفية مفقودة للإصدار
 # en-hash: 0c69cf64725f51a7e4efab7b4d293b33
 msgid "Missing repository metadata for remote fetch."
 msgstr "بيانات المستودع الميتا مفقودة للجلب البعيد."
+
+# en-hash: 81008b533ffec1a6dec86966526d2194
+msgid "Missing repository metadata."
+msgstr "بيانات المستودع الوصفية مفقودة."
 
 # en-hash: 8dfff041fcd598a7a41df55b9e8ea076
 msgid "Missing target path"
@@ -1761,9 +1793,9 @@ msgstr "تحديث الكتالوج"
 msgid "Refreshing catalog via Direct GitHub API…"
 msgstr "تحديث الفهرس عبر Direct GitHub API…"
 
-# en-hash: d79adaec4b83cfc1e3cb44ded7689888
-msgid "Refreshing catalog..."
-msgstr "جاري تحديث الفهرس..."
+# en-hash: 3177625a0f340b8e4af8dfd90e538697
+msgid "Refreshing catalog via Direct GitHub API…\nTap screen to cancel."
+msgstr "جاري تحديث الفهرس عبر واجهة GitHub البرمجية المباشرة…\nانقر على الشاشة للإلغاء."
 
 # en-hash: 0cb1e25c68defbaa1b6fcb7a10f9932f
 msgid "Refreshing catalog…"
@@ -2365,6 +2397,10 @@ msgstr "تم تحديث %d من %d عنصرًا (فشل %d)."
 msgid "Updated patch \"%s\"."
 msgstr "تم تحديث التصحيح \"%s\"."
 
+# en-hash: f880f1649aab716c5a93877127a74c3b
+msgid "Updated plugin \"%s\" to %s."
+msgstr "تم تحديث الملحق \"%s\" إلى %s."
+
 # en-hash: ea03cc9fdc791c9e882185f9871e2d19
 msgid "Updated plugin \"%s\" to version %s."
 msgstr "تم تحديث الإضافة \"%s\" إلى الإصدار %s."
@@ -2557,6 +2593,14 @@ msgstr "تحديث"
 msgid "btn_view_details"
 msgstr "عرض التفاصيل"
 
+# en-hash: 334af2789e69c8fc39aa4b9238c68a9c
+msgid "confirm_branch_install_body"
+msgstr "هذا البناء خاص بالمطورين والمساهمين وقد يكون غير مستقر. ثبته فقط إذا كنت تعرف ما تفعله."
+
+# en-hash: 483d7d4cd34c8827b262a06626d554f9
+msgid "confirm_branch_install_title"
+msgstr "هل تريد التثبيت من الفرع '%s'؟"
+
 # en-hash: bbdb1b84c8613a1be1923b11899bcc8c
 msgid "confirm_install"
 msgstr "تثبيت '%s'؟"
@@ -2593,6 +2637,10 @@ msgstr "خطأ في الشبكة: تعذر تنزيل الكتالوج."
 msgid "err_uninstall_failed"
 msgstr "فشل إلغاء تثبيت '%s'."
 
+# en-hash: 4d2405b58cce01613812d5938bf492e6
+msgid "fetching_branches"
+msgstr "جاري جلب الفروع…"
+
 # en-hash: a6a2a55bea8760389dfca77132905b7c
 msgid "filter_all"
 msgstr "جميع الفئات"
@@ -2620,6 +2668,10 @@ msgstr "حول"
 # en-hash: 608900ed06f424f6830232f2c2080b42
 msgid "header_updates"
 msgstr "التحديثات"
+
+# en-hash: b4a63ad3de9a22e2ce7c43b1678477d0
+msgid "install_from_branch"
+msgstr "التثبيت من فرع…"
 
 # en-hash: a517747c3d12f99244ae598910d979c5
 msgid "label_author"
@@ -2693,6 +2745,14 @@ msgstr "لم يتم العثور على نتائج مطابقة."
 msgid "new"
 msgstr "جديد"
 
+# en-hash: b0f3f2e2e91f82331788271556582cf2
+msgid "new_commit_on_branch"
+msgstr "تعديل جديد على '%s'"
+
+# en-hash: df1635b0a9033ae6e2f6acded2a3a84a
+msgid "no_branches_found"
+msgstr "لم يتم العثور على فروع لهذا المستودع."
+
 # en-hash: d8f4a1993546cc4b850cde3599e27aec
 msgid "not found"
 msgstr "غير موجود"
@@ -2728,6 +2788,10 @@ msgstr "النسخة البعيدة أحدث حسب التاريخ"
 # en-hash: b3f2035551f6e48c67489ace9f588f94
 msgid "repository"
 msgstr "مستودع"
+
+# en-hash: 116f6125d1c7dc42ae6ba28eab61f898
+msgid "repull_from_branch"
+msgstr "إعادة السحب من الفرع"
 
 # en-hash: fe1cf176acd521dda7c2ef219171a5da
 msgid "search_hint"
@@ -2796,6 +2860,10 @@ msgstr "الخلفيات"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "tab_versions"
 msgstr "الإصدارات"
+
+# en-hash: be9026abbba62fdf36ac5706fcb0b76b
+msgid "tracking_branch"
+msgstr "تتبع الفرع: %s"
 
 # en-hash: ad921d60486366258809553a3db49a4a
 msgid "unknown"

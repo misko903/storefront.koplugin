@@ -4,6 +4,7 @@ local NetworkMgr = require("ui/network/manager")
 local UIManager = require("ui/uimanager")
 local Cache = require("storefront_cache")
 local Localization = require("localization_storefront")
+local StorefrontUtils = require("storefront_utils")
 local _ = function(key, ...) return Localization:t(key, ...) end
 
 local StorefrontUpdatesUi = {}
@@ -88,8 +89,33 @@ function StorefrontUpdatesUi:init(StorefrontClass)
             local remote_ver_raw = remote and (remote.release_tag_name or remote.remote_version)
             local remote_ver = remote_ver_raw and tostring(remote_ver_raw):gsub("^[vV]", "") or nil
 
+            local is_branch_tracked = record and record.source == "branch" and record.branch
+
+            if is_branch_tracked and has_update then
+                local remote_sha = remote and remote.remote_version
+                local short_l = record.sha and record.sha:sub(1, 7):lower() or ""
+                local short_r = remote_sha and tostring(remote_sha):sub(1, 7):lower() or ""
+                if (short_l ~= "" and short_l == short_r) or not StorefrontUtils.isShaDifferent(remote_sha, record.sha) then
+                    has_update = false
+                end
+            end
+
             if has_update and match_search then
                 local remote_display = remote_ver or _("new")
+                local transition
+                if is_branch_tracked then
+                    local short_local_sha = record.sha and record.sha:sub(1, 7) or ""
+                    local remote_sha = remote and remote.remote_version
+                    local is_remote_sha = remote_sha and type(remote_sha) == "string" and remote_sha:match("^%x%x%x%x%x%x%x+$")
+                    local short_remote_sha = is_remote_sha and remote_sha:sub(1, 7) or ""
+                    if short_remote_sha ~= "" then
+                        transition = string.format(_("tracking_branch"), record.branch) .. " (" .. short_local_sha .. " → " .. short_remote_sha .. ")"
+                    else
+                        transition = string.format(_("tracking_branch"), record.branch) .. " (" .. short_local_sha .. ")"
+                    end
+                else
+                    transition = local_ver .. " → " .. remote_display
+                end
                 
                 table.insert(merged, {
                     name = display_name,
@@ -98,11 +124,11 @@ function StorefrontUpdatesUi:init(StorefrontClass)
                     updated = "",
                     kind_label = _("Plugin"),
                     description = record and record.repo_description or "",
-                    badge = _("Update"),
+                    badge = is_branch_tracked and _("repull_from_branch") or _("Update"),
                     is_entry = true,
                     keep_menu_open = true,
                     is_update_item = true,
-                    version_transition = local_ver .. " → " .. remote_display,
+                    version_transition = transition,
                     callback = function()
                         local DetailsDialog = require("storefront_details_dialog")
                         local cached_repo
@@ -252,6 +278,7 @@ function StorefrontUpdatesUi:init(StorefrontClass)
         }
         end
 
+        local display_total = #merged
         local items = {}
         if display_total == 0 then
             table.insert(items, {

@@ -313,17 +313,13 @@ msgstr "대상 파일에 쓸 수 없습니다."
 msgid "Catalog & Cache"
 msgstr "카탈로그 및 캐시"
 
-# en-hash: cca9b8e583b2870d117efee0c14b97ad
-msgid "Catalog refresh failed: "
-msgstr "카탈로그 새로고침 실패: "
+# en-hash: d31b6ab3c216a7f4c21b8c9bdae226e9
+msgid "Catalog refresh cancelled."
+msgstr "카탈로그 새로고침이 취소되었습니다."
 
 # en-hash: d08b63f6583dcd5bb36142564f1b3ff4
 msgid "Catalog refresh is already in progress in the background."
 msgstr "카탈로그 새로고침이 이미 백그라운드에서 진행 중입니다."
-
-# en-hash: 5f83265800ab3a842101d5d67ea875ce
-msgid "Catalog refreshed successfully."
-msgstr "카탈로그를 성공적으로 새로고쳤습니다."
 
 # en-hash: 646e1f1324e200b3910e35ea3f015960
 msgid "Catalog source"
@@ -400,6 +396,10 @@ msgstr "패치 업데이트 확인 중…"
 # en-hash: 010600e4b0c20b08887a141c471a517f
 msgid "Checking plugin updates…"
 msgstr "플러그인 업데이트 확인 중…"
+
+# en-hash: 687b7dfc45c5765421d4ff52183093fd
+msgid "Choose Branch — %s"
+msgstr "브랜치 선택 — %s"
 
 # en-hash: 118d059b31b7c7d0fafb1c9e3372df83
 msgid "Choose Build — %s"
@@ -532,6 +532,10 @@ msgstr "압축 파일에서 .koplugin 폴더를 찾을 수 없습니다"
 # en-hash: 8b4f90cf7829bf588a67afa2dbcd691b
 msgid "Could not detect plugin inside archive."
 msgstr "압축 파일 내에서 플러그인을 찾을 수 없습니다."
+
+# en-hash: b00149f5c175fcc7f481d40a27a4bf0f
+msgid "Could not fetch branch SHA."
+msgstr "브랜치 SHA를 가져올 수 없습니다."
 
 # en-hash: 72ae81f8bda1220d8b574180c62788fc
 msgid "Could not fetch commit comparison."
@@ -693,6 +697,10 @@ msgstr "다운로드 옵션 — %s"
 msgid "Download options — %s (%s)"
 msgstr "다운로드 옵션 — %s (%s)"
 
+# en-hash: 50e6982dae572d95c62dcf2796614e5f
+msgid "Downloading %s (%s)…\nTap screen to cancel."
+msgstr "%s (%s) 다운로드 중…\n취소하려면 화면을 누르세요."
+
 # en-hash: 8108a1e1d020224c8b28fe992bfd63ee
 msgid "Downloading %s%s…\nTap screen to cancel."
 msgstr "%s%s 다운로드 중…\n취소하려면 화면을 탭하세요."
@@ -793,6 +801,10 @@ msgstr "삭제 실패: %s"
 msgid "Failed to disable patch '%s'."
 msgstr "패치 '%s' 비활성화 실패."
 
+# en-hash: 313cfbeaf69faf0cd64559afdc97320a
+msgid "Failed to display branch list."
+msgstr "브랜치 목록을 표시하지 못했습니다."
+
 # en-hash: f0ebe26dcf9d6fa44cde188e40a589e7
 msgid "Failed to download patch: %s"
 msgstr "패치 다운로드 실패: %s"
@@ -828,6 +840,10 @@ msgstr "다운로드한 파일을 저장하지 못했습니다"
 # en-hash: b2b70bea56298693ab867c3578f69689
 msgid "Failed to toggle patch status."
 msgstr "패치 상태 변경 실패."
+
+# en-hash: d4478c7c3ecd901d07cc947b819a69df
+msgid "Fetching branch information…"
+msgstr "브랜치 정보를 가져오는 중…"
 
 # en-hash: eebc29b3e7e2c6769ebff642798b1404
 msgid "Fetching changelog…"
@@ -1081,6 +1097,18 @@ msgstr "전체 폰트 패밀리 \"%s\" (%d개 파일) 설치 완료."
 msgid "Installed patch \"%s\"."
 msgstr "패치 \"%s\" 설치 완료."
 
+# en-hash: 4bd81b06cd959054d5f7ffcda00b205a
+msgid "Installed plugin \"%s\" (%s)."
+msgstr "\"%s\" 플러그인이 설치되었습니다 (%s)."
+
+# en-hash: 1ea8b0189bc054c587a78d1b13f5dc9d
+msgid "Installed plugin \"%s\" (version %s)."
+msgstr "\"%s\" 플러그인이 설치되었습니다 (버전 %s)."
+
+# en-hash: ea7009546a19031e6fddcf0ad7e2d5a9
+msgid "Installed plugin \"%s\"."
+msgstr "\"%s\" 플러그인이 설치되었습니다."
+
 # en-hash: c98f920c29f4d2f367f11f8aad8c6b98
 msgid "Installing %s…"
 msgstr "%s 설치 중…"
@@ -1300,6 +1328,10 @@ msgstr "릴리스용 저장소 메타데이터가 없습니다."
 # en-hash: 0c69cf64725f51a7e4efab7b4d293b33
 msgid "Missing repository metadata for remote fetch."
 msgstr "원격 가져오기용 저장소 메타데이터가 없습니다."
+
+# en-hash: 81008b533ffec1a6dec86966526d2194
+msgid "Missing repository metadata."
+msgstr "저장소 메타데이터가 없습니다."
 
 # en-hash: 8dfff041fcd598a7a41df55b9e8ea076
 msgid "Missing target path"
@@ -1761,9 +1793,9 @@ msgstr "카탈로그 새로고침"
 msgid "Refreshing catalog via Direct GitHub API…"
 msgstr "직접 GitHub API를 통해 카탈로그 새로고침 중…"
 
-# en-hash: d79adaec4b83cfc1e3cb44ded7689888
-msgid "Refreshing catalog..."
-msgstr "카탈로그 새로고침 중..."
+# en-hash: 3177625a0f340b8e4af8dfd90e538697
+msgid "Refreshing catalog via Direct GitHub API…\nTap screen to cancel."
+msgstr "GitHub API를 통해 카탈로그를 새로고치는 중…\n취소하려면 화면을 누르세요."
 
 # en-hash: 0cb1e25c68defbaa1b6fcb7a10f9932f
 msgid "Refreshing catalog…"
@@ -2365,6 +2397,10 @@ msgstr "%d/%d개 항목 업데이트 완료 (%d개 실패)."
 msgid "Updated patch \"%s\"."
 msgstr "패치 \"%s\" 업데이트 완료."
 
+# en-hash: f880f1649aab716c5a93877127a74c3b
+msgid "Updated plugin \"%s\" to %s."
+msgstr "\"%s\" 플러그인이 %s(으)로 업데이트되었습니다."
+
 # en-hash: ea03cc9fdc791c9e882185f9871e2d19
 msgid "Updated plugin \"%s\" to version %s."
 msgstr "플러그인 \"%s\"을(를) 버전 %s(으)로 업데이트했습니다."
@@ -2557,6 +2593,14 @@ msgstr "업데이트"
 msgid "btn_view_details"
 msgstr "세부정보 보기"
 
+# en-hash: 334af2789e69c8fc39aa4b9238c68a9c
+msgid "confirm_branch_install_body"
+msgstr "이 빌드는 개발자/기여자용 빌드이며 불안정할 수 있습니다. 어떤 동작인지 알고 있는 경우에만 설치하세요."
+
+# en-hash: 483d7d4cd34c8827b262a06626d554f9
+msgid "confirm_branch_install_title"
+msgstr "'%s' 브랜치에서 설치할까요?"
+
 # en-hash: bbdb1b84c8613a1be1923b11899bcc8c
 msgid "confirm_install"
 msgstr "'%s'을(를) 설치하시겠습니까?"
@@ -2593,6 +2637,10 @@ msgstr "네트워크 오류: 카탈로그를 다운로드할 수 없습니다."
 msgid "err_uninstall_failed"
 msgstr "'%s' 제거 실패."
 
+# en-hash: 4d2405b58cce01613812d5938bf492e6
+msgid "fetching_branches"
+msgstr "브랜치 가져오는 중…"
+
 # en-hash: a6a2a55bea8760389dfca77132905b7c
 msgid "filter_all"
 msgstr "모든 카테고리"
@@ -2620,6 +2668,10 @@ msgstr "정보"
 # en-hash: 608900ed06f424f6830232f2c2080b42
 msgid "header_updates"
 msgstr "업데이트"
+
+# en-hash: b4a63ad3de9a22e2ce7c43b1678477d0
+msgid "install_from_branch"
+msgstr "브랜치에서 설치…"
 
 # en-hash: a517747c3d12f99244ae598910d979c5
 msgid "label_author"
@@ -2693,6 +2745,14 @@ msgstr "검색어와 일치하는 항목이 없습니다."
 msgid "new"
 msgstr "신규"
 
+# en-hash: b0f3f2e2e91f82331788271556582cf2
+msgid "new_commit_on_branch"
+msgstr "'%s' 브랜치에 새 커밋 있음"
+
+# en-hash: df1635b0a9033ae6e2f6acded2a3a84a
+msgid "no_branches_found"
+msgstr "이 저장소에서 발견된 브랜치가 없습니다."
+
 # en-hash: d8f4a1993546cc4b850cde3599e27aec
 msgid "not found"
 msgstr "찾을 수 없음"
@@ -2728,6 +2788,10 @@ msgstr "날짜 기준으로 원격이 더 최신입니다"
 # en-hash: b3f2035551f6e48c67489ace9f588f94
 msgid "repository"
 msgstr "저장소"
+
+# en-hash: 116f6125d1c7dc42ae6ba28eab61f898
+msgid "repull_from_branch"
+msgstr "브랜치에서 다시 가져오기"
 
 # en-hash: fe1cf176acd521dda7c2ef219171a5da
 msgid "search_hint"
@@ -2796,6 +2860,10 @@ msgstr "배경화면"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "tab_versions"
 msgstr "버전 목록"
+
+# en-hash: be9026abbba62fdf36ac5706fcb0b76b
+msgid "tracking_branch"
+msgstr "추적 중인 브랜치: %s"
 
 # en-hash: ad921d60486366258809553a3db49a4a
 msgid "unknown"

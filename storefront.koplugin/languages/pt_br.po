@@ -313,17 +313,13 @@ msgstr "Não foi possível gravar no arquivo de destino."
 msgid "Catalog & Cache"
 msgstr "Catálogo e cache"
 
-# en-hash: cca9b8e583b2870d117efee0c14b97ad
-msgid "Catalog refresh failed: "
-msgstr "Falha ao atualizar o catálogo: "
+# en-hash: d31b6ab3c216a7f4c21b8c9bdae226e9
+msgid "Catalog refresh cancelled."
+msgstr "Atualização do catálogo cancelada."
 
 # en-hash: d08b63f6583dcd5bb36142564f1b3ff4
 msgid "Catalog refresh is already in progress in the background."
 msgstr "A atualização do catálogo já está em andamento em segundo plano."
-
-# en-hash: 5f83265800ab3a842101d5d67ea875ce
-msgid "Catalog refreshed successfully."
-msgstr "Catálogo atualizado com sucesso."
 
 # en-hash: 646e1f1324e200b3910e35ea3f015960
 msgid "Catalog source"
@@ -400,6 +396,10 @@ msgstr "Verificando atualizações de patch…"
 # en-hash: 010600e4b0c20b08887a141c471a517f
 msgid "Checking plugin updates…"
 msgstr "Verificando atualizações de plugins…"
+
+# en-hash: 687b7dfc45c5765421d4ff52183093fd
+msgid "Choose Branch — %s"
+msgstr "Escolher Branch — %s"
 
 # en-hash: 118d059b31b7c7d0fafb1c9e3372df83
 msgid "Choose Build — %s"
@@ -532,6 +532,10 @@ msgstr "Não foi possível detectar a pasta .koplugin no arquivo"
 # en-hash: 8b4f90cf7829bf588a67afa2dbcd691b
 msgid "Could not detect plugin inside archive."
 msgstr "Não foi possível detectar o plugin dentro do arquivo."
+
+# en-hash: b00149f5c175fcc7f481d40a27a4bf0f
+msgid "Could not fetch branch SHA."
+msgstr "Não foi possível obter o SHA do branch."
 
 # en-hash: 72ae81f8bda1220d8b574180c62788fc
 msgid "Could not fetch commit comparison."
@@ -693,6 +697,10 @@ msgstr "Opções de download — %s"
 msgid "Download options — %s (%s)"
 msgstr "Opções de download — %s (%s)"
 
+# en-hash: 50e6982dae572d95c62dcf2796614e5f
+msgid "Downloading %s (%s)…\nTap screen to cancel."
+msgstr "Baixando %s (%s)…\nToque na tela para cancelar."
+
 # en-hash: 8108a1e1d020224c8b28fe992bfd63ee
 msgid "Downloading %s%s…\nTap screen to cancel."
 msgstr "Baixando %s%s…\nToque na tela para cancelar."
@@ -793,6 +801,10 @@ msgstr "Falha ao excluir: %s"
 msgid "Failed to disable patch '%s'."
 msgstr "Falha ao desativar o patch '%s'."
 
+# en-hash: 313cfbeaf69faf0cd64559afdc97320a
+msgid "Failed to display branch list."
+msgstr "Falha ao exibir a lista de branches."
+
 # en-hash: f0ebe26dcf9d6fa44cde188e40a589e7
 msgid "Failed to download patch: %s"
 msgstr "Falha ao baixar patch: %s"
@@ -828,6 +840,10 @@ msgstr "Falha ao salvar arquivo baixado"
 # en-hash: b2b70bea56298693ab867c3578f69689
 msgid "Failed to toggle patch status."
 msgstr "Falha ao alterar o status do patch."
+
+# en-hash: d4478c7c3ecd901d07cc947b819a69df
+msgid "Fetching branch information…"
+msgstr "Buscando informações do branch…"
 
 # en-hash: eebc29b3e7e2c6769ebff642798b1404
 msgid "Fetching changelog…"
@@ -1081,6 +1097,18 @@ msgstr "Família de fontes completa \"%s\" instalada (%d arquivo(s))."
 msgid "Installed patch \"%s\"."
 msgstr "Patch \"%s\" instalado."
 
+# en-hash: 4bd81b06cd959054d5f7ffcda00b205a
+msgid "Installed plugin \"%s\" (%s)."
+msgstr "Plugin \"%s\" (%s) instalado."
+
+# en-hash: 1ea8b0189bc054c587a78d1b13f5dc9d
+msgid "Installed plugin \"%s\" (version %s)."
+msgstr "Plugin \"%s\" (versão %s) instalado."
+
+# en-hash: ea7009546a19031e6fddcf0ad7e2d5a9
+msgid "Installed plugin \"%s\"."
+msgstr "Plugin \"%s\" instalado."
+
 # en-hash: c98f920c29f4d2f367f11f8aad8c6b98
 msgid "Installing %s…"
 msgstr "Instalando %s…"
@@ -1300,6 +1328,10 @@ msgstr "Metadados do repositório ausentes para lançamentos."
 # en-hash: 0c69cf64725f51a7e4efab7b4d293b33
 msgid "Missing repository metadata for remote fetch."
 msgstr "Metadados de repositório ausentes para busca remota."
+
+# en-hash: 81008b533ffec1a6dec86966526d2194
+msgid "Missing repository metadata."
+msgstr "Metadados do repositório ausentes."
 
 # en-hash: 8dfff041fcd598a7a41df55b9e8ea076
 msgid "Missing target path"
@@ -1761,9 +1793,9 @@ msgstr "Atualizar catálogo"
 msgid "Refreshing catalog via Direct GitHub API…"
 msgstr "Atualizando catálogo via API direta do GitHub…"
 
-# en-hash: d79adaec4b83cfc1e3cb44ded7689888
-msgid "Refreshing catalog..."
-msgstr "Atualizando catálogo..."
+# en-hash: 3177625a0f340b8e4af8dfd90e538697
+msgid "Refreshing catalog via Direct GitHub API…\nTap screen to cancel."
+msgstr "Atualizando catálogo via API direta do GitHub…\nToque na tela para cancelar."
 
 # en-hash: 0cb1e25c68defbaa1b6fcb7a10f9932f
 msgid "Refreshing catalog…"
@@ -2365,6 +2397,10 @@ msgstr "Atualizado %d de %d item(ns) (%d com falha)."
 msgid "Updated patch \"%s\"."
 msgstr "Patch \"%s\" atualizado."
 
+# en-hash: f880f1649aab716c5a93877127a74c3b
+msgid "Updated plugin \"%s\" to %s."
+msgstr "Plugin \"%s\" atualizado para %s."
+
 # en-hash: ea03cc9fdc791c9e882185f9871e2d19
 msgid "Updated plugin \"%s\" to version %s."
 msgstr "Plugin \"%s\" atualizado para a versão %s."
@@ -2557,6 +2593,14 @@ msgstr "Atualizar"
 msgid "btn_view_details"
 msgstr "Ver detalhes"
 
+# en-hash: 334af2789e69c8fc39aa4b9238c68a9c
+msgid "confirm_branch_install_body"
+msgstr "Esta é uma versão de desenvolvedor/colaborador e pode ser instável. Instale apenas se souber o que está fazendo."
+
+# en-hash: 483d7d4cd34c8827b262a06626d554f9
+msgid "confirm_branch_install_title"
+msgstr "Instalar do branch '%s'?"
+
 # en-hash: bbdb1b84c8613a1be1923b11899bcc8c
 msgid "confirm_install"
 msgstr "Instalar '%s'?"
@@ -2593,6 +2637,10 @@ msgstr "Erro de rede: Não foi possível baixar o catálogo."
 msgid "err_uninstall_failed"
 msgstr "Falha na desinstalação de '%s'."
 
+# en-hash: 4d2405b58cce01613812d5938bf492e6
+msgid "fetching_branches"
+msgstr "Buscando branches…"
+
 # en-hash: a6a2a55bea8760389dfca77132905b7c
 msgid "filter_all"
 msgstr "Todas as categorias"
@@ -2620,6 +2668,10 @@ msgstr "Sobre"
 # en-hash: 608900ed06f424f6830232f2c2080b42
 msgid "header_updates"
 msgstr "Atualizações"
+
+# en-hash: b4a63ad3de9a22e2ce7c43b1678477d0
+msgid "install_from_branch"
+msgstr "Instalar do branch…"
 
 # en-hash: a517747c3d12f99244ae598910d979c5
 msgid "label_author"
@@ -2693,6 +2745,14 @@ msgstr "Nenhum item encontrado."
 msgid "new"
 msgstr "novo"
 
+# en-hash: b0f3f2e2e91f82331788271556582cf2
+msgid "new_commit_on_branch"
+msgstr "Novo commit no '%s'"
+
+# en-hash: df1635b0a9033ae6e2f6acded2a3a84a
+msgid "no_branches_found"
+msgstr "Nenhum branch encontrado para este repositório."
+
 # en-hash: d8f4a1993546cc4b850cde3599e27aec
 msgid "not found"
 msgstr "não encontrado"
@@ -2728,6 +2788,10 @@ msgstr "remoto é mais recente por data"
 # en-hash: b3f2035551f6e48c67489ace9f588f94
 msgid "repository"
 msgstr "repositório"
+
+# en-hash: 116f6125d1c7dc42ae6ba28eab61f898
+msgid "repull_from_branch"
+msgstr "Baixar novamente do branch"
 
 # en-hash: fe1cf176acd521dda7c2ef219171a5da
 msgid "search_hint"
@@ -2796,6 +2860,10 @@ msgstr "Papéis"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "tab_versions"
 msgstr "Versões"
+
+# en-hash: be9026abbba62fdf36ac5706fcb0b76b
+msgid "tracking_branch"
+msgstr "Rastreando branch: %s"
 
 # en-hash: ad921d60486366258809553a3db49a4a
 msgid "unknown"
