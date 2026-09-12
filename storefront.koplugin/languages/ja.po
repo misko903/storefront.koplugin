@@ -53,6 +53,10 @@ msgstr "%s と %s"
 msgid "%s is up to date (version %s)."
 msgstr "%s は最新です (バージョン %s)。"
 
+# en-hash: 0784fca1b52721482e16c07042427ed6
+msgid "%s is up to date on branch %s (%s)."
+msgstr "%s はブランチ %s (%s) で最新の状態です。"
+
 # en-hash: 6837c7d74a6273ec361dfa5576ac324e
 msgid "%s is up to date."
 msgstr "%s は最新です。"
@@ -2301,6 +2305,14 @@ msgstr "総コミット数: %d"
 msgid "Tracked: %d"
 msgstr "追跡中: %d"
 
+# en-hash: be9026abbba62fdf36ac5706fcb0b76b
+msgid "Tracking branch: %s"
+msgstr "追跡ブランチ: %s"
+
+# en-hash: 8e333a66e5579cf851a6251d112bca80
+msgid "Tracking branch: %s (%s)"
+msgstr "追跡ブランチ: %s (%s)"
+
 # en-hash: 9f20e45267caff9e39ca3b9bea16db47
 msgid "Transparent overlay (page content visible behind)"
 msgstr "透明オーバーレイ（読書画面の上に表示）"
@@ -2368,6 +2380,10 @@ msgstr "%sを更新しますか？"
 # en-hash: 6d9160dc4176d784df94f92a091a9a59
 msgid "Update All"
 msgstr "すべて更新"
+
+# en-hash: fe9d9f6d8401ec278f5716062385a9de
+msgid "Update available for %s (%s): %s → %s."
+msgstr "%s (%s) のアップデートがあります: %s → %s。"
 
 # en-hash: 247ef2772cca9ce82a8934100af8683c
 msgid "Update available for %s: remote %s, installed %s."
@@ -2532,6 +2548,18 @@ msgstr "Storefrontは、KOReader用のプラグイン、パッチ、フォント
 # en-hash: b1f8e4a5ec893d89ea440ddff299c0fc
 msgid "anyone"
 msgstr "誰でも"
+
+# en-hash: 13e880e5a3199e5274dbad89142671db
+msgid "branch: %s"
+msgstr "ブランチ: %s"
+
+# en-hash: fbd54111126fb5c3c6a1848139e835c9
+msgid "branch: %s (%s)"
+msgstr "ブランチ: %s (%s)"
+
+# en-hash: 13e880e5a3199e5274dbad89142671db
+msgid "branch_label"
+msgstr "ブランチ: %s"
 
 # en-hash: 9639e32cab248434a17ab32237cb3b71
 msgid "btn_apply"
@@ -2860,6 +2888,10 @@ msgstr "壁紙"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "tab_versions"
 msgstr "バージョン"
+
+# en-hash: 0dd049bbb4bf7e0306a2647b7ef69484
+msgid "tracked_badge"
+msgstr "追跡中"
 
 # en-hash: be9026abbba62fdf36ac5706fcb0b76b
 msgid "tracking_branch"

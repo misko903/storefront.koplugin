@@ -1730,6 +1730,12 @@ msgstr "Total commits: %d"
 msgid "Tracked: %d"
 msgstr "Tracked: %d"
 
+msgid "Tracking branch: %s"
+msgstr "Tracking branch: %s"
+
+msgid "Tracking branch: %s (%s)"
+msgstr "Tracking branch: %s (%s)"
+
 msgid "Transparent overlay (page content visible behind)"
 msgstr "Transparent overlay (page content visible behind)"
 
@@ -1906,6 +1912,12 @@ msgstr "Storefront is an in-app package manager for KOReader plugins, patches, a
 
 msgid "anyone"
 msgstr "anyone"
+
+msgid "branch: %s"
+msgstr "branch: %s"
+
+msgid "branch: %s (%s)"
+msgstr "branch: %s (%s)"
 
 msgid "branch_label"
 msgstr "branch: %s"

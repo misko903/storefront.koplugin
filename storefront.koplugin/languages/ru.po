@@ -53,6 +53,10 @@ msgstr "%s и %s"
 msgid "%s is up to date (version %s)."
 msgstr "%s имеет актуальную версию (версия %s)."
 
+# en-hash: 0784fca1b52721482e16c07042427ed6
+msgid "%s is up to date on branch %s (%s)."
+msgstr "%s обновлён на ветке %s (%s)."
+
 # en-hash: 6837c7d74a6273ec361dfa5576ac324e
 msgid "%s is up to date."
 msgstr "%s имеет актуальную версию."
@@ -2301,6 +2305,14 @@ msgstr "Всего коммитов: %d"
 msgid "Tracked: %d"
 msgstr "Отслеживается: %d"
 
+# en-hash: be9026abbba62fdf36ac5706fcb0b76b
+msgid "Tracking branch: %s"
+msgstr "Отслеживаемая ветка: %s"
+
+# en-hash: 8e333a66e5579cf851a6251d112bca80
+msgid "Tracking branch: %s (%s)"
+msgstr "Отслеживаемая ветка: %s (%s)"
+
 # en-hash: 9f20e45267caff9e39ca3b9bea16db47
 msgid "Transparent overlay (page content visible behind)"
 msgstr "Прозрачный слой (страница видна на фоне)"
@@ -2368,6 +2380,10 @@ msgstr "Обновить %s?"
 # en-hash: 6d9160dc4176d784df94f92a091a9a59
 msgid "Update All"
 msgstr "Обновить все"
+
+# en-hash: fe9d9f6d8401ec278f5716062385a9de
+msgid "Update available for %s (%s): %s → %s."
+msgstr "Доступно обновление для %s (%s): %s → %s."
 
 # en-hash: 247ef2772cca9ce82a8934100af8683c
 msgid "Update available for %s: remote %s, installed %s."
@@ -2532,6 +2548,18 @@ msgstr "Storefront — это менеджер пакетов в KOReader для
 # en-hash: b1f8e4a5ec893d89ea440ddff299c0fc
 msgid "anyone"
 msgstr "любой"
+
+# en-hash: 13e880e5a3199e5274dbad89142671db
+msgid "branch: %s"
+msgstr "ветка: %s"
+
+# en-hash: fbd54111126fb5c3c6a1848139e835c9
+msgid "branch: %s (%s)"
+msgstr "ветка: %s (%s)"
+
+# en-hash: 13e880e5a3199e5274dbad89142671db
+msgid "branch_label"
+msgstr "ветка: %s"
 
 # en-hash: 9639e32cab248434a17ab32237cb3b71
 msgid "btn_apply"
@@ -2860,6 +2888,10 @@ msgstr "Обои"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "tab_versions"
 msgstr "Версии"
+
+# en-hash: 0dd049bbb4bf7e0306a2647b7ef69484
+msgid "tracked_badge"
+msgstr "ОТСЛЕЖИВАЕТСЯ"
 
 # en-hash: be9026abbba62fdf36ac5706fcb0b76b
 msgid "tracking_branch"
