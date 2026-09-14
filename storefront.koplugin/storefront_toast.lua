@@ -117,10 +117,10 @@ function StorefrontToastWidget:init()
     self:buildCard()
 
     if self.dismissable ~= false then
-        if Device:hasKeys() then
+        if Device.hasKeys and Device:hasKeys() then
             self.key_events.AnyKeyPressed = { { Device.input.group.Any } }
         end
-        if Device:isTouchDevice() then
+        if Device.isTouchDevice and Device:isTouchDevice() then
             local GestureRange = require("ui/gesturerange")
             self.ges_events = {
                 TapDismiss = {

@@ -21,6 +21,10 @@ msgstr "%d patchs"
 msgid "%d plugins"
 msgstr "%d greffons"
 
+# en-hash: 2462ceb6cb35cddddc731719d5c1372a
+msgid "%d updates available"
+msgstr "%d mises à jour disponibles"
+
 # en-hash: fa6eebde796e7a0cd580534b810334a7
 msgid "%d wallpapers"
 msgstr "%d fonds d'écran"
@@ -77,6 +81,10 @@ msgstr "%s · 1 fichier"
 msgid "(fork)"
 msgstr "(fork)"
 
+# en-hash: 56de8bcb4bb6bb1514f306b0f500fddf
+msgid "(patch)"
+msgstr "(correctif)"
+
 # en-hash: a122476080135dddfadec5a2bc576873
 msgid "(showing %d of %d commits)"
 msgstr "(affichage de %d sur %d commits)"
@@ -97,6 +105,10 @@ msgstr ".. (Dossier parent)"
 msgid "1 / 1"
 msgstr "1 / 1"
 
+# en-hash: 72ab9d0304d3e84c6aa2dd15eda282f2
+msgid "1 hour"
+msgstr "1 heure"
+
 # en-hash: f22f39e15c8f1579ba49d528da2ceef5
 msgid "1 patch"
 msgstr "1 correctif"
@@ -104,6 +116,14 @@ msgstr "1 correctif"
 # en-hash: 8848b53275f0757ec5174d00d36fa107
 msgid "1 plugin"
 msgstr "1 greffon"
+
+# en-hash: 51ab5b23d368b5115021548ef958818b
+msgid "1 update available"
+msgstr "1 mise à jour disponible"
+
+# en-hash: adc66a0660acb82a5a959125d60c75e6
+msgid "4 hours"
+msgstr "4 heures"
 
 # en-hash: 36cf3e1f679e22c5433ff72069545444
 msgid "< Back"
@@ -573,6 +593,10 @@ msgstr "'%s' créé"
 msgid "Custom folder"
 msgstr "Dossier personnalisé"
 
+# en-hash: c512b685438f41daa7386329a3b8f8d3
+msgid "Daily"
+msgstr "Quotidien"
+
 # en-hash: 7a1920d61156abc05a60135aefe8bc67
 msgid "Default"
 msgstr "Par défaut"
@@ -660,6 +684,10 @@ msgstr "Désactiver le plugin"
 # en-hash: b9f5c797ebbf55adccdd8539a65a0241
 msgid "Disabled"
 msgstr "Désactivé"
+
+# en-hash: c8a59e7135a20b362f9c768b09454fdb
+msgid "Dismiss"
+msgstr "Ignorer"
 
 # en-hash: 9cbc24d23b943fe4b092e79dd82948e2
 msgid "Display Options"
@@ -772,6 +800,22 @@ msgstr "Saisir le numéro d'élément"
 # en-hash: 888bd819da7fe02d3297018a56143a94
 msgid "Enter plugin number"
 msgstr "Saisir le numéro du plugin"
+
+# en-hash: 48bf14c419a1d441412510faf39c326d
+msgid "Every day"
+msgstr "Tous les jours"
+
+# en-hash: 02fd27d2951d00b83f111f63611ea863
+msgid "Every hour"
+msgstr "Toutes les heures"
+
+# en-hash: 8ed91b71d01993965915f3b296c20336
+msgid "Every month"
+msgstr "Tous les mois"
+
+# en-hash: 64863d871b7d8ecb1eb689ceb3595cb5
+msgid "Every week"
+msgstr "Toutes les semaines"
 
 # en-hash: 006ec38349cf69bccea24bc63924ae72
 msgid "Failed to check %s: %s"
@@ -973,6 +1017,10 @@ msgstr "Polices"
 msgid "Free up storage space on your device. Cached items are re-downloaded automatically when needed."
 msgstr "Libérez de l'espace de stockage. Les éléments en cache sont retéléchargés automatiquement si besoin."
 
+# en-hash: 7cf395303ce3665a9834721d4b748e4b
+msgid "Frequency"
+msgstr "Fréquence"
+
 # en-hash: 4da7aff05cb0f2c3407a7c1614f4bdfc
 msgid "GitHub API rate limit exceeded. Add a GitHub token in Storefront settings to increase the limit (10→30 req/min)."
 msgstr "Limite de taux de l'API GitHub dépassée. Ajoutez un jeton GitHub dans les paramètres de Storefront pour augmenter la limite (10→30 req/min)."
@@ -1008,6 +1056,10 @@ msgstr "Aller à la page"
 # en-hash: 1f651ab3d2499f9ec45d86440334683e
 msgid "HTTP error"
 msgstr "Erreur HTTP"
+
+# en-hash: 769cb50c95fd3a43c659aa73aba99e5b
+msgid "Hourly"
+msgstr "Toutes les heures"
 
 # en-hash: fd038fc7f319e48f3115d92bf5bdbef9
 msgid "Ignore"
@@ -1160,6 +1212,14 @@ msgstr "Plus anciens"
 # en-hash: 89de86aa34494d545d8cbb4fff3a4e59
 msgid "Last check: %s"
 msgstr "Dernière vérification : %s"
+
+# en-hash: 205f4daedd8cc00022f3850c19aaf4bc
+msgid "Last checked: %s"
+msgstr "Dernière vérification : %s"
+
+# en-hash: 61057a0c84605444201929bdd72014f0
+msgid "Later"
+msgstr "Plus tard"
 
 # en-hash: f3a9b7d34a5f7e5519618c0dd6c5cf81
 msgid "Latest Release"
@@ -1352,6 +1412,10 @@ msgstr "Modifier le plugin"
 # en-hash: 9dbdd0c952fedc3db87f3a02d99591d4
 msgid "Modify Plugin: %s"
 msgstr "Modifier le plugin : %s"
+
+# en-hash: 9030e39f00132d583da4122532e509e9
+msgid "Monthly"
+msgstr "Mensuel"
 
 # en-hash: 406af19badea17896b1bfef1897f23bd
 msgid "Most Downloaded"
@@ -1569,6 +1633,18 @@ msgstr "Non associé à un dépôt."
 msgid "Not set"
 msgstr "Non défini"
 
+# en-hash: 76d8f3c00672f61b39846b2112d356a8
+msgid "Notification Settings"
+msgstr "Paramètres des notifications"
+
+# en-hash: 018d963f1c49025140a70dac3b430a19
+msgid "Notification settings"
+msgstr "Paramètres des notifications"
+
+# en-hash: a274f4d4670213a9045ce258c6c56b80
+msgid "Notifications"
+msgstr "Notifications"
+
 # en-hash: e0aa021e21dddbd6d8cecec71e9cf564
 msgid "OK"
 msgstr "OK"
@@ -1580,6 +1656,10 @@ msgstr "Hors-ligne standard"
 # en-hash: c3bf447eabe632720a3aa1a7ce401274
 msgid "Open"
 msgstr "Ouvrir"
+
+# en-hash: 4a31d8334b7e00e010c8b3ab58ed1b37
+msgid "Open Storefront"
+msgstr "Ouvrir la boutique"
 
 # en-hash: aaaca14de025427e39ed056b29af4058
 msgid "Open Wallpaper Collection Gallery"
@@ -1749,6 +1829,10 @@ msgstr "Plugin système KOReader préinstallé."
 msgid "Prev"
 msgstr "Préc"
 
+# en-hash: 30fd318c4edd89ba37df54b02c9df563
+msgid "Preview Notification Now"
+msgstr "Aperçu de la notification"
+
 # en-hash: 0387f6092bdd447cc77402e2af1e1fb1
 msgid "Published: %s"
 msgstr "Publié : %s"
@@ -1780,6 +1864,10 @@ msgstr "Progression de lecture"
 # en-hash: 09d465b122ab48dbe5cad73d4656d4e1
 msgid "Reading Progress / Summary"
 msgstr "Progression de lecture / Résumé"
+
+# en-hash: d7a84a9fb236df685f29540da550488c
+msgid "Recently"
+msgstr "Récemment"
 
 # en-hash: e1a444c57a59c310dfd913b8fbbcaa70
 msgid "Recently Added"
@@ -1836,6 +1924,22 @@ msgstr "Versions"
 # en-hash: 44398344dd02c7d56e1b9629ef8d724d
 msgid "Releases — %s"
 msgstr "Versions — %s"
+
+# en-hash: c5a2e8d484061abee1eb7c14a7ac7082
+msgid "Remind Me Later"
+msgstr "Me le rappeler plus tard"
+
+# en-hash: 2215a7fa48c4de242839da413a9802a4
+msgid "Remind me in 1 hour."
+msgstr "Me le rappeler dans 1 heure."
+
+# en-hash: 7b80023a4f9005b108d12e317a4da050
+msgid "Remind me in 4 hours."
+msgstr "Me le rappeler dans 4 heures."
+
+# en-hash: fab2041a4c9dc8de86de57a1288abac1
+msgid "Remind me tomorrow."
+msgstr "Me le rappeler demain."
 
 # en-hash: ef9e8096713bc1df35e59a0eef226bc6
 msgid "Remote SHA: %s"
@@ -2121,6 +2225,10 @@ msgstr "Unique"
 msgid "Single Wallpaper"
 msgstr "Fond d'écran unique"
 
+# en-hash: 199a73d4643754477ed833ee6a6959ba
+msgid "Snooze Options"
+msgstr "Options de report"
+
 # en-hash: bc586928ac8f7c25dabb909c67bdfa88
 msgid "Solid fill for screen margins & letterboxing"
 msgstr "Remplissage plein pour marges d'écran"
@@ -2261,6 +2369,10 @@ msgstr "Passer à la liste des plugins"
 msgid "Tag not found on GitHub (%s or %s)."
 msgstr "Étiquette introuvable sur GitHub (%s ou %s)."
 
+# en-hash: 43e457749450b5b2303d56a0b2495e34
+msgid "Testing & Preview"
+msgstr "Test et aperçu"
+
 # en-hash: e60eb6a944962445b77455f99dd667be
 msgid "Text editor plugin is not available."
 msgstr "Le plugin d'éditeur de texte n'est pas disponible."
@@ -2297,6 +2409,14 @@ msgstr "Cela supprimera les articles wiki et les images téléchargées en cache
 msgid "This will take effect on next restart."
 msgstr "Prendra effet au prochain redémarrage."
 
+# en-hash: ac05bbb158fed4992e0708f35bb575eb
+msgid "Today %s"
+msgstr "Aujourd'hui %s"
+
+# en-hash: ff9eb8bd8c927da073cea632f294e23b
+msgid "Tomorrow"
+msgstr "Demain"
+
 # en-hash: d425644c6a2afa44fa44a1565b489dd6
 msgid "Total commits: %d"
 msgstr "Total des commits : %d"
@@ -2316,6 +2436,10 @@ msgstr "Branche de suivi : %s (%s)"
 # en-hash: 9f20e45267caff9e39ca3b9bea16db47
 msgid "Transparent overlay (page content visible behind)"
 msgstr "Superposition transparente (page visible en arrière-plan)"
+
+# en-hash: 87c4c4558e9a94b6d2e94fe7a408b616
+msgid "Trigger on every startup (testing)"
+msgstr "Déclencher à chaque démarrage (test)"
 
 # en-hash: a1fa27779242b4902f7ae3bdd5c6d508
 msgid "Type"
@@ -2353,6 +2477,10 @@ msgstr "Inconnu"
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
+# en-hash: 20ac757837006b5e62196fb350fe652d
+msgid "Unknown item"
+msgstr "Élément inconnu"
+
 # en-hash: a08ab7628919ab9cdf4f5f0bc062f885
 msgid "Unlink the repo"
 msgstr "Délier le dépôt"
@@ -2381,6 +2509,10 @@ msgstr "Mettre à jour %s ?"
 msgid "Update All"
 msgstr "Tout mettre à jour"
 
+# en-hash: 8bd7695831e104e2669e086e03927a20
+msgid "Update Available"
+msgstr "Mise à jour disponible"
+
 # en-hash: fe9d9f6d8401ec278f5716062385a9de
 msgid "Update available for %s (%s): %s → %s."
 msgstr "Mise à jour disponible pour %s (%s) : %s → %s."
@@ -2396,6 +2528,10 @@ msgstr "Canal de mise à jour"
 # en-hash: e1ba91f9b8666f2b30bf501bb1114462
 msgid "Update check was cancelled."
 msgstr "La recherche de mise à jour a été annulée."
+
+# en-hash: c9cf7338d6687a99088094c52d0e60b4
+msgid "Update notifications"
+msgstr "Notifications de mise à jour"
 
 # en-hash: 43c694f6abd3b6ce1e256015dfe2513e
 msgid "Update patch"
@@ -2432,6 +2568,10 @@ msgstr "Mis à jour : %s"
 # en-hash: 9ac41b6a577daadd588f0fcde0071e8b
 msgid "Updates"
 msgstr "Mises à jour"
+
+# en-hash: 59ea61e4d9d9255e175f475275becb51
+msgid "Updates Available"
+msgstr "Mises à jour disponibles"
 
 # en-hash: 7a1861cda946de73714affbeb669eba4
 msgid "Updates Ignored"
@@ -2496,6 +2636,14 @@ msgstr "Fond d'écran défini comme écran de veille actif !"
 # en-hash: 5debabbcc269798b673cbe19cd73e8e7
 msgid "Warning: the selected version is older than what is currently installed. You are downgrading."
 msgstr "Avertissement : la version sélectionnée est plus ancienne que celle actuellement installée. Vous effectuez une rétrogradation."
+
+# en-hash: 6c25e6a6da95b3d583c6ec4c3f82ed4d
+msgid "Weekly"
+msgstr "Hebdomadaire"
+
+# en-hash: 8b8dda5f7cfe3a9f13f2300d953c2148
+msgid "When tapping 'Remind Me Later' on an update notification, you can choose:"
+msgstr "En touchant « Me le rappeler plus tard » sur une notification de mise à jour, vous pouvez choisir :"
 
 # en-hash: a89746741af25fe85303aa1ec68a24dd
 msgid "White Fill"

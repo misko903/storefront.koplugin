@@ -138,6 +138,12 @@ require("storefront_updates_mgr"):init(Storefront)
 local storefront_patch_mgr = require("storefront_patch_mgr")
 storefront_patch_mgr:init(Storefront)
 
+Storefront.instance = Storefront
+
+function Storefront:init()
+    Storefront.instance = self
+end
+
 
 
 
@@ -10347,6 +10353,11 @@ function Storefront:init()
                     if Storefront.instance and Storefront.instance.browser_menu then
                         Storefront.instance:reopenBrowser()
                     end
+                    pcall(function()
+                        if Storefront.checkStartupNotifications then
+                            Storefront:checkStartupNotifications(true)
+                        end
+                    end)
                 else
                     logger.warn("Storefront init: background catalog update failed: " .. tostring(err))
                     StorefrontLogger.warn("Storefront init: background catalog update failed: " .. tostring(err))
@@ -10374,6 +10385,11 @@ function Storefront:init()
                                     if Storefront.instance and Storefront.instance.browser_menu then
                                         Storefront.instance:reopenBrowser()
                                     end
+                                    pcall(function()
+                                        if Storefront.checkStartupNotifications then
+                                            Storefront:checkStartupNotifications(true)
+                                        end
+                                    end)
                                 else
                                     logger.warn("Storefront init: background catalog update retry failed: " .. tostring(retry_err))
                                     if StorefrontLogger then StorefrontLogger.warn("Storefront init: background catalog update retry failed: " .. tostring(retry_err)) end
@@ -10391,6 +10407,11 @@ function Storefront:init()
             local msg = string.format("Storefront init: catalog cache is fresh (%ds old <= 3600s), skipping background fetch", age)
             logger.info(msg)
             StorefrontLogger.info(msg)
+            pcall(function()
+                if Storefront.checkStartupNotifications then
+                    Storefront:checkStartupNotifications(true)
+                end
+            end)
         end
     end)
 end

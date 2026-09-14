@@ -21,6 +21,10 @@ msgstr "%d件のパッチ"
 msgid "%d plugins"
 msgstr "%d件のプラグイン"
 
+# en-hash: 2462ceb6cb35cddddc731719d5c1372a
+msgid "%d updates available"
+msgstr "%d件のアップデートが利用可能"
+
 # en-hash: fa6eebde796e7a0cd580534b810334a7
 msgid "%d wallpapers"
 msgstr "%d 枚の壁紙"
@@ -77,6 +81,10 @@ msgstr "%s · 1 ファイル"
 msgid "(fork)"
 msgstr "(フォーク)"
 
+# en-hash: 56de8bcb4bb6bb1514f306b0f500fddf
+msgid "(patch)"
+msgstr "(パッチ)"
+
 # en-hash: a122476080135dddfadec5a2bc576873
 msgid "(showing %d of %d commits)"
 msgstr "(%d / %d 件のコミットを表示中)"
@@ -97,6 +105,10 @@ msgstr ".. (親フォルダ)"
 msgid "1 / 1"
 msgstr "1 / 1"
 
+# en-hash: 72ab9d0304d3e84c6aa2dd15eda282f2
+msgid "1 hour"
+msgstr "1時間"
+
 # en-hash: f22f39e15c8f1579ba49d528da2ceef5
 msgid "1 patch"
 msgstr "1件のパッチ"
@@ -104,6 +116,14 @@ msgstr "1件のパッチ"
 # en-hash: 8848b53275f0757ec5174d00d36fa107
 msgid "1 plugin"
 msgstr "1件のプラグイン"
+
+# en-hash: 51ab5b23d368b5115021548ef958818b
+msgid "1 update available"
+msgstr "1件のアップデートが利用可能"
+
+# en-hash: adc66a0660acb82a5a959125d60c75e6
+msgid "4 hours"
+msgstr "4時間"
 
 # en-hash: 36cf3e1f679e22c5433ff72069545444
 msgid "< Back"
@@ -573,6 +593,10 @@ msgstr "'%s' を作成しました"
 msgid "Custom folder"
 msgstr "カスタムフォルダ"
 
+# en-hash: c512b685438f41daa7386329a3b8f8d3
+msgid "Daily"
+msgstr "毎日"
+
 # en-hash: 7a1920d61156abc05a60135aefe8bc67
 msgid "Default"
 msgstr "デフォルト"
@@ -660,6 +684,10 @@ msgstr "プラグインを無効化"
 # en-hash: b9f5c797ebbf55adccdd8539a65a0241
 msgid "Disabled"
 msgstr "無効"
+
+# en-hash: c8a59e7135a20b362f9c768b09454fdb
+msgid "Dismiss"
+msgstr "閉じる"
 
 # en-hash: 9cbc24d23b943fe4b092e79dd82948e2
 msgid "Display Options"
@@ -772,6 +800,22 @@ msgstr "項目番号を入力"
 # en-hash: 888bd819da7fe02d3297018a56143a94
 msgid "Enter plugin number"
 msgstr "プラグイン番号を入力"
+
+# en-hash: 48bf14c419a1d441412510faf39c326d
+msgid "Every day"
+msgstr "毎日"
+
+# en-hash: 02fd27d2951d00b83f111f63611ea863
+msgid "Every hour"
+msgstr "1時間ごと"
+
+# en-hash: 8ed91b71d01993965915f3b296c20336
+msgid "Every month"
+msgstr "毎月"
+
+# en-hash: 64863d871b7d8ecb1eb689ceb3595cb5
+msgid "Every week"
+msgstr "毎週"
 
 # en-hash: 006ec38349cf69bccea24bc63924ae72
 msgid "Failed to check %s: %s"
@@ -973,6 +1017,10 @@ msgstr "フォント"
 msgid "Free up storage space on your device. Cached items are re-downloaded automatically when needed."
 msgstr "デバイスの空き容量を増やします。キャッシュされた項目は必要に応じて自動的に再ダウンロードされます。"
 
+# en-hash: 7cf395303ce3665a9834721d4b748e4b
+msgid "Frequency"
+msgstr "頻度"
+
 # en-hash: 4da7aff05cb0f2c3407a7c1614f4bdfc
 msgid "GitHub API rate limit exceeded. Add a GitHub token in Storefront settings to increase the limit (10→30 req/min)."
 msgstr "GitHub APIのレート制限を超過しました。制限を増やすには Storefront の設定で GitHub トークンを追加してください (10→30 リクエスト/分)。"
@@ -1008,6 +1056,10 @@ msgstr "ページへ移動"
 # en-hash: 1f651ab3d2499f9ec45d86440334683e
 msgid "HTTP error"
 msgstr "HTTP エラー"
+
+# en-hash: 769cb50c95fd3a43c659aa73aba99e5b
+msgid "Hourly"
+msgstr "毎時間"
 
 # en-hash: fd038fc7f319e48f3115d92bf5bdbef9
 msgid "Ignore"
@@ -1160,6 +1212,14 @@ msgstr "更新日（古い順）"
 # en-hash: 89de86aa34494d545d8cbb4fff3a4e59
 msgid "Last check: %s"
 msgstr "最終確認: %s"
+
+# en-hash: 205f4daedd8cc00022f3850c19aaf4bc
+msgid "Last checked: %s"
+msgstr "最終確認: %s"
+
+# en-hash: 61057a0c84605444201929bdd72014f0
+msgid "Later"
+msgstr "後で"
 
 # en-hash: f3a9b7d34a5f7e5519618c0dd6c5cf81
 msgid "Latest Release"
@@ -1352,6 +1412,10 @@ msgstr "プラグインを変更"
 # en-hash: 9dbdd0c952fedc3db87f3a02d99591d4
 msgid "Modify Plugin: %s"
 msgstr "プラグインの修正: %s"
+
+# en-hash: 9030e39f00132d583da4122532e509e9
+msgid "Monthly"
+msgstr "毎月"
 
 # en-hash: 406af19badea17896b1bfef1897f23bd
 msgid "Most Downloaded"
@@ -1569,6 +1633,18 @@ msgstr "リポジトリに関連付けられていません。"
 msgid "Not set"
 msgstr "未設定"
 
+# en-hash: 76d8f3c00672f61b39846b2112d356a8
+msgid "Notification Settings"
+msgstr "通知設定"
+
+# en-hash: 018d963f1c49025140a70dac3b430a19
+msgid "Notification settings"
+msgstr "通知設定"
+
+# en-hash: a274f4d4670213a9045ce258c6c56b80
+msgid "Notifications"
+msgstr "通知"
+
 # en-hash: e0aa021e21dddbd6d8cecec71e9cf564
 msgid "OK"
 msgstr "OK"
@@ -1580,6 +1656,10 @@ msgstr "オフライン Regular"
 # en-hash: c3bf447eabe632720a3aa1a7ce401274
 msgid "Open"
 msgstr "開く"
+
+# en-hash: 4a31d8334b7e00e010c8b3ab58ed1b37
+msgid "Open Storefront"
+msgstr "ストアフロントを開く"
 
 # en-hash: aaaca14de025427e39ed056b29af4058
 msgid "Open Wallpaper Collection Gallery"
@@ -1749,6 +1829,10 @@ msgstr "KOReader に標準でインストールされているコアプラグイ
 msgid "Prev"
 msgstr "前へ"
 
+# en-hash: 30fd318c4edd89ba37df54b02c9df563
+msgid "Preview Notification Now"
+msgstr "今すぐ通知をプレビュー"
+
 # en-hash: 0387f6092bdd447cc77402e2af1e1fb1
 msgid "Published: %s"
 msgstr "公開日: %s"
@@ -1780,6 +1864,10 @@ msgstr "読書進捗"
 # en-hash: 09d465b122ab48dbe5cad73d4656d4e1
 msgid "Reading Progress / Summary"
 msgstr "読書の進捗 / サマリー"
+
+# en-hash: d7a84a9fb236df685f29540da550488c
+msgid "Recently"
+msgstr "最近"
 
 # en-hash: e1a444c57a59c310dfd913b8fbbcaa70
 msgid "Recently Added"
@@ -1836,6 +1924,22 @@ msgstr "リリース"
 # en-hash: 44398344dd02c7d56e1b9629ef8d724d
 msgid "Releases — %s"
 msgstr "リリース — %s"
+
+# en-hash: c5a2e8d484061abee1eb7c14a7ac7082
+msgid "Remind Me Later"
+msgstr "後で通知"
+
+# en-hash: 2215a7fa48c4de242839da413a9802a4
+msgid "Remind me in 1 hour."
+msgstr "1時間後に通知する。"
+
+# en-hash: 7b80023a4f9005b108d12e317a4da050
+msgid "Remind me in 4 hours."
+msgstr "4時間後に通知する。"
+
+# en-hash: fab2041a4c9dc8de86de57a1288abac1
+msgid "Remind me tomorrow."
+msgstr "明日通知する。"
 
 # en-hash: ef9e8096713bc1df35e59a0eef226bc6
 msgid "Remote SHA: %s"
@@ -2121,6 +2225,10 @@ msgstr "単一"
 msgid "Single Wallpaper"
 msgstr "単一壁紙"
 
+# en-hash: 199a73d4643754477ed833ee6a6959ba
+msgid "Snooze Options"
+msgstr "スヌーズ設定"
+
 # en-hash: bc586928ac8f7c25dabb909c67bdfa88
 msgid "Solid fill for screen margins & letterboxing"
 msgstr "画面余白を塗りつぶし"
@@ -2261,6 +2369,10 @@ msgstr "プラグイン一覧に切り替え"
 msgid "Tag not found on GitHub (%s or %s)."
 msgstr "GitHub上にタグが見つかりません (%s または %s)。"
 
+# en-hash: 43e457749450b5b2303d56a0b2495e34
+msgid "Testing & Preview"
+msgstr "テストとプレビュー"
+
 # en-hash: e60eb6a944962445b77455f99dd667be
 msgid "Text editor plugin is not available."
 msgstr "テキストエディタプラグインが利用できません。"
@@ -2297,6 +2409,14 @@ msgstr "キャッシュされたWiki記事とダウンロード画像 (%s) が�
 msgid "This will take effect on next restart."
 msgstr "これは次回の再起動時に有効になります。"
 
+# en-hash: ac05bbb158fed4992e0708f35bb575eb
+msgid "Today %s"
+msgstr "今日 %s"
+
+# en-hash: ff9eb8bd8c927da073cea632f294e23b
+msgid "Tomorrow"
+msgstr "明日"
+
 # en-hash: d425644c6a2afa44fa44a1565b489dd6
 msgid "Total commits: %d"
 msgstr "総コミット数: %d"
@@ -2316,6 +2436,10 @@ msgstr "追跡ブランチ: %s (%s)"
 # en-hash: 9f20e45267caff9e39ca3b9bea16db47
 msgid "Transparent overlay (page content visible behind)"
 msgstr "透明オーバーレイ（読書画面の上に表示）"
+
+# en-hash: 87c4c4558e9a94b6d2e94fe7a408b616
+msgid "Trigger on every startup (testing)"
+msgstr "起動ごとに実行 (テスト用)"
 
 # en-hash: a1fa27779242b4902f7ae3bdd5c6d508
 msgid "Type"
@@ -2353,6 +2477,10 @@ msgstr "不明"
 msgid "Unknown error"
 msgstr "不明なエラー"
 
+# en-hash: 20ac757837006b5e62196fb350fe652d
+msgid "Unknown item"
+msgstr "不明なアイテム"
+
 # en-hash: a08ab7628919ab9cdf4f5f0bc062f885
 msgid "Unlink the repo"
 msgstr "リポジトリのリンクを解除"
@@ -2381,6 +2509,10 @@ msgstr "%sを更新しますか？"
 msgid "Update All"
 msgstr "すべて更新"
 
+# en-hash: 8bd7695831e104e2669e086e03927a20
+msgid "Update Available"
+msgstr "アップデートがあります"
+
 # en-hash: fe9d9f6d8401ec278f5716062385a9de
 msgid "Update available for %s (%s): %s → %s."
 msgstr "%s (%s) のアップデートがあります: %s → %s。"
@@ -2396,6 +2528,10 @@ msgstr "更新チャンネル"
 # en-hash: e1ba91f9b8666f2b30bf501bb1114462
 msgid "Update check was cancelled."
 msgstr "更新確認がキャンセルされました。"
+
+# en-hash: c9cf7338d6687a99088094c52d0e60b4
+msgid "Update notifications"
+msgstr "アップデート通知"
 
 # en-hash: 43c694f6abd3b6ce1e256015dfe2513e
 msgid "Update patch"
@@ -2432,6 +2568,10 @@ msgstr "更新日時: %s"
 # en-hash: 9ac41b6a577daadd588f0fcde0071e8b
 msgid "Updates"
 msgstr "更新"
+
+# en-hash: 59ea61e4d9d9255e175f475275becb51
+msgid "Updates Available"
+msgstr "アップデートがあります"
 
 # en-hash: 7a1861cda946de73714affbeb669eba4
 msgid "Updates Ignored"
@@ -2496,6 +2636,14 @@ msgstr "壁紙をアクティブなスクリーンセーバーに設定しまし
 # en-hash: 5debabbcc269798b673cbe19cd73e8e7
 msgid "Warning: the selected version is older than what is currently installed. You are downgrading."
 msgstr "警告: 選択したバージョンは現在インストールされているものより古いバージョンです。ダウングレードされます。"
+
+# en-hash: 6c25e6a6da95b3d583c6ec4c3f82ed4d
+msgid "Weekly"
+msgstr "毎週"
+
+# en-hash: 8b8dda5f7cfe3a9f13f2300d953c2148
+msgid "When tapping 'Remind Me Later' on an update notification, you can choose:"
+msgstr "アップデート通知で「後で通知」をタップしたときの選択肢:"
 
 # en-hash: a89746741af25fe85303aa1ec68a24dd
 msgid "White Fill"

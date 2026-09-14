@@ -556,7 +556,41 @@ function StorefrontSettingsCard.show(Storefront)
             end)
         end))
 
-        -- SECTION 4: ABOUT STOREFRONT
+        -- SECTION 4: NOTIFICATIONS
+        table.insert(content_vg, create_section_header(_("Notifications")))
+
+        local NotificationMgr = require("storefront_notification_mgr")
+        local notif_enabled = NotificationMgr.isEnabled()
+        local notif_indicator = notif_enabled and "☑" or "☐"
+
+        -- Toggle update notifications row
+        table.insert(content_vg, create_setting_row(notif_indicator, _("Update notifications"), nil, function()
+            NotificationMgr.setEnabled(not notif_enabled)
+            refresh()
+        end))
+
+        -- Notification settings row (frequency sub-dialog)
+        local freq_labels = {
+            hourly = _("Hourly"),
+            daily = _("Daily"),
+            weekly = _("Weekly"),
+            monthly = _("Monthly"),
+        }
+        local current_freq_label = (freq_labels[NotificationMgr.getFrequency()] or _("Daily")) .. " ›"
+        local freq_widget = TextWidget:new{
+            text = current_freq_label,
+            face = Font:getFace("cfont", subtext_font_size),
+            fgcolor = storefront_theme.color_label_dim,
+        }
+        table.insert(content_vg, create_setting_row(nil, _("Notification settings"), freq_widget, function()
+            UIManager:close(overlay, "ui")
+            local StorefrontNotificationSettingsDialog = require("storefront_notification_settings_dialog")
+            StorefrontNotificationSettingsDialog.show(Storefront, function()
+                StorefrontSettingsCard.show(Storefront)
+            end)
+        end))
+
+        -- SECTION 5: ABOUT STOREFRONT
         table.insert(content_vg, create_section_header(_("About Storefront")))
 
         -- About Storefront Row

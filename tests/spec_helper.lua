@@ -17,6 +17,7 @@ package.loaded["device"] = {
     hasDPad = function() return false end,
     hasKeys = function() return false end,
     hasKeyboard = function() return false end,
+    isTouchDevice = function() return true end,
     input = { group = {} },
     screen = {
         getWidth = function() return 600 end,
@@ -122,7 +123,12 @@ local luasettings_mock = {
     open = function(self, path)
         local s = {
             data = {},
-            readSetting = function(me, k, default) return me.data[k] or default end,
+            readSetting = function(me, k, default)
+                if me.data[k] ~= nil then
+                    return me.data[k]
+                end
+                return default
+            end,
             saveSetting = function(me, k, v) me.data[k] = v end,
             isTrue = function(me, k) return me.data[k] == true end,
             isFalse = function(me, k) return me.data[k] == false end,
@@ -491,7 +497,13 @@ package.loaded["ui/widget/textwidget"] = {
     new = function(a, b) 
         local args = b or a or {}
         local tw = { type = "TextWidget", args = args, text = args.text or "" }
-        tw.getSize = function() return { w = #(tw.args and tw.args.text or tw.text or "") * 8, h = 20 } end
+        tw.getSize = function()
+            local w = #(tw.args and tw.args.text or tw.text or "") * 8
+            if args.max_width and w > args.max_width then
+                w = args.max_width
+            end
+            return { w = w, h = 20 }
+        end
         return tw
     end
 }

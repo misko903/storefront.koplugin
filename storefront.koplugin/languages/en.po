@@ -17,6 +17,9 @@ msgstr "%d patches"
 msgid "%d plugins"
 msgstr "%d plugins"
 
+msgid "%d updates available"
+msgstr "%d updates available"
+
 msgid "%d wallpapers"
 msgstr "%d wallpapers"
 
@@ -59,6 +62,9 @@ msgstr "%s · 1 file"
 msgid "(fork)"
 msgstr "(fork)"
 
+msgid "(patch)"
+msgstr "(patch)"
+
 msgid "(showing %d of %d commits)"
 msgstr "(showing %d of %d commits)"
 
@@ -74,11 +80,20 @@ msgstr ".. (Parent Folder)"
 msgid "1 / 1"
 msgstr "1 / 1"
 
+msgid "1 hour"
+msgstr "1 hour"
+
 msgid "1 patch"
 msgstr "1 patch"
 
 msgid "1 plugin"
 msgstr "1 plugin"
+
+msgid "1 update available"
+msgstr "1 update available"
+
+msgid "4 hours"
+msgstr "4 hours"
 
 msgid "< Back"
 msgstr "< Back"
@@ -431,6 +446,9 @@ msgstr "Created '%s'"
 msgid "Custom folder"
 msgstr "Custom folder"
 
+msgid "Daily"
+msgstr "Daily"
+
 msgid "Default"
 msgstr "Default"
 
@@ -496,6 +514,9 @@ msgstr "Disable plugin"
 
 msgid "Disabled"
 msgstr "Disabled"
+
+msgid "Dismiss"
+msgstr "Dismiss"
 
 msgid "Display Options"
 msgstr "Display Options"
@@ -580,6 +601,18 @@ msgstr "Enter item number"
 
 msgid "Enter plugin number"
 msgstr "Enter plugin number"
+
+msgid "Every day"
+msgstr "Every day"
+
+msgid "Every hour"
+msgstr "Every hour"
+
+msgid "Every month"
+msgstr "Every month"
+
+msgid "Every week"
+msgstr "Every week"
 
 msgid "Failed to check %s: %s"
 msgstr "Failed to check %s: %s"
@@ -731,6 +764,9 @@ msgstr "Fonts"
 msgid "Free up storage space on your device. Cached items are re-downloaded automatically when needed."
 msgstr "Free up storage space on your device. Cached items are re-downloaded automatically when needed."
 
+msgid "Frequency"
+msgstr "Frequency"
+
 msgid "GitHub API rate limit exceeded. Add a GitHub token in Storefront settings to increase the limit (10→30 req/min)."
 msgstr "GitHub API rate limit exceeded. Add a GitHub token in Storefront settings to increase the limit (10→30 req/min)."
 
@@ -757,6 +793,9 @@ msgstr "Go to page"
 
 msgid "HTTP error"
 msgstr "HTTP error"
+
+msgid "Hourly"
+msgstr "Hourly"
 
 msgid "Ignore"
 msgstr "Ignore"
@@ -871,6 +910,12 @@ msgstr "Last Updated (Oldest)"
 
 msgid "Last check: %s"
 msgstr "Last check: %s"
+
+msgid "Last checked: %s"
+msgstr "Last checked: %s"
+
+msgid "Later"
+msgstr "Later"
 
 msgid "Latest Release"
 msgstr "Latest Release"
@@ -1015,6 +1060,9 @@ msgstr "Modify Plugin"
 
 msgid "Modify Plugin: %s"
 msgstr "Modify Plugin: %s"
+
+msgid "Monthly"
+msgstr "Monthly"
 
 msgid "Most Downloaded"
 msgstr "Most Downloaded"
@@ -1178,6 +1226,15 @@ msgstr "Not matched with a repository."
 msgid "Not set"
 msgstr "Not set"
 
+msgid "Notification Settings"
+msgstr "Notification Settings"
+
+msgid "Notification settings"
+msgstr "Notification settings"
+
+msgid "Notifications"
+msgstr "Notifications"
+
 msgid "OK"
 msgstr "OK"
 
@@ -1186,6 +1243,9 @@ msgstr "Offline Regular"
 
 msgid "Open"
 msgstr "Open"
+
+msgid "Open Storefront"
+msgstr "Open Storefront"
 
 msgid "Open Wallpaper Collection Gallery"
 msgstr "Open Wallpaper Collection Gallery"
@@ -1313,6 +1373,9 @@ msgstr "Pre-installed core KOReader plugin."
 msgid "Prev"
 msgstr "Prev"
 
+msgid "Preview Notification Now"
+msgstr "Preview Notification Now"
+
 msgid "Published: %s"
 msgstr "Published: %s"
 
@@ -1336,6 +1399,9 @@ msgstr "Reading Progress"
 
 msgid "Reading Progress / Summary"
 msgstr "Reading Progress / Summary"
+
+msgid "Recently"
+msgstr "Recently"
 
 msgid "Recently Added"
 msgstr "Recently Added"
@@ -1378,6 +1444,18 @@ msgstr "Releases"
 
 msgid "Releases — %s"
 msgstr "Releases — %s"
+
+msgid "Remind Me Later"
+msgstr "Remind Me Later"
+
+msgid "Remind me in 1 hour."
+msgstr "Remind me in 1 hour."
+
+msgid "Remind me in 4 hours."
+msgstr "Remind me in 4 hours."
+
+msgid "Remind me tomorrow."
+msgstr "Remind me tomorrow."
 
 msgid "Remote SHA: %s"
 msgstr "Remote SHA: %s"
@@ -1592,6 +1670,9 @@ msgstr "Single"
 msgid "Single Wallpaper"
 msgstr "Single Wallpaper"
 
+msgid "Snooze Options"
+msgstr "Snooze Options"
+
 msgid "Solid fill for screen margins & letterboxing"
 msgstr "Solid fill for screen margins & letterboxing"
 
@@ -1697,6 +1778,9 @@ msgstr "Switch to plugin list"
 msgid "Tag not found on GitHub (%s or %s)."
 msgstr "Tag not found on GitHub (%s or %s)."
 
+msgid "Testing & Preview"
+msgstr "Testing & Preview"
+
 msgid "Text editor plugin is not available."
 msgstr "Text editor plugin is not available."
 
@@ -1724,6 +1808,12 @@ msgstr "This will delete cached wiki articles and downloaded images (%s)."
 msgid "This will take effect on next restart."
 msgstr "This will take effect on next restart."
 
+msgid "Today %s"
+msgstr "Today %s"
+
+msgid "Tomorrow"
+msgstr "Tomorrow"
+
 msgid "Total commits: %d"
 msgstr "Total commits: %d"
 
@@ -1738,6 +1828,9 @@ msgstr "Tracking branch: %s (%s)"
 
 msgid "Transparent overlay (page content visible behind)"
 msgstr "Transparent overlay (page content visible behind)"
+
+msgid "Trigger on every startup (testing)"
+msgstr "Trigger on every startup (testing)"
 
 msgid "Type"
 msgstr "Type"
@@ -1766,6 +1859,9 @@ msgstr "Unknown"
 msgid "Unknown error"
 msgstr "Unknown error"
 
+msgid "Unknown item"
+msgstr "Unknown item"
+
 msgid "Unlink the repo"
 msgstr "Unlink the repo"
 
@@ -1787,6 +1883,9 @@ msgstr "Update %s?"
 msgid "Update All"
 msgstr "Update All"
 
+msgid "Update Available"
+msgstr "Update Available"
+
 msgid "Update available for %s (%s): %s → %s."
 msgstr "Update available for %s (%s): %s → %s."
 
@@ -1798,6 +1897,9 @@ msgstr "Update channel"
 
 msgid "Update check was cancelled."
 msgstr "Update check was cancelled."
+
+msgid "Update notifications"
+msgstr "Update notifications"
 
 msgid "Update patch"
 msgstr "Update patch"
@@ -1825,6 +1927,9 @@ msgstr "Updated: %s"
 
 msgid "Updates"
 msgstr "Updates"
+
+msgid "Updates Available"
+msgstr "Updates Available"
 
 msgid "Updates Ignored"
 msgstr "Updates Ignored"
@@ -1873,6 +1978,12 @@ msgstr "Wallpaper set as active screensaver!"
 
 msgid "Warning: the selected version is older than what is currently installed. You are downgrading."
 msgstr "Warning: the selected version is older than what is currently installed. You are downgrading."
+
+msgid "Weekly"
+msgstr "Weekly"
+
+msgid "When tapping 'Remind Me Later' on an update notification, you can choose:"
+msgstr "When tapping 'Remind Me Later' on an update notification, you can choose:"
 
 msgid "White Fill"
 msgstr "White Fill"
