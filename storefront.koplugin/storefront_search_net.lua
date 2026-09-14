@@ -315,7 +315,36 @@ function SearchNet:init(Storefront)
                     local p_count = Cache.countRepos("plugin")
                     local pt_count = Cache.countRepos("patch")
                     local f_count = Cache.countRepos("font")
-                    local summary = string.format(_("Catalog updated: %d plugins, %d patches, %d fonts."), p_count, pt_count, f_count)
+
+                    -- Fetch and cache screensavers feed
+                    local s_count = 0
+                    local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+                    if ok_ss and StorefrontScreensavers and StorefrontScreensavers.fetchCatalog then
+                        pcall(function()
+                            StorefrontScreensavers.fetchCatalog(function(s_ok, s_catalog)
+                                if s_ok and type(s_catalog) == "table" then
+                                    s_count = #s_catalog
+                                    if sf then
+                                        sf.screensavers_cache = s_catalog
+                                    end
+                                end
+                            end)
+                        end)
+                    end
+                    if s_count == 0 and ok_ss and StorefrontScreensavers and StorefrontScreensavers.getCachedCatalog then
+                        local cat = StorefrontScreensavers.getCachedCatalog()
+                        if type(cat) == "table" then
+                            s_count = #cat
+                        end
+                    end
+
+                    local summary
+                    if s_count > 0 then
+                        summary = string.format(_("Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."), p_count, pt_count, f_count, s_count)
+                    else
+                        summary = string.format(_("Catalog updated: %d plugins, %d patches, %d fonts."), p_count, pt_count, f_count)
+                    end
+
                     StorefrontSettings:saveSetting("status_text", summary)
                     StorefrontSettings:flush()
                     finishRefresh(true, summary, nil)

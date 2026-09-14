@@ -7582,11 +7582,16 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
 
     -- Fetch catalog (cached after first call)
     if not self.screensavers_cache then
-        pcall(function()
-            StorefrontScreensavers.fetchCatalog(function(ok, catalog)
-                self.screensavers_cache = catalog
+        local local_mem = StorefrontScreensavers.getCachedCatalog and StorefrontScreensavers.getCachedCatalog()
+        if local_mem and #local_mem > 0 then
+            self.screensavers_cache = local_mem
+        else
+            pcall(function()
+                StorefrontScreensavers.fetchCatalog(function(ok, catalog)
+                    self.screensavers_cache = catalog
+                end)
             end)
-        end)
+        end
     end
     local catalog = self.screensavers_cache or {}
 

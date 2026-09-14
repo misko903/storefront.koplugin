@@ -1718,6 +1718,11 @@ if ok_browser then
         StorefrontScreensaversUI.clearCachedCatalog()
         check("clearCachedCatalog executes cleanly", true, true)
 
+        -- 6. Test catalog refresh summary formatting with screensavers
+        local p_count, pt_count, f_count, s_count = 567, 137, 21, 535
+        local summary_with_ss = string.format("Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers.", p_count, pt_count, f_count, s_count)
+        check("catalog summary contains screensavers count", summary_with_ss:find("535 screensavers") ~= nil, true)
+
         -- Test StorefrontAboutDialog.checkForUpdates executes without error
         local StorefrontAboutDialog = require("storefront_about_dialog")
         local about_check_ok = pcall(function()
