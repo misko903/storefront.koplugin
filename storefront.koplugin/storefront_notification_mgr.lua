@@ -30,7 +30,7 @@ local FREQUENCY_SECONDS = {
     monthly = 2592000, -- 30 days
 }
 
-local DEFAULT_FREQUENCY = "daily"
+local DEFAULT_FREQUENCY = "weekly"
 
 local settings_instance = nil
 local function getSettings()

@@ -576,7 +576,7 @@ function StorefrontSettingsCard.show(Storefront)
             weekly = _("Weekly"),
             monthly = _("Monthly"),
         }
-        local current_freq_label = (freq_labels[NotificationMgr.getFrequency()] or _("Daily")) .. " ›"
+        local current_freq_label = (freq_labels[NotificationMgr.getFrequency()] or _("Weekly")) .. " ›"
         local freq_widget = TextWidget:new{
             text = current_freq_label,
             face = Font:getFace("cfont", subtext_font_size),

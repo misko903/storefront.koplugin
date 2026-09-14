@@ -37,6 +37,7 @@ end
 
 -- 2. Test NotificationMgr frequencies
 do
+    check("NotificationMgr.getFrequency() defaults to weekly", NotificationMgr.getFrequency() == "weekly")
     check("NotificationMgr.getFrequencySeconds('hourly') == 3600", NotificationMgr.getFrequencySeconds("hourly") == 3600)
     check("NotificationMgr.getFrequencySeconds('daily') == 86400", NotificationMgr.getFrequencySeconds("daily") == 86400)
     check("NotificationMgr.getFrequencySeconds('weekly') == 604800", NotificationMgr.getFrequencySeconds("weekly") == 604800)
@@ -46,8 +47,8 @@ do
     check("NotificationMgr.setFrequency('hourly') sets frequency", NotificationMgr.getFrequency() == "hourly")
     check("NotificationMgr.getFrequencySeconds() reflects hourly", NotificationMgr.getFrequencySeconds() == 3600)
 
-    NotificationMgr.setFrequency("weekly")
-    check("NotificationMgr.setFrequency('weekly') sets frequency", NotificationMgr.getFrequency() == "weekly")
+    NotificationMgr.setFrequency("daily")
+    check("NotificationMgr.setFrequency('daily') sets frequency", NotificationMgr.getFrequency() == "daily")
 
     NotificationMgr.setFrequency("monthly")
     check("NotificationMgr.setFrequency('monthly') sets frequency", NotificationMgr.getFrequency() == "monthly")
@@ -55,8 +56,8 @@ do
     NotificationMgr.setFrequency("invalid_freq")
     check("NotificationMgr.setFrequency rejects invalid value", NotificationMgr.getFrequency() == "monthly")
 
-    NotificationMgr.setFrequency("daily")
-    check("NotificationMgr.setFrequency('daily') restores to daily", NotificationMgr.getFrequency() == "daily")
+    NotificationMgr.setFrequency("weekly")
+    check("NotificationMgr.setFrequency('weekly') restores to weekly", NotificationMgr.getFrequency() == "weekly")
 end
 
 -- 3. Test markChecked and last_checked tracking
