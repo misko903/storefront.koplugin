@@ -269,7 +269,7 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
 
     local ui_font_size = storefront_theme.face_label_size or 16
     local subtext_font_size = storefront_theme.subtext_font_size or 14
-    local title_font_size = 18
+    local title_font_size = 22
 
     local overlay
     local function closeNotification()
@@ -285,27 +285,27 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
         align = "left",
     }
 
-    -- 1. Header with Bell icon and Dynamic Title (Singular vs Plural)
-    local bell_icon = ImageWidget:new{
-        file = getAssetPath("bell.svg"),
-        width = sc(22),
-        height = sc(22),
+    -- 1. Header with Storefront lightning bolt icon and Dynamic Title (Singular vs Plural)
+    local zap_icon = ImageWidget:new{
+        file = getAssetPath("zap.svg"),
+        width = sc(24),
+        height = sc(24),
         scale_factor = 0,
         is_icon = true,
         alpha = true,
     }
 
-    local title_text = (#updates == 1) and _("Update Available") or _("Updates Available")
+    local title_text = _("Storefront")
     local title_label = TextWidget:new{
         text = title_text,
-        face = Font:getFace("cfont", title_font_size),
+        face = Font:getFace("NotoSerif-Regular.ttf", title_font_size) or Font:getFace("cfont", title_font_size),
         bold = true,
         fgcolor = Blitbuffer.COLOR_BLACK,
     }
 
     local header_row = HorizontalGroup:new{
         align = "center",
-        bell_icon,
+        zap_icon,
         HorizontalSpan:new{ width = sc(10) },
         title_label,
     }
@@ -442,7 +442,7 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
         background = Blitbuffer.COLOR_BLACK,
     })
 
-    -- 4. Three Action Buttons side by side: [ Open Storefront ] [ Later ] [ Dismiss ]
+    -- 4. Three Action Buttons side by side: [ View Updates ] [ Later ] [ Dismiss ]
     local btn_spacing = sc(8)
     local avail_btn_w = dialog_w - (pad_h * 2) - (btn_spacing * 2) - sc(4)
     local open_btn_w = math.floor(avail_btn_w * 0.45)
@@ -450,7 +450,7 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
     local btn_h = sc(36)
 
     local open_btn = StorefrontUtils.createButton{
-        text = _("Open Storefront"),
+        text = _("View Updates"),
         text_font_size = subtext_font_size,
         bold = true,
         width = open_btn_w,
@@ -461,17 +461,21 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
         callback = function()
             closeNotification()
             -- Deep link directly to Updates tab
-            if Storefront then
-                if Storefront.ensureBrowserState then Storefront:ensureBrowserState() end
-                if Storefront.browser_state then
-                    Storefront.browser_state.tab = "Updates"
-                    Storefront.browser_state.kind = "plugin"
-                    Storefront.browser_state.page = 1
-                    Storefront.browser_state.scroll_offset = nil
-                    if Storefront.saveBrowserState then Storefront:saveBrowserState(true) end
+            local sf = (Storefront and Storefront.instance) or Storefront
+            if sf then
+                if sf.ensureBrowserState then sf:ensureBrowserState() end
+                if sf.browser_state then
+                    sf.browser_state.tab = "Updates"
+                    sf.browser_state.kind = "plugin"
+                    sf.browser_state.page = 1
+                    sf.browser_state.scroll_offset = nil
+                    if sf.saveBrowserState then sf:saveBrowserState(true) end
                 end
-                if Storefront.showBrowser then
-                    Storefront:showBrowser()
+                sf._merged_updates_cache = nil
+                sf._cached_plugin_summary = nil
+                sf._cached_patch_summary = nil
+                if sf.showBrowser then
+                    sf:showBrowser()
                 end
             end
         end,

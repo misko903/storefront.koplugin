@@ -400,7 +400,7 @@ function UpdatesMgr:init(Storefront)
         local updates = sf:collectUpdatesForNotification()
         if (not updates or #updates == 0) and NotificationMgr.isDebugAlwaysTrigger() then
             updates = {
-                { name = "Libbee", version = "v26.9.13-beta", kind = "plugin" },
+                { name = "Libbee (Test)", version = "v26.9.13-beta", kind = "plugin" },
             }
         end
         NotificationMgr.markChecked()

@@ -272,6 +272,49 @@ function StorefrontUpdatesUi:init(StorefrontClass)
             return aname < bname
         end)
 
+        if #merged == 0 then
+            local ok_nm, NotificationMgr = pcall(require, "storefront_notification_mgr")
+            if ok_nm and NotificationMgr and NotificationMgr.isDebugAlwaysTrigger and NotificationMgr.isDebugAlwaysTrigger() then
+                table.insert(merged, {
+                    name = "Libbee (Test)",
+                    owner = "dvdkhvr",
+                    stars_fmt = "plugin",
+                    updated = "",
+                    kind_label = _("Plugin"),
+                    description = _("Mock test update shown because 'Test Notification on Launch' is enabled in Notification Settings."),
+                    badge = _("Update"),
+                    is_entry = true,
+                    keep_menu_open = true,
+                    is_update_item = true,
+                    version_transition = "v26.9.12 → v26.9.13-beta",
+                    callback = function()
+                        local DetailsDialog = require("storefront_details_dialog")
+                        local cached_repo = (Cache and Cache.getRepoByName and Cache.getRepoByName("dvdkhvr", "libbee.koplugin")) or {
+                            name = "libbee",
+                            owner = "dvdkhvr",
+                            full_name = "dvdkhvr/libbee.koplugin",
+                            description = "Libbee library manager",
+                            stars = 0,
+                            data = {
+                                owner = { login = "dvdkhvr" },
+                                default_branch = "main",
+                                stargazers_count = 0,
+                            }
+                        }
+                        local details_dialog = DetailsDialog:new{
+                            Storefront = self,
+                            repo = cached_repo,
+                            kind = "update",
+                            update_item = { plugin = { name = "Libbee", dirname = "libbee.koplugin" }, needs_update = true },
+                            default_tab = "release_notes",
+                            from_updates_tab = true,
+                        }
+                        details_dialog:show()
+                    end,
+                })
+            end
+        end
+
         self._merged_updates_cache = {
             key = cache_key,
             merged = merged,
