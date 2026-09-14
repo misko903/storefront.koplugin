@@ -18,6 +18,7 @@ end
 
 print("=== Running Storefront Notification Manager & UI Regression Tests ===")
 
+local Blitbuffer = require("ffi/blitbuffer")
 local NotificationMgr = require("storefront_notification_mgr")
 local NotificationUI = require("storefront_notification_ui")
 local NotificationSettingsDialog = require("storefront_notification_settings_dialog")
@@ -215,6 +216,7 @@ do
     local dismiss_btn = overlay.layout[1][3]
 
     check("Open button exists with callback", open_btn and type(open_btn.callback) == "function")
+    check("Open button is styled black with white text", open_btn and open_btn.background == Blitbuffer.COLOR_BLACK and open_btn.text_font_color == Blitbuffer.COLOR_WHITE)
     check("Later button exists with callback", later_btn and type(later_btn.callback) == "function")
     check("Dismiss button exists with callback", dismiss_btn and type(dismiss_btn.callback) == "function")
 

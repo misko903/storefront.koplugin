@@ -455,8 +455,8 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
         bold = true,
         width = open_btn_w,
         height = btn_h,
-        background = Blitbuffer.COLOR_WHITE,
-        text_font_color = Blitbuffer.COLOR_BLACK,
+        background = Blitbuffer.COLOR_BLACK,
+        text_font_color = Blitbuffer.COLOR_WHITE,
         bordersize = sc(1),
         callback = function()
             closeNotification()
