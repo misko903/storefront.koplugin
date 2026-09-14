@@ -1690,6 +1690,34 @@ if ok_browser then
         StorefrontScreensaverMgr.listLocalScreensavers = orig_list_ss
         MainStorefront.installed_state.filter_type = "all"
 
+        -- 4. Test StorefrontScreensavers catalog normalization & cache clearing
+        local StorefrontScreensaversUI = require("storefront_screensavers_ui")
+        local test_item_1 = {
+            id = "nordic-cabin-sunset",
+            ext = "png",
+            title = "Nordic Cabin Sunset",
+        }
+        StorefrontScreensaversUI.normalizeItem(test_item_1)
+        check("normalizeItem derives fullUrl from id and ext", test_item_1.fullUrl, "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/images/nordic-cabin-sunset.png")
+        check("normalizeItem derives thumbnailUrl", test_item_1.thumbnailUrl, "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/images/thumbnails/nordic-cabin-sunset.png")
+        check("normalizeItem derives pluginThumbnailUrl", test_item_1.pluginThumbnailUrl, "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/images/thumbnails/plugin/nordic-cabin-sunset.png")
+
+        local test_item_2 = {
+            id = "misty-mountains",
+            title = "Misty Mountains",
+        }
+        StorefrontScreensaversUI.normalizeItem(test_item_2)
+        check("normalizeItem defaults ext to jpg", test_item_2.fullUrl, "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/images/misty-mountains.jpg")
+
+        -- 5. Test screensavers cache invalidation in MainStorefront
+        MainStorefront.screensavers_cache = { { id = "dummy" } }
+        MainStorefront:softRefreshCurrentBrowserView()
+        check("softRefreshCurrentBrowserView clears screensavers_cache", MainStorefront.screensavers_cache == nil, true)
+
+        MainStorefront.screensavers_cache = { { id = "dummy2" } }
+        StorefrontScreensaversUI.clearCachedCatalog()
+        check("clearCachedCatalog executes cleanly", true, true)
+
         -- Test StorefrontAboutDialog.checkForUpdates executes without error
         local StorefrontAboutDialog = require("storefront_about_dialog")
         local about_check_ok = pcall(function()

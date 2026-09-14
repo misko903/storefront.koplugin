@@ -7,7 +7,45 @@ local _ = function(key, ...) return Localization:t(key, ...) end
 
 local StorefrontScreensavers = {}
 
-local DEFAULT_SCREENSAVER_CATALOG_URL = "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/screensavers.json"
+local DEFAULT_SCREENSAVER_CATALOG_URL = "https://ultimatejimmy.github.io/storefront-screensavers/screensavers.lite.json"
+
+local CATALOG_URL_CANDIDATES = {
+    "https://ultimatejimmy.github.io/storefront-screensavers/screensavers.lite.json",
+    "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/screensavers.lite.json",
+    "https://ultimatejimmy.github.io/storefront-screensavers/screensavers.json",
+    "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/screensavers.json",
+}
+
+local BASE_IMAGE_URL = "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/images"
+
+function StorefrontScreensavers.normalizeItem(item)
+    if not item or type(item) ~= "table" then return item end
+    if not item.id then return item end
+    local ext = item.ext
+    if not ext or ext == "" then
+        if item.fullUrl and tostring(item.fullUrl):lower():find("%.png") then
+            ext = "png"
+        else
+            local cat_str = type(item.category) == "table" and table.concat(item.category, " ") or tostring(item.category or "")
+            if cat_str:lower():find("transparent", 1, true) then
+                ext = "png"
+            else
+                ext = "jpg"
+            end
+        end
+    end
+    item.ext = ext
+    if not item.fullUrl or item.fullUrl == "" then
+        item.fullUrl = string.format("%s/%s.%s", BASE_IMAGE_URL, tostring(item.id), ext)
+    end
+    if not item.thumbnailUrl or item.thumbnailUrl == "" then
+        item.thumbnailUrl = string.format("%s/thumbnails/%s.%s", BASE_IMAGE_URL, tostring(item.id), ext)
+    end
+    if not item.pluginThumbnailUrl or item.pluginThumbnailUrl == "" then
+        item.pluginThumbnailUrl = string.format("%s/thumbnails/plugin/%s.%s", BASE_IMAGE_URL, tostring(item.id), ext)
+    end
+    return item
+end
 
 local function getHttpModule(url)
     if url and url:match("^https://") then
@@ -18,6 +56,7 @@ local function getHttpModule(url)
 end
 
 local function requestWithRedirects(target_url, sink_fn)
+    local ok_su, socketutil = pcall(require, "socketutil")
     local ltn12 = require("ltn12")
     local current_url = target_url
     local max_redirects = 5
@@ -27,7 +66,8 @@ local function requestWithRedirects(target_url, sink_fn)
         local is_https = current_url:match("^https://") ~= nil
         local http_req = getHttpModule(current_url)
         local headers = {
-            ["User-Agent"] = "KOReader-Storefront",
+            ["User-Agent"] = (ok_su and socketutil and socketutil.USER_AGENT) or "Mozilla/5.0 (compatible; KOReader-Storefront/1.0)",
+            ["Accept"] = "application/json",
         }
 
         local sink = sink_fn()
@@ -41,10 +81,18 @@ local function requestWithRedirects(target_url, sink_fn)
         }
         if not is_https then params.redirect = true end
 
+        if ok_su and socketutil and socketutil.set_timeout then
+            socketutil:set_timeout(socketutil.FILE_BLOCK_TIMEOUT or 15, socketutil.FILE_TOTAL_TIMEOUT or 180)
+        end
+
         local ok_req, res_code, response_headers = pcall(function()
             local _, c, h = http_req.request(params)
             return c, h
         end)
+
+        if ok_su and socketutil and socketutil.reset_timeout then
+            socketutil:reset_timeout()
+        end
 
         local code = tonumber(res_code) or 0
         if ok_req and code == 200 then
@@ -66,6 +114,15 @@ end
 
 local cached_catalog_mem = nil
 
+function StorefrontScreensavers.clearCachedCatalog()
+    cached_catalog_mem = nil
+    local ok_ds, DataStorage = pcall(require, "datastorage")
+    if ok_ds and DataStorage and DataStorage.getDataDir then
+        local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
+        pcall(os.remove, cat_file)
+    end
+end
+
 function StorefrontScreensavers.getCachedCatalog()
     if cached_catalog_mem and type(cached_catalog_mem) == "table" and #cached_catalog_mem > 0 then
         return cached_catalog_mem
@@ -83,6 +140,9 @@ function StorefrontScreensavers.getCachedCatalog()
                 if content and content ~= "" then
                     local ok_j, parsed = pcall(json.decode, content)
                     if ok_j and type(parsed) == "table" then
+                        for _, item in ipairs(parsed) do
+                            StorefrontScreensavers.normalizeItem(item)
+                        end
                         cached_catalog_mem = parsed
                         return parsed
                     end
@@ -95,37 +155,44 @@ end
 
 function StorefrontScreensavers.fetchCatalog(callback)
     local ltn12 = require("ltn12")
-    local response_body = {}
-    local sink_fn = function()
-        response_body = {}
-        return ltn12.sink.table(response_body)
-    end
+    local urls_to_try = CATALOG_URL_CANDIDATES
 
-    local ok, code = requestWithRedirects(DEFAULT_SCREENSAVER_CATALOG_URL, sink_fn)
-    if ok and code == 200 then
-        local body_str = table.concat(response_body)
-        local parsed_ok, data = pcall(json.decode, body_str)
-        if parsed_ok and type(data) == "table" then
-            cached_catalog_mem = data
-            pcall(function()
-                local ok_ds, DataStorage = pcall(require, "datastorage")
-                if ok_ds and DataStorage and DataStorage.getDataDir then
-                    local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
-                    local f = io.open(cat_file, "w")
-                    if f then
-                        f:write(body_str)
-                        f:close()
-                    end
+    for _, target_url in ipairs(urls_to_try) do
+        local response_body = {}
+        local sink_fn = function()
+            response_body = {}
+            return ltn12.sink.table(response_body)
+        end
+
+        local ok, code = requestWithRedirects(target_url, sink_fn)
+        if ok and code == 200 then
+            local body_str = table.concat(response_body)
+            local parsed_ok, data = pcall(json.decode, body_str)
+            if parsed_ok and type(data) == "table" and #data > 0 then
+                for _, item in ipairs(data) do
+                    StorefrontScreensavers.normalizeItem(item)
                 end
-            end)
-            callback(true, data)
-            return
+                cached_catalog_mem = data
+                pcall(function()
+                    local ok_ds, DataStorage = pcall(require, "datastorage")
+                    if ok_ds and DataStorage and DataStorage.getDataDir then
+                        local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
+                        local f = io.open(cat_file, "w")
+                        if f then
+                            f:write(body_str)
+                            f:close()
+                        end
+                    end
+                end)
+                if callback then callback(true, data) end
+                return
+            end
         end
     end
 
     local local_cached = StorefrontScreensavers.getCachedCatalog()
     if local_cached then
-        callback(true, local_cached)
+        if callback then callback(true, local_cached) end
         return
     end
 
@@ -153,7 +220,10 @@ function StorefrontScreensavers.fetchCatalog(callback)
             fullUrl = "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/images/cosmic-nebula-monochrome.jpg",
         },
     }
-    callback(false, fallback)
+    for _, item in ipairs(fallback) do
+        StorefrontScreensavers.normalizeItem(item)
+    end
+    if callback then callback(false, fallback) end
 end
 
 function StorefrontScreensavers.fetchThumbnail(item, callback)
@@ -473,6 +543,7 @@ function StorefrontScreensavers.getThumbnailsCacheStats()
 end
 
 function StorefrontScreensavers.clearThumbnailsCache()
+    StorefrontScreensavers.clearCachedCatalog()
     local cache_dir = DataStorage:getDataDir() .. "/cache/storefront_thumbs"
     local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
     if not ok_lfs or not lfs then ok_lfs, lfs = pcall(require, "lfs") end

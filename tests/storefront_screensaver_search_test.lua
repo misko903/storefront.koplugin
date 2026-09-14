@@ -183,6 +183,7 @@ package.loaded["dispatcher"] = {
         registered_actions[id] = action
     end,
 }
+package.loaded["luasettings"] = dummy_widget
 _G.G_defaults = {}
 _G.G_reader_settings = dummy_widget
 

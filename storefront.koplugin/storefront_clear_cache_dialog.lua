@@ -312,6 +312,12 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                         local r1 = RepoContent.clearReadmeCache()
                         local r2 = RepoContent.clearWikiCache()
                         local r3 = StorefrontScreensavers.clearThumbnailsCache()
+                        if StorefrontScreensavers.clearCachedCatalog then
+                            StorefrontScreensavers.clearCachedCatalog()
+                        end
+                        if Storefront then
+                            Storefront.screensavers_cache = nil
+                        end
                         local freed_bytes = (r1.bytes or 0) + (r2.bytes or 0) + (r3.bytes or 0)
                         local freed_files = (r1.removed or 0) + (r2.removed or 0) + (r3.removed or 0)
                         refresh()
@@ -376,6 +382,12 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                     _("Clear"),
                     function()
                         local res = StorefrontScreensavers.clearThumbnailsCache()
+                        if StorefrontScreensavers.clearCachedCatalog then
+                            StorefrontScreensavers.clearCachedCatalog()
+                        end
+                        if Storefront then
+                            Storefront.screensavers_cache = nil
+                        end
                         refresh()
                         StorefrontToast.show(string.format(_("Cleared screensaver thumbnails (%s freed)."), formatSize(res.bytes or 0)), 3)
                     end

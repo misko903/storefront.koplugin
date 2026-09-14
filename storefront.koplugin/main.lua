@@ -8482,8 +8482,19 @@ function Storefront:browserRefresh()
         return
     end
     local kind = self.browser_state.kind or "plugin"
+    if self.browser_state.tab == "Screensavers" then
+        kind = "screensaver"
+    end
     self:resetBrowserScrollState()
     self:resetFiltersForRefresh()
+    pcall(function()
+        local StorefrontScreensavers = require("storefront_screensavers_ui")
+        if StorefrontScreensavers and StorefrontScreensavers.clearCachedCatalog then
+            StorefrontScreensavers.clearCachedCatalog()
+        end
+    end)
+    self.screensavers_cache = nil
+    self._filtered_screensavers_cache = nil
     NetworkMgr:runWhenOnline(function()
         self:refreshCache(kind, function(ok)
             self:softRefreshCurrentBrowserView()
@@ -8540,6 +8551,7 @@ function Storefront:softRefreshCurrentBrowserView()
     self._repo_descriptors_cache = nil
     self._filtered_descriptors_cache = nil
     self._filtered_screensavers_cache = nil
+    self.screensavers_cache = nil
     self._cached_updates_count = nil
     self._cached_updates_gen = nil
     self._tab_menu_items_cache = nil
