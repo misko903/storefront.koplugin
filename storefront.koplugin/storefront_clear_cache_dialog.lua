@@ -67,7 +67,7 @@ end
 function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
     local sw = Device.screen:getWidth()
     local sh = Device.screen:getHeight()
-    local dialog_w = math.min(sw - sc(20), sc(400))
+    local dialog_w = math.min(sw - sc(20), sc(460))
 
     local ui_font_size = storefront_theme.face_label_size or 18
     local subtext_font_size = storefront_theme.subtext_font_size or 16
@@ -165,17 +165,40 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
             local has_items = stats and (stats.files > 0 or stats.bytes > 0)
             local sub_str = formatStats(stats)
 
-            local title_w = TextWidget:new{
+            local action_btn_w = is_accent and sc(116) or sc(92)
+            local action_btn_h = sc(32)
+            local avail_w = dialog_w - sc(24)
+            local max_left_w = avail_w - action_btn_w - sc(12)
+
+            local row_bg = is_accent and Blitbuffer.Color8(240) or Blitbuffer.COLOR_WHITE
+            local test_face = Font:getFace("cfont", is_accent and (ui_font_size + 1) or ui_font_size)
+            local title_w
+            local test_tw = TextWidget:new{
                 text = title_str,
-                face = Font:getFace("cfont", is_accent and (ui_font_size + 1) or ui_font_size),
+                face = test_face,
                 bold = is_accent,
                 fgcolor = Blitbuffer.COLOR_BLACK,
             }
+            if test_tw:getSize().w <= max_left_w then
+                title_w = test_tw
+            else
+                test_tw:free()
+                title_w = TextBoxWidget:new{
+                    text = title_str,
+                    face = test_face,
+                    bold = is_accent,
+                    fgcolor = Blitbuffer.COLOR_BLACK,
+                    bgcolor = row_bg,
+                    width = max_left_w,
+                    alignment = "left",
+                }
+            end
 
             local sub_w = TextWidget:new{
                 text = sub_str,
                 face = Font:getFace("cfont", subtext_font_size),
                 fgcolor = storefront_theme.color_label_dim,
+                max_width = max_left_w,
             }
 
             local left_vg = VerticalGroup:new{
@@ -184,9 +207,6 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                 VerticalSpan:new{ width = sc(3) },
                 sub_w,
             }
-
-            local action_btn_w = sc(92)
-            local action_btn_h = sc(32)
 
             local right_action
             if not has_items then
@@ -203,6 +223,7 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                 right_action = StorefrontUtils.createButton{
                     text = is_accent and _("Clear All") or _("Clear"),
                     text_font_size = 14,
+                    min_font_size = 9,
                     bold = true,
                     bordersize = storefront_theme.border_btn or sc(1),
                     radius = storefront_theme.radius_btn or sc(4),
@@ -217,7 +238,6 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
             end
 
             local row_h = math.max(left_vg:getSize().h, right_action:getSize().h)
-            local avail_w = dialog_w - sc(24)
 
             local row_overlap = OverlapGroup:new{
                 dimen = Geom:new{ w = avail_w, h = row_h },
@@ -236,7 +256,7 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                 padding_left = sc(10),
                 padding_right = sc(10),
                 bordersize = 0,
-                background = is_accent and Blitbuffer.Color8(240) or Blitbuffer.COLOR_WHITE,
+                background = row_bg,
                 width = dialog_w - sc(4),
                 row_overlap,
             }

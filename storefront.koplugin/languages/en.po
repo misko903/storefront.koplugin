@@ -263,6 +263,9 @@ msgstr "Catalog refresh is already in progress in the background."
 msgid "Catalog source"
 msgstr "Catalog source"
 
+msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
+msgstr "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
+
 msgid "Catalog updated: %d plugins, %d patches, %d fonts."
 msgstr "Catalog updated: %d plugins, %d patches, %d fonts."
 
@@ -1052,6 +1055,9 @@ msgstr "Missing repository metadata."
 msgid "Missing target path"
 msgstr "Missing target path"
 
+msgid "Mock test update shown because 'Test Notification on Launch' is enabled in Notification Settings."
+msgstr "Mock test update shown because 'Test Notification on Launch' is enabled in Notification Settings."
+
 msgid "Modify Patch"
 msgstr "Modify Patch"
 
@@ -1243,9 +1249,6 @@ msgstr "Offline Regular"
 
 msgid "Open"
 msgstr "Open"
-
-msgid "Open Storefront"
-msgstr "Open Storefront"
 
 msgid "Open Wallpaper Collection Gallery"
 msgstr "Open Wallpaper Collection Gallery"
@@ -1733,9 +1736,6 @@ msgstr "Status: Up to date"
 msgid "Status: Update available"
 msgstr "Status: Update available"
 
-msgid "Storefront"
-msgstr "Storefront"
-
 msgid "Storefront cache refreshed."
 msgstr "Storefront cache refreshed."
 
@@ -1883,9 +1883,6 @@ msgstr "Update %s?"
 msgid "Update All"
 msgstr "Update All"
 
-msgid "Update Available"
-msgstr "Update Available"
-
 msgid "Update available for %s (%s): %s → %s."
 msgstr "Update available for %s (%s): %s → %s."
 
@@ -1928,9 +1925,6 @@ msgstr "Updated: %s"
 msgid "Updates"
 msgstr "Updates"
 
-msgid "Updates Available"
-msgstr "Updates Available"
-
 msgid "Updates Ignored"
 msgstr "Updates Ignored"
 
@@ -1951,6 +1945,9 @@ msgstr "Versions"
 
 msgid "View README"
 msgstr "View README"
+
+msgid "View Updates"
+msgstr "View Updates"
 
 msgid "View commits (%s → %s)"
 msgstr "View commits (%s → %s)"

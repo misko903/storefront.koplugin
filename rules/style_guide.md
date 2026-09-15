@@ -131,12 +131,13 @@ In settings cards and list dialogs where rows have left labels and optional righ
 
 ## 3. Button Styles & Visual Hierarchy
 
-Dialog action buttons must follow a clear primary vs. secondary visual hierarchy. Use the unified `StorefrontUtils.createButton(opts)` helper to ensure perfect 4-sided high-contrast borders and touch event handling across all KOReader devices.
+Dialog action buttons must follow a clear primary vs. secondary visual hierarchy. Use the unified `StorefrontUtils.createButton(opts)` helper to ensure perfect 4-sided high-contrast borders, dynamic text scaling to fit translations without clipping, and touch event handling across all KOReader devices.
 
-### 3.1 Primary Action Buttons (Confirm / Delete / Apply / Update All / Restart now)
-- **Background**: `Blitbuffer.COLOR_BLACK`
-- **Text Color**: `Blitbuffer.COLOR_WHITE`
+### 3.1 Primary Action Buttons (Confirm / Delete / Apply / Update All / Restart now / Clear All)
+- **Visual Style**: High-contrast inverted button (black background with crisp white text in Light Mode, inverted cleanly in Night Mode).
+- **Inversion Mechanism**: `StorefrontUtils.createButton` uses KOReader's native `preselect = true` and `FrameContainer.invert = true` to guarantee proper color reversal for both `TextWidget` and `TextBoxWidget` across all display themes.
 - **Typography**: `Font:getFace("cfont", ui_font_size)`, `bold = true`
+- **Dynamic Text Scaling**: Localized button text MUST automatically scale down font size (via `createButton` `text_font_size` down to `min_font_size` or `calcDynamicFontSize`) to fit within button width on a single line.
 - **Border**: `bordersize = storefront_theme.border_btn or sc(1)`, `color = Blitbuffer.COLOR_BLACK`
 - **Radius**: `storefront_theme.radius_btn or sc(4)`
 
@@ -150,14 +151,14 @@ local primary_btn = StorefrontUtils.createButton{
     radius = storefront_theme.radius_btn or sc(4),
     width = btn_w,
     height = sc(38),
-    background = Blitbuffer.COLOR_BLACK,
-    text_font_color = Blitbuffer.COLOR_WHITE,
+    primary = true, -- Or background = Blitbuffer.COLOR_BLACK
+    min_font_size = 10,
     callback = on_apply,
 }
 ```
 
-### 3.2 Secondary Action Buttons (Cancel / Settings / Back / Close / Restart later)
-- **Background**: `Blitbuffer.COLOR_WHITE`
+### 3.2 Secondary Action Buttons (Cancel / Settings / Back / Close / Restart later / Clear)
+- **Background**: `Blitbuffer.COLOR_WHITE` (standard unselected)
 - **Text Color**: `Blitbuffer.COLOR_BLACK`
 - **Typography**: `Font:getFace("cfont", ui_font_size)`, `bold = true`
 - **Border**: `bordersize = storefront_theme.border_btn or sc(1)`, `color = Blitbuffer.COLOR_BLACK`
@@ -178,6 +179,10 @@ local cancel_btn = StorefrontUtils.createButton{
     callback = on_cancel,
 }
 ```
+
+### 3.3 Dynamic Text Scaling & Width Guidelines
+- Action buttons in list rows or dialogs must specify sufficient width (e.g., `sc(116)` for longer action strings like `_("Clear All")`) to prevent multi-line overflow.
+- All buttons with variable or translated text should allow font scaling down to 9–10pt to fit comfortably on one line without truncation or wrapping.
 
 ### 3.3 Multi-Button Action Rows
 When placing buttons side-by-side:

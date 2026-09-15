@@ -123,6 +123,15 @@ do
     }
     check("createButton without width assigns default horizontal padding", (btn_auto.padding_h or 0) > 0)
     check("createButton without width assigns default vertical padding", (btn_auto.padding_v or 0) > 0)
+
+    local btn_primary = StorefrontUtils.createButton{
+        text = "Wyczyść wszystko",
+        width = 116,
+        primary = true,
+        min_font_size = 9,
+    }
+    check("createButton primary sets preselect flag", btn_primary.preselect == true)
+    check("createButton scales long localized text down to fit width", (btn_primary.text_font_size or 18) <= 12)
 end
 
 -- 5. Test StorefrontClearCacheDialog button styling and layout

@@ -422,9 +422,10 @@ function storefront_utils.createButton(opts)
         pad_v = sc(6)
     end
 
+    local min_font_size = opts.min_font_size or 9
     if btn_w and opts.text and opts.text ~= "" then
         local max_text_w = math.max(10, btn_w - (pad_h and (2 * pad_h) or sc(16)))
-        for sz = initial_font_size, 10, -1 do
+        for sz = initial_font_size, min_font_size, -1 do
             local test_face = Font:getFace(face_name, sz)
             local tw = TextWidget:new{
                 text = opts.text,
@@ -453,21 +454,22 @@ function storefront_utils.createButton(opts)
         radius = radius,
         width = btn_w,
         height = btn_h,
+        preselect = (opts.preselect ~= nil) and opts.preselect or is_primary,
         show_parent = opts.show_parent,
         callback = opts.callback,
     }
 
     if is_primary then
-        btn_opts.background = Blitbuffer.COLOR_BLACK
-        btn_opts.text_font_color = Blitbuffer.COLOR_WHITE
+        btn_opts.background = nil
+        btn_opts.text_font_color = nil
     else
         btn_opts.background = nil
         btn_opts.text_font_color = opts.text_font_color or Blitbuffer.COLOR_BLACK
     end
 
     local btn = Button:new(btn_opts)
-    if is_primary and btn.label_widget then
-        btn.label_widget.fgcolor = Blitbuffer.COLOR_WHITE
+    if is_primary and btn.frame then
+        btn.frame.invert = true
     end
 
     return btn

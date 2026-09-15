@@ -217,7 +217,7 @@ do
 
     check("Open button exists with callback", open_btn and type(open_btn.callback) == "function")
     check("Open button text is 'View Updates'", open_btn and (open_btn.text == "View Updates" or open_btn.text == _("View Updates")))
-    check("Open button is styled black with white text", open_btn and open_btn.background == Blitbuffer.COLOR_BLACK and open_btn.text_font_color == Blitbuffer.COLOR_WHITE)
+    check("Open button is styled as primary inverted button", open_btn and open_btn.preselect == true)
     check("Later button exists with callback", later_btn and type(later_btn.callback) == "function")
     check("Dismiss button exists with callback", dismiss_btn and type(dismiss_btn.callback) == "function")
 

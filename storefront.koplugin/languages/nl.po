@@ -349,6 +349,10 @@ msgstr "Catalogus wordt op de achtergrond al vernieuwd."
 msgid "Catalog source"
 msgstr "Catalogusbron"
 
+# en-hash: 4249cd63253ab5d3dd2627b96ddeff03
+msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
+msgstr "Catalogus bijgewerkt: %d plugins, %d patches, %d lettertypen, %d screensavers."
+
 # en-hash: d9c3997833636a589e7e5194bdee5d13
 msgid "Catalog updated: %d plugins, %d patches, %d fonts."
 msgstr "Catalogus bijgewerkt: %d plugins, %d patches, %d lettertypen."
@@ -1401,6 +1405,10 @@ msgstr "Repository-metadata ontbreekt."
 msgid "Missing target path"
 msgstr "Doelpad ontbreekt"
 
+# en-hash: a4d135c373399ae6ff7b8601f670f299
+msgid "Mock test update shown because 'Test Notification on Launch' is enabled in Notification Settings."
+msgstr "Nepupdate weergegeven omdat 'Testmelding bij opstarten' is ingeschakeld in de meldingsinstellingen."
+
 # en-hash: 6043603aeda23c74e75b67ae9ced95ce
 msgid "Modify Patch"
 msgstr "Patch bewerken"
@@ -1657,10 +1665,6 @@ msgstr "Offline regulier"
 msgid "Open"
 msgstr "Openen"
 
-# en-hash: 4a31d8334b7e00e010c8b3ab58ed1b37
-msgid "Open Storefront"
-msgstr "Storefront openen"
-
 # en-hash: aaaca14de025427e39ed056b29af4058
 msgid "Open Wallpaper Collection Gallery"
 msgstr "Achtergrondgalerij openen"
@@ -1903,7 +1907,7 @@ msgstr "Herinstalleren"
 
 # en-hash: b8e7b465df7c5979dc731d06e84ce2cf
 msgid "Release"
-msgstr "Release"
+msgstr "Versie"
 
 # en-hash: 5dd03e8d039863e563e049be198c3fd3
 msgid "Release Notes"
@@ -1915,15 +1919,15 @@ msgstr "Release-notities voor %s"
 
 # en-hash: 33a351564f22fd647623cfb28f147bc6
 msgid "Release: %s"
-msgstr "Release: %s"
+msgstr "Versie: %s"
 
 # en-hash: d50ae403cb49a205bdf789f377f5cfe6
 msgid "Releases"
-msgstr "Releases"
+msgstr "Versies"
 
 # en-hash: 44398344dd02c7d56e1b9629ef8d724d
 msgid "Releases — %s"
-msgstr "Releases — %s"
+msgstr "Versies — %s"
 
 # en-hash: c5a2e8d484061abee1eb7c14a7ac7082
 msgid "Remind Me Later"
@@ -1943,7 +1947,7 @@ msgstr "Herinner mij morgen."
 
 # en-hash: ef9e8096713bc1df35e59a0eef226bc6
 msgid "Remote SHA: %s"
-msgstr "Remote SHA: %s"
+msgstr "Externe SHA: %s"
 
 # en-hash: 6a95db820d2b45a6d7ab155283c5b028
 msgid "Remote SHA: %s (checked %s)"
@@ -1963,7 +1967,7 @@ msgstr "Externe versie niet gevonden."
 
 # en-hash: c6b535676cfd2fe183aa6dded3c028e4
 msgid "Remote: %s"
-msgstr "Remote: %s"
+msgstr "Extern: %s"
 
 # en-hash: 97220aac05a7c16b7b17306c71151f98
 msgid "Remote: %s (checked %s)"
@@ -2309,10 +2313,6 @@ msgstr "Status: Up-to-date"
 msgid "Status: Update available"
 msgstr "Status: Update beschikbaar"
 
-# en-hash: f0dca7e4eaedf573d4664be249845942
-msgid "Storefront"
-msgstr "Storefront"
-
 # en-hash: 7ade5d484a71e39d2c37c5eb72d01b80
 msgid "Storefront cache refreshed."
 msgstr "Storefront-cache vernieuwd."
@@ -2509,10 +2509,6 @@ msgstr "%s bijwerken?"
 msgid "Update All"
 msgstr "Alles bijwerken"
 
-# en-hash: 8bd7695831e104e2669e086e03927a20
-msgid "Update Available"
-msgstr "Update beschikbaar"
-
 # en-hash: fe9d9f6d8401ec278f5716062385a9de
 msgid "Update available for %s (%s): %s → %s."
 msgstr "Update beschikbaar voor %s (%s): %s → %s."
@@ -2569,10 +2565,6 @@ msgstr "Bijgewerkt: %s"
 msgid "Updates"
 msgstr "Updates"
 
-# en-hash: 59ea61e4d9d9255e175f475275becb51
-msgid "Updates Available"
-msgstr "Updates beschikbaar"
-
 # en-hash: 7a1861cda946de73714affbeb669eba4
 msgid "Updates Ignored"
 msgstr "Updates genegeerd"
@@ -2600,6 +2592,10 @@ msgstr "Versies"
 # en-hash: ea4021361394f56beeae77c394271b11
 msgid "View README"
 msgstr "README bekijken"
+
+# en-hash: 50b29b831baf83b21536a0ced58759f6
+msgid "View Updates"
+msgstr "Updates bekijken"
 
 # en-hash: 033b69530c7d38c7bcda12b16b97b203
 msgid "View commits (%s → %s)"

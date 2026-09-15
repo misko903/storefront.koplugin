@@ -349,6 +349,10 @@ msgstr "카탈로그 새로고침이 이미 백그라운드에서 진행 중입�
 msgid "Catalog source"
 msgstr "카탈로그 소스"
 
+# en-hash: 4249cd63253ab5d3dd2627b96ddeff03
+msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
+msgstr "카탈로그 업데이트됨: 플러그인 %d개, 패치 %d개, 글꼴 %d개, 화면 보호기 %d개."
+
 # en-hash: d9c3997833636a589e7e5194bdee5d13
 msgid "Catalog updated: %d plugins, %d patches, %d fonts."
 msgstr "카탈로그 업데이트됨: 플러그인 %d개, 패치 %d개, 폰트 %d개."
@@ -1401,6 +1405,10 @@ msgstr "저장소 메타데이터가 없습니다."
 msgid "Missing target path"
 msgstr "대상 경로가 없습니다"
 
+# en-hash: a4d135c373399ae6ff7b8601f670f299
+msgid "Mock test update shown because 'Test Notification on Launch' is enabled in Notification Settings."
+msgstr "알림 설정에서 'Test Notification on Launch'가 활성화되어 있어 모의 테스트 업데이트가 표시됩니다."
+
 # en-hash: 6043603aeda23c74e75b67ae9ced95ce
 msgid "Modify Patch"
 msgstr "패치 수정"
@@ -1656,10 +1664,6 @@ msgstr "오프라인 Regular"
 # en-hash: c3bf447eabe632720a3aa1a7ce401274
 msgid "Open"
 msgstr "열기"
-
-# en-hash: 4a31d8334b7e00e010c8b3ab58ed1b37
-msgid "Open Storefront"
-msgstr "스토어프론트 열기"
 
 # en-hash: aaaca14de025427e39ed056b29af4058
 msgid "Open Wallpaper Collection Gallery"
@@ -2309,10 +2313,6 @@ msgstr "상태: 최신 상태"
 msgid "Status: Update available"
 msgstr "상태: 업데이트 가능"
 
-# en-hash: f0dca7e4eaedf573d4664be249845942
-msgid "Storefront"
-msgstr "Storefront"
-
 # en-hash: 7ade5d484a71e39d2c37c5eb72d01b80
 msgid "Storefront cache refreshed."
 msgstr "Storefront 캐시가 새로고침되었습니다."
@@ -2509,10 +2509,6 @@ msgstr "%s을(를) 업데이트하시겠습니까?"
 msgid "Update All"
 msgstr "전체 업데이트"
 
-# en-hash: 8bd7695831e104e2669e086e03927a20
-msgid "Update Available"
-msgstr "업데이트 가능"
-
 # en-hash: fe9d9f6d8401ec278f5716062385a9de
 msgid "Update available for %s (%s): %s → %s."
 msgstr "%s (%s) 업데이트 가능: %s → %s."
@@ -2569,10 +2565,6 @@ msgstr "업데이트됨: %s"
 msgid "Updates"
 msgstr "업데이트"
 
-# en-hash: 59ea61e4d9d9255e175f475275becb51
-msgid "Updates Available"
-msgstr "업데이트 가능"
-
 # en-hash: 7a1861cda946de73714affbeb669eba4
 msgid "Updates Ignored"
 msgstr "업데이트 무시됨"
@@ -2600,6 +2592,10 @@ msgstr "버전 목록"
 # en-hash: ea4021361394f56beeae77c394271b11
 msgid "View README"
 msgstr "README 보기"
+
+# en-hash: 50b29b831baf83b21536a0ced58759f6
+msgid "View Updates"
+msgstr "업데이트 보기"
 
 # en-hash: 033b69530c7d38c7bcda12b16b97b203
 msgid "View commits (%s → %s)"

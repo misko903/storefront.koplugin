@@ -349,6 +349,10 @@ msgstr "Aggiornamento catalogo già in corso in background."
 msgid "Catalog source"
 msgstr "Origine catalogo"
 
+# en-hash: 4249cd63253ab5d3dd2627b96ddeff03
+msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
+msgstr "Catalogo aggiornato: %d plugin, %d patch, %d font, %d screensaver."
+
 # en-hash: d9c3997833636a589e7e5194bdee5d13
 msgid "Catalog updated: %d plugins, %d patches, %d fonts."
 msgstr "Catalogo aggiornato: %d plugin, %d patch, %d font."
@@ -1401,6 +1405,10 @@ msgstr "Metadati del repository mancanti."
 msgid "Missing target path"
 msgstr "Percorso di destinazione mancante"
 
+# en-hash: a4d135c373399ae6ff7b8601f670f299
+msgid "Mock test update shown because 'Test Notification on Launch' is enabled in Notification Settings."
+msgstr "Aggiornamento di test fittizio mostrato perché 'Test Notification on Launch' è abilitato nelle impostazioni di notifica."
+
 # en-hash: 6043603aeda23c74e75b67ae9ced95ce
 msgid "Modify Patch"
 msgstr "Modifica patch"
@@ -1656,10 +1664,6 @@ msgstr "Offline regolare"
 # en-hash: c3bf447eabe632720a3aa1a7ce401274
 msgid "Open"
 msgstr "Apri"
-
-# en-hash: 4a31d8334b7e00e010c8b3ab58ed1b37
-msgid "Open Storefront"
-msgstr "Apri Storefront"
 
 # en-hash: aaaca14de025427e39ed056b29af4058
 msgid "Open Wallpaper Collection Gallery"
@@ -2309,10 +2313,6 @@ msgstr "Stato: Aggiornato"
 msgid "Status: Update available"
 msgstr "Stato: Aggiornamento disponibile"
 
-# en-hash: f0dca7e4eaedf573d4664be249845942
-msgid "Storefront"
-msgstr "Storefront"
-
 # en-hash: 7ade5d484a71e39d2c37c5eb72d01b80
 msgid "Storefront cache refreshed."
 msgstr "Cache dello Storefront aggiornata."
@@ -2509,10 +2509,6 @@ msgstr "Aggiornare %s?"
 msgid "Update All"
 msgstr "Aggiorna tutto"
 
-# en-hash: 8bd7695831e104e2669e086e03927a20
-msgid "Update Available"
-msgstr "Aggiornamento disponibile"
-
 # en-hash: fe9d9f6d8401ec278f5716062385a9de
 msgid "Update available for %s (%s): %s → %s."
 msgstr "Aggiornamento disponibile per %s (%s): %s → %s."
@@ -2569,10 +2565,6 @@ msgstr "Aggiornato: %s"
 msgid "Updates"
 msgstr "Aggiornamenti"
 
-# en-hash: 59ea61e4d9d9255e175f475275becb51
-msgid "Updates Available"
-msgstr "Aggiornamenti disponibili"
-
 # en-hash: 7a1861cda946de73714affbeb669eba4
 msgid "Updates Ignored"
 msgstr "Aggiornamenti ignorati"
@@ -2600,6 +2592,10 @@ msgstr "Versioni"
 # en-hash: ea4021361394f56beeae77c394271b11
 msgid "View README"
 msgstr "Visualizza README"
+
+# en-hash: 50b29b831baf83b21536a0ced58759f6
+msgid "View Updates"
+msgstr "Visualizza aggiornamenti"
 
 # en-hash: 033b69530c7d38c7bcda12b16b97b203
 msgid "View commits (%s → %s)"

@@ -349,6 +349,10 @@ msgstr "カタログの更新はすでにバックグラウンドで進行中で
 msgid "Catalog source"
 msgstr "カタログソース"
 
+# en-hash: 4249cd63253ab5d3dd2627b96ddeff03
+msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
+msgstr "カタログを更新しました: %d個のプラグイン、%d個のパッチ、%d個のフォント、%d個のスクリーンセーバー"
+
 # en-hash: d9c3997833636a589e7e5194bdee5d13
 msgid "Catalog updated: %d plugins, %d patches, %d fonts."
 msgstr "カタログを更新しました: %d プラグイン、%d パッチ、%d フォント。"
@@ -1401,6 +1405,10 @@ msgstr "リポジトリのメタデータが見つかりません。"
 msgid "Missing target path"
 msgstr "対象パスが見つかりません"
 
+# en-hash: a4d135c373399ae6ff7b8601f670f299
+msgid "Mock test update shown because 'Test Notification on Launch' is enabled in Notification Settings."
+msgstr "通知設定で「Test Notification on Launch」が有効になっているため、テスト用のモックアップデートが表示されています。"
+
 # en-hash: 6043603aeda23c74e75b67ae9ced95ce
 msgid "Modify Patch"
 msgstr "パッチを修正"
@@ -1656,10 +1664,6 @@ msgstr "オフライン Regular"
 # en-hash: c3bf447eabe632720a3aa1a7ce401274
 msgid "Open"
 msgstr "開く"
-
-# en-hash: 4a31d8334b7e00e010c8b3ab58ed1b37
-msgid "Open Storefront"
-msgstr "ストアフロントを開く"
 
 # en-hash: aaaca14de025427e39ed056b29af4058
 msgid "Open Wallpaper Collection Gallery"
@@ -2309,10 +2313,6 @@ msgstr "ステータス: 最新"
 msgid "Status: Update available"
 msgstr "ステータス: 更新あり"
 
-# en-hash: f0dca7e4eaedf573d4664be249845942
-msgid "Storefront"
-msgstr "Storefront"
-
 # en-hash: 7ade5d484a71e39d2c37c5eb72d01b80
 msgid "Storefront cache refreshed."
 msgstr "ストアフロントのキャッシュを更新しました。"
@@ -2509,10 +2509,6 @@ msgstr "%sを更新しますか？"
 msgid "Update All"
 msgstr "すべて更新"
 
-# en-hash: 8bd7695831e104e2669e086e03927a20
-msgid "Update Available"
-msgstr "アップデートがあります"
-
 # en-hash: fe9d9f6d8401ec278f5716062385a9de
 msgid "Update available for %s (%s): %s → %s."
 msgstr "%s (%s) のアップデートがあります: %s → %s。"
@@ -2569,10 +2565,6 @@ msgstr "更新日時: %s"
 msgid "Updates"
 msgstr "更新"
 
-# en-hash: 59ea61e4d9d9255e175f475275becb51
-msgid "Updates Available"
-msgstr "アップデートがあります"
-
 # en-hash: 7a1861cda946de73714affbeb669eba4
 msgid "Updates Ignored"
 msgstr "更新を無視中"
@@ -2600,6 +2592,10 @@ msgstr "バージョン"
 # en-hash: ea4021361394f56beeae77c394271b11
 msgid "View README"
 msgstr "README を表示"
+
+# en-hash: 50b29b831baf83b21536a0ced58759f6
+msgid "View Updates"
+msgstr "アップデートを表示"
 
 # en-hash: 033b69530c7d38c7bcda12b16b97b203
 msgid "View commits (%s → %s)"
