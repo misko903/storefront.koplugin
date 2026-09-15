@@ -2311,7 +2311,7 @@ msgstr "Статус: Доступне оновлення"
 
 # en-hash: f0dca7e4eaedf573d4664be249845942
 msgid "Storefront"
-msgstr "Магазин"
+msgstr "Storefront"
 
 # en-hash: 7ade5d484a71e39d2c37c5eb72d01b80
 msgid "Storefront cache refreshed."
@@ -2895,7 +2895,7 @@ msgstr "Налаштування Storefront"
 
 # en-hash: f0dca7e4eaedf573d4664be249845942
 msgid "menu_storefront"
-msgstr "Магазин"
+msgstr "Storefront"
 
 # en-hash: 88311e0136525ece02a3ddc403fa9306
 msgid "menu_storefront_desc"
@@ -3003,7 +3003,7 @@ msgstr "Доступне оновлення"
 
 # en-hash: f0dca7e4eaedf573d4664be249845942
 msgid "storefront_title"
-msgstr "Магазин"
+msgstr "Storefront"
 
 # en-hash: b1c94ca2fbc3e78fc30069c8d0f01680
 msgid "tab_all"

@@ -376,7 +376,7 @@ function StorefrontSettingsCard.show(Storefront)
 
         -- Catalog Source Row
         local catalog_mode = GitHubClient.getCatalogMode()
-        local catalog_mode_label = (catalog_mode == "static") and _("Storefront") or _("Direct GitHub API")
+        local catalog_mode_label = (catalog_mode == "static") and "Storefront" or _("Direct GitHub API")
         local catalog_widget = TextWidget:new{
             text = catalog_mode_label,
             face = Font:getFace("cfont", subtext_font_size),

@@ -2311,7 +2311,7 @@ msgstr "Statut : Mise à jour disponible"
 
 # en-hash: f0dca7e4eaedf573d4664be249845942
 msgid "Storefront"
-msgstr "Boutique"
+msgstr "Storefront"
 
 # en-hash: 7ade5d484a71e39d2c37c5eb72d01b80
 msgid "Storefront cache refreshed."

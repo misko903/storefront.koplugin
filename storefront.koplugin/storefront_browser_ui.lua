@@ -433,7 +433,7 @@ function StorefrontBrowserDialog:measureListViewport(options)
     end
 
     local probe = StorefrontBrowserDialog:new{
-        title = options.title or _("Storefront"),
+        title = options.title or "Storefront",
         items = {},
         page = 1,
         total_pages = 1,
@@ -526,7 +526,7 @@ function StorefrontBrowserDialog:init()
     }
 
     local title_label = TextWidget:new{
-        text = self.title or _("Storefront"),
+        text = self.title or "Storefront",
         face = Font:getFace("NotoSerif-Regular.ttf", 22),
         bold = true,
         fgcolor = Blitbuffer.COLOR_BLACK,

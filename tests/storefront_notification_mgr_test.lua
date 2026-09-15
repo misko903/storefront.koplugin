@@ -309,6 +309,32 @@ do
     end)
     check("collectUpdatesForNotification executes without error", ok_collect)
     check("collectUpdatesForNotification returns a table", type(updates) == "table")
+
+    -- Test deduplication when plugin summary contains Storefront (under any name) and self-update triggers
+    local sf_stub = {
+        collectUpdateSummary = function()
+            return {
+                data = {
+                    {
+                        has_update = true,
+                        plugin = { dirname = "storefront.koplugin", name = "Sklep", fullname = "Sklep" },
+                        record = { repo = "storefront.koplugin", owner = "ultimatejimmy" },
+                        remote = { release_tag_name = "v26.9.16" },
+                    }
+                }
+            }
+        end,
+        collectPatchUpdateSummary = function() return { data = {} } end,
+    }
+    local updates_dupe = MainStorefront.collectUpdatesForNotification(sf_stub)
+    local sf_count = 0
+    for _, u in ipairs(updates_dupe) do
+        if u.name == "Storefront" or u.name == "Sklep" or (u.kind == "plugin" and u.name:lower():match("storefront")) then
+            sf_count = sf_count + 1
+        end
+    end
+    check("collectUpdatesForNotification deduplicates Storefront update to exactly 1 item", sf_count == 1)
+    check("collectUpdatesForNotification normalizes Storefront item name to 'Storefront'", updates_dupe[1] and updates_dupe[1].name == "Storefront")
 end
 
 print(string.format("=== Notification Regression Tests Complete: %d Failures ===", failures))

@@ -450,6 +450,9 @@ local KEY_ALIASES = {
 
 -- Translate string key with formatting support
 function Localization:t(key, ...)
+    if key == "Storefront" or key == "menu_storefront" or key == "storefront_title" then
+        return "Storefront"
+    end
     self:ensureInit()
     local translation = self.translations[key]
     if (not translation or translation == "") and KEY_ALIASES[key] then

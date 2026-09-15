@@ -196,7 +196,11 @@ local function runTests()
         assertTest(count > 0, string.format("Language '%s' loaded translations (%d keys)", lang, count), "Loaded 0 keys")
         
         local title = Localization:t("storefront_title")
-        assertTest(type(title) == "string" and #title > 0, string.format("Language '%s' translates 'storefront_title'", lang))
+        assertTest(title == "Storefront", string.format("Language '%s' preserves 'storefront_title' as 'Storefront'", lang), "Got: " .. tostring(title))
+        local menu = Localization:t("menu_storefront")
+        assertTest(menu == "Storefront", string.format("Language '%s' preserves 'menu_storefront' as 'Storefront'", lang), "Got: " .. tostring(menu))
+        local direct = Localization:t("Storefront")
+        assertTest(direct == "Storefront", string.format("Language '%s' preserves 'Storefront' as 'Storefront'", lang), "Got: " .. tostring(direct))
     end
 
     print("\n==================================================")

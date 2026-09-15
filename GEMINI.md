@@ -62,6 +62,7 @@ KOReader uses a dedicated table-based Object-Oriented Programming model.
 * **EmmyLua Annotations:** Every file, class definition, table schema, and function must include comprehensive EmmyLua docstring annotations (`---@class`, `---@field`, `---@param`, `---@return`) to enable static analysis and IDE intelligence.
 * **Intent-Based Commenting:** Document *why* complex architectural workarounds or mathematical formulas exist; do not state *what* obvious syntax is doing. Mark future optimizations clearly using `TODO:` or `FIXME:`.
 * **Universal Localization (`i18n`):** Every user-facing interface string (buttons, dialog labels, status messages, menu items) must be wrapped in gettext translation calls (`_("...")`). Never use string concatenation to build dynamic sentences; always employ formatted string templates with named or numbered placeholders.
+* **"Storefront" Must Never Be Translated:** The name "Storefront" is a proper noun/brand name and must never be localized or translated into any language. Never wrap "Storefront" in `_("Storefront")` or attempt to localize it in menus, headers, dialog titles, notification titles, or `.po` translation catalogs. Always keep it as `"Storefront"` verbatim.
 
 ---
 

@@ -314,16 +314,45 @@ function UpdatesMgr:init(Storefront)
         -- 1. Plugins with updates
         for _, item in ipairs(plugin_summary.data or {}) do
             if item.has_update then
-                local name = (item.plugin and (item.plugin.name or item.plugin.dirname))
-                    or (item.record and item.record.repo)
-                    or _("Plugin")
+                local dirname = item.plugin and item.plugin.dirname
+                local repo = item.record and item.record.repo
+                local is_storefront = (dirname and dirname:lower():match("storefront"))
+                    or (repo and repo:lower():match("storefront"))
+
+                local name
+                if is_storefront then
+                    name = "Storefront"
+                else
+                    name = (item.plugin and (item.plugin.name or item.plugin.dirname))
+                        or (item.record and item.record.repo)
+                        or _("Plugin")
+                end
+
                 local ver = item.remote and (item.remote.release_tag_name or item.remote.remote_version)
                 if not ver and item.record then
                     ver = item.record.tag_name or item.record.version
                 end
                 local key = name:lower():gsub("%.koplugin$", "")
-                if not seen_names[key] then
+                
+                local is_seen = seen_names[key]
+                if dirname then
+                    local d_key = dirname:lower():gsub("%.koplugin$", "")
+                    is_seen = is_seen or seen_names[d_key]
+                end
+                if repo then
+                    local r_key = repo:lower():gsub("%.koplugin$", "")
+                    is_seen = is_seen or seen_names[r_key]
+                end
+
+                if not is_seen then
                     seen_names[key] = true
+                    if dirname then seen_names[dirname:lower():gsub("%.koplugin$", "")] = true end
+                    if repo then seen_names[repo:lower():gsub("%.koplugin$", "")] = true end
+                    if is_storefront then
+                        seen_names["storefront"] = true
+                        seen_names["storefront.koplugin"] = true
+                    end
+
                     table.insert(updates, {
                         name = name,
                         version = ver or "",

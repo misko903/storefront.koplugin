@@ -335,8 +335,9 @@ def translate_all_gemini(all_untranslated, lang_names, max_pairs=50):
 For each target language, you will receive its language name, language code, and a list of key-value pairs where the values are in English. Translate the English values into the target language, keeping them short, clear, and natural for e-reader menus and dialogs.
 
 CRITICAL rules:
-1. Retain all format specifiers such as %s, %d, %1$s, %2$d, etc. exactly in the translated output.
-2. Retain all literal escaped newlines (\\n) and tabs (\\t) exactly.
+1. "Storefront" is the brand name of the plugin and must NEVER be translated into any language. Always keep "Storefront" as "Storefront".
+2. Retain all format specifiers such as %s, %d, %1$s, %2$d, etc. exactly in the translated output.
+3. Retain all literal escaped newlines (\n) and tabs (\t) exactly.
 3. Keep translations concise, natural, and suited for a mobile e-reader display.
 4. Return ONLY a valid JSON object matching this exact schema:
 {{

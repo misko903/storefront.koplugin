@@ -8681,7 +8681,7 @@ function Storefront:showBrowser(kind)
         end
     end
 
-    local title = _("Storefront")
+    local title = "Storefront"
     local Trapper = require("ui/trapper")
     Trapper:wrap(function()
         local ok, err = pcall(function()
@@ -9459,7 +9459,7 @@ function Storefront:showPatchSelectionDialogForInstall(repo, entries)
 end
 
 function Storefront:getStatusLines()
-    local status_lines = { _("Storefront") }
+    local status_lines = { "Storefront" }
     local plugin_count = Cache.countRepos and Cache.countRepos("plugin") or #Cache.listRepos("plugin")
     local patch_count = Cache.countRepos and Cache.countRepos("patch") or #Cache.listRepos("patch")
     local plugin_ts = Cache.getLastFetched("plugin")
@@ -10467,7 +10467,7 @@ function Storefront:addToMainMenu(menu_items)
     injectStorefrontIntoToolsMenu()
     menu_items.Storefront = {
         sorting_hint = "tools",
-        text = _("Storefront"),
+        text = "Storefront",
         callback = function()
             self:showBrowser()
         end,
