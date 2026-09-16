@@ -376,8 +376,15 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
         if on_done then on_done() end
     end
 
+    local saved_focus_x = 1
+    local saved_focus_y = 1
+    local was_refreshed = false
+
     refresh = function()
         if overlay then
+            saved_focus_x = (overlay.selected and overlay.selected.x) or 1
+            saved_focus_y = (overlay.selected and overlay.selected.y) or 1
+            was_refreshed = true
             local ov = overlay
             overlay = nil
             ov.onClose = nil
@@ -406,27 +413,85 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
         local focusable_rows = {}
 
         local function add_toggle_row(label_text, value, on_toggle)
-            local check_indicator = value and "☑ " or "☐ "
+            local get_val = (type(value) == "function") and value or (function() return value end)
+            local current_val = get_val()
+            local icon_file = getAssetPath(current_val and "check-square.svg" or "square.svg")
+            local icon_part
+            local check_sz = ui_font_size + sc(2)
+            if icon_file then
+                icon_part = ImageWidget:new{
+                    file = icon_file,
+                    width = check_sz,
+                    height = check_sz,
+                    scale_factor = 0,
+                    is_icon = true,
+                    alpha = true,
+                }
+            else
+                local check_indicator = current_val and "☑" or "☐"
+                icon_part = TextWidget:new{
+                    text = check_indicator,
+                    face = Font:getFace("cfont", check_sz),
+                    fgcolor = Blitbuffer.COLOR_BLACK,
+                }
+            end
             local label = TextWidget:new{
-                text = check_indicator .. label_text,
+                text = label_text,
                 face = Font:getFace("cfont", ui_font_size),
                 fgcolor = Blitbuffer.COLOR_BLACK,
+            }
+            local row_hg = HorizontalGroup:new{
+                align = "center",
+                icon_part,
+                HorizontalSpan:new{ width = sc(8) },
+                label,
             }
             local frame = FrameContainer:new{
                 padding_v = sc(6),
                 padding_h = sc(12),
                 bordersize = 0,
                 width = dialog_w - sc(4),
-                label,
+                row_hg,
             }
             local row = InputContainer:new{
                 dimen = Geom:new{ w = dialog_w - sc(4), h = frame:getSize().h },
                 frame,
             }
             row.frame = frame
+
+            local function update_icon(val)
+                local new_file = getAssetPath(val and "check-square.svg" or "square.svg")
+                local new_icon_part
+                if new_file then
+                    new_icon_part = ImageWidget:new{
+                        file = new_file,
+                        width = check_sz,
+                        height = check_sz,
+                        scale_factor = 0,
+                        is_icon = true,
+                        alpha = true,
+                    }
+                else
+                    new_icon_part = TextWidget:new{
+                        text = val and "☑" or "☐",
+                        face = Font:getFace("cfont", check_sz),
+                        fgcolor = Blitbuffer.COLOR_BLACK,
+                    }
+                end
+                icon_part = new_icon_part
+                row_hg[1] = icon_part
+            end
+
             row.callback = function()
-                on_toggle()
-                refresh()
+                if type(value) == "function" then
+                    local new_val = not get_val()
+                    on_toggle(new_val)
+                    update_icon(new_val)
+                    UIManager:setDirty(row.show_parent or row, "fast")
+                else
+                    on_toggle()
+                    refresh()
+                end
             end
             row.ges_events = {
                 Tap = {
@@ -548,9 +613,9 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
             and _("Versions: Latest Releases (Recommended)")
             or _("Versions: Pin Current Installed Versions")
         local strat_widget = TextWidget:new{
-            text = "⚙ " .. strat_label,
+            text = strat_label,
             face = Font:getFace("cfont", ui_font_size),
-            fgcolor = storefront_theme.color_label_dim,
+            fgcolor = Blitbuffer.COLOR_BLACK,
         }
         local strat_frame = FrameContainer:new{
             padding_v = sc(6),
@@ -564,6 +629,7 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
             strat_frame,
         }
         strat_row.frame = strat_frame
+        strat_row.strat_widget = strat_widget
         strat_row.ges_events = {
             Tap = {
                 GestureRange:new{
@@ -574,7 +640,16 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
         }
         strat_row.callback = function()
             version_strategy = (version_strategy == "latest") and "pinned" or "latest"
-            refresh()
+            local new_label = (version_strategy == "latest")
+                and _("Versions: Latest Releases (Recommended)")
+                or _("Versions: Pin Current Installed Versions")
+            if strat_widget.setText then
+                strat_widget:setText(new_label)
+            else
+                strat_widget.text = new_label
+                if strat_widget.args then strat_widget.args.text = new_label end
+            end
+            UIManager:setDirty(strat_row.show_parent or strat_row, "fast")
         end
         strat_row.onTap = function()
             strat_row.callback()
@@ -608,11 +683,11 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
         })
 
         -- Component toggles
-        add_toggle_row(_("Include Plugins"), inc_plugins, function() inc_plugins = not inc_plugins end)
-        add_toggle_row(_("Include User Patches"), inc_patches, function() inc_patches = not inc_patches end)
-        add_toggle_row(_("Include Fonts"), inc_fonts, function() inc_fonts = not inc_fonts end)
-        add_toggle_row(_("Include Wallpaper/Screensavers"), inc_screensavers, function() inc_screensavers = not inc_screensavers end)
-        add_toggle_row(_("Include Storefront Settings"), inc_settings, function() inc_settings = not inc_settings end)
+        add_toggle_row(_("Include Plugins"), function() return inc_plugins end, function(v) inc_plugins = v end)
+        add_toggle_row(_("Include User Patches"), function() return inc_patches end, function(v) inc_patches = v end)
+        add_toggle_row(_("Include Fonts"), function() return inc_fonts end, function(v) inc_fonts = v end)
+        add_toggle_row(_("Include Wallpaper/Screensavers"), function() return inc_screensavers end, function(v) inc_screensavers = v end)
+        add_toggle_row(_("Include Storefront Settings"), function() return inc_settings end, function(v) inc_settings = v end)
 
         table.insert(content_vg, LineWidget:new{
             dimen = Geom:new{ w = dialog_w - sc(4), h = sc(1) },
@@ -739,12 +814,15 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
         end
         table.insert(layout, { save_btn, share_btn, cancel_btn })
 
+        if saved_focus_y > #layout then saved_focus_y = #layout end
+        if saved_focus_x > #layout[saved_focus_y] then saved_focus_x = #layout[saved_focus_y] end
+
         overlay = FocusManager:new{
             align = "center",
             vertical_align = "center",
             dimen = Geom:new{ w = sw, h = sh },
             layout = layout,
-            selected = { x = 1, y = 1 },
+            selected = { x = saved_focus_x, y = saved_focus_y },
             card,
         }
 
@@ -754,6 +832,13 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
         save_btn.show_parent = overlay
         share_btn.show_parent = overlay
         cancel_btn.show_parent = overlay
+
+        if was_refreshed then
+            local cur_item = layout[saved_focus_y] and layout[saved_focus_y][saved_focus_x]
+            if cur_item and cur_item.frame then
+                cur_item.frame.invert = true
+            end
+        end
 
         overlay.onClose = function()
             overlay = nil
@@ -1305,31 +1390,27 @@ function StorefrontBlueprintUI.showDiffDialog(Storefront, blueprint, on_done)
     local card
     local renderPage
 
-    renderPage = function()
+    renderPage = function(reset_focus)
+        local saved_focus_x = (not reset_focus and overlay and overlay.selected and overlay.selected.x) or 1
+        local saved_focus_y = (not reset_focus and overlay and overlay.selected and overlay.selected.y) or 1
+
         if current_page > total_pages then current_page = total_pages end
         if current_page < 1 then current_page = 1 end
 
         local focusable_items = {}
         local list_vg = VerticalGroup:new{ align = "left" }
-        local row_h = sc(44)
+        local row_h = sc(40)
         local icon_size = sc(22)
 
         if total_items == 0 then
-            table.insert(list_vg, FrameContainer:new{
-                padding_v = sc(20),
-                padding_h = sc(10),
-                bordersize = 0,
-                width = dialog_w - sc(20),
-                CenterContainer:new{
-                    dimen = Geom:new{ w = dialog_w - sc(20), h = sc(40) },
-                    TextWidget:new{
-                        text = _("No items found in this blueprint."),
-                        face = Font:getFace("cfont", 16),
-                        fgcolor = storefront_theme.color_label_dim,
-                    }
+            table.insert(list_vg, CenterContainer:new{
+                dimen = Geom:new{ w = dialog_w - sc(20), h = ITEMS_PER_PAGE * row_h },
+                TextWidget:new{
+                    text = _("No items found in this blueprint."),
+                    face = Font:getFace("cfont", 16),
+                    fgcolor = storefront_theme.color_label_dim,
                 }
             })
-            table.insert(list_vg, VerticalSpan:new{ width = (ITEMS_PER_PAGE - 1) * row_h })
         else
             local start_idx = (current_page - 1) * ITEMS_PER_PAGE + 1
             local end_idx = math.min(total_items, current_page * ITEMS_PER_PAGE)
@@ -1436,15 +1517,21 @@ function StorefrontBlueprintUI.showDiffDialog(Storefront, blueprint, on_done)
 
                 local row_hg = HorizontalGroup:new(row_elements)
 
-                local frame = FrameContainer:new{
-                    padding_v = sc(6),
-                    padding_h = sc(10),
-                    bordersize = 0,
-                    width = dialog_w - sc(20),
+                local row_inner = CenterContainer:new{
+                    dimen = Geom:new{ w = dialog_w - sc(40), h = row_h - sc(8) },
                     row_hg,
                 }
 
+                local frame = FrameContainer:new{
+                    padding_v = sc(4),
+                    padding_h = sc(10),
+                    bordersize = 0,
+                    width = dialog_w - sc(20),
+                    row_inner,
+                }
+
                 local ic = InputContainer:new{ frame }
+                ic.dimen = Geom:new{ w = dialog_w - sc(20), h = row_h }
                 ic.frame = frame
                 ic.item = item
                 local toggle_item = function()
@@ -1510,7 +1597,7 @@ function StorefrontBlueprintUI.showDiffDialog(Storefront, blueprint, on_done)
             callback = function()
                 if current_page > 1 then
                     current_page = current_page - 1
-                    renderPage()
+                    renderPage(true)
                 end
             end,
         }
@@ -1536,7 +1623,7 @@ function StorefrontBlueprintUI.showDiffDialog(Storefront, blueprint, on_done)
             callback = function()
                 if current_page < total_pages then
                     current_page = current_page + 1
-                    renderPage()
+                    renderPage(true)
                 end
             end,
         }
@@ -1604,23 +1691,7 @@ function StorefrontBlueprintUI.showDiffDialog(Storefront, blueprint, on_done)
                 content_vg,
             }
 
-            local key_events = {
-                Close = { { "Back" }, { "Escape" } },
-                NextPage = { { "PageDown" } },
-                PrevPage = { { "PageUp" } },
-            }
             local Device_input = require("device").input
-            if Device_input and Device_input.group then
-                if Device_input.group.Back then
-                    table.insert(key_events.Close, { Device_input.group.Back })
-                end
-                if Device_input.group.PgFwd then
-                    table.insert(key_events.NextPage, { Device_input.group.PgFwd })
-                end
-                if Device_input.group.PgBack then
-                    table.insert(key_events.PrevPage, { Device_input.group.PgBack })
-                end
-            end
 
             local ges_events = {
                 Swipe = {
@@ -1637,34 +1708,79 @@ function StorefrontBlueprintUI.showDiffDialog(Storefront, blueprint, on_done)
                 dimen = Geom:new{ w = sw, h = sh },
                 layout = layout,
                 selected = { x = 1, y = 1 },
-                key_events = key_events,
                 ges_events = ges_events,
                 card,
             }
 
-            overlay.onNextPage = function()
+            -- CRITICAL: FocusManager:_init() unconditionally resets self.key_events = util.tableDeepCopy(KEY_EVENTS).
+            -- Passing key_events inside FocusManager:new{ key_events = ... } is wiped out by _init().
+            -- Custom key_events MUST be assigned directly onto the instance after creation.
+            overlay.key_events = overlay.key_events or {}
+            overlay.key_events.Close = { { "Back" }, { "Escape" } }
+            overlay.key_events.NextPage = {
+                { "PageDown" },
+                { "RPgFwd" },
+                { "LPgFwd" },
+            }
+            overlay.key_events.PrevPage = {
+                { "PageUp" },
+                { "RPgBack" },
+                { "LPgBack" },
+            }
+            if Device_input and Device_input.group then
+                if Device_input.group.Back then
+                    table.insert(overlay.key_events.Close, { Device_input.group.Back })
+                end
+                if Device_input.group.PgFwd then
+                    table.insert(overlay.key_events.NextPage, { Device_input.group.PgFwd })
+                end
+                if Device_input.group.PgBack then
+                    table.insert(overlay.key_events.PrevPage, { Device_input.group.PgBack })
+                end
+            end
+
+            overlay.onNextPage = function(self)
                 if current_page < total_pages then
                     current_page = current_page + 1
-                    renderPage()
+                    renderPage(true)
                 end
                 return true
             end
 
-            overlay.onPrevPage = function()
+            overlay.onPrevPage = function(self)
                 if current_page > 1 then
                     current_page = current_page - 1
-                    renderPage()
+                    renderPage(true)
                 end
                 return true
             end
+
+            -- Direct onKeyPress/onKeyRepeat fallback to guarantee physical button presses paginate
+            local orig_onKeyPress = overlay.onKeyPress
+            local function handleKey(self, key)
+                if orig_onKeyPress and orig_onKeyPress(self, key) then
+                    return true
+                end
+                local k_name = (type(key) == "table" and key.key) or (type(key) == "string" and key) or ""
+                if k_name == "PageDown" or k_name == "RPgFwd" or k_name == "LPgFwd"
+                    or (type(key) == "table" and (key.PageDown or key.RPgFwd or key.LPgFwd)) then
+                    return self:onNextPage()
+                elseif k_name == "PageUp" or k_name == "RPgBack" or k_name == "LPgBack"
+                    or (type(key) == "table" and (key.PageUp or key.RPgBack or key.LPgBack)) then
+                    return self:onPrevPage()
+                end
+                return false
+            end
+            overlay.onKeyPress = handleKey
+            overlay.onKeyRepeat = handleKey
 
             overlay.onSwipe = function(self, arg, ges_ev)
                 local ev = (type(arg) == "table" and arg) or (type(ges_ev) == "table" and ges_ev)
                 local direction = ev and ev.direction
                 if direction == "left" or direction == "west" then
-                    return overlay.onNextPage()
+                    return overlay:onNextPage()
                 elseif direction == "right" or direction == "east" then
-                    return overlay.onPrevPage()
+                    return overlay:onPrevPage()
                 end
                 return false
             end
@@ -1684,13 +1800,23 @@ function StorefrontBlueprintUI.showDiffDialog(Storefront, blueprint, on_done)
         else
             card[1] = content_vg
             overlay.layout = layout
-            overlay.selected = { x = 1, y = 1 }
+            if reset_focus then
+                overlay.selected = { x = 1, y = 1 }
+            else
+                if saved_focus_y > #layout then saved_focus_y = #layout end
+                if saved_focus_x > #layout[saved_focus_y] then saved_focus_x = #layout[saved_focus_y] end
+                overlay.selected = { x = saved_focus_x, y = saved_focus_y }
+                local cur_item = layout[saved_focus_y] and layout[saved_focus_y][saved_focus_x]
+                if cur_item and cur_item.frame then
+                    cur_item.frame.invert = true
+                end
+            end
             for i, item in ipairs(focusable_items) do item.show_parent = overlay end
             prev_btn.show_parent = overlay
             next_btn.show_parent = overlay
             apply_btn.show_parent = overlay
             cancel_btn.show_parent = overlay
-            UIManager:setDirty(overlay, "ui")
+            UIManager:setDirty("all", "ui")
         end
     end
 

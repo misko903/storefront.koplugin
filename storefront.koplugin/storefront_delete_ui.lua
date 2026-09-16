@@ -11,6 +11,7 @@ local TextBoxWidget = require("ui/widget/textboxwidget")
 local TextWidget = require("ui/widget/textwidget")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
+local ImageWidget = require("ui/widget/imagewidget")
 local Font = require("ui/font")
 local Geom = require("ui/geometry")
 local GestureRange = require("ui/gesturerange")
@@ -29,6 +30,45 @@ if not ok_log then StorefrontLogger = { action = function() end, err = function(
 
 local SETTINGS_PATH = DataStorage:getSettingsDir() .. "/Storefront.lua"
 local StorefrontSettings = LuaSettings:open(SETTINGS_PATH)
+
+local _asset_path_cache = {}
+local function getAssetPath(filename)
+    if not filename or filename == "" then return nil end
+    if _asset_path_cache[filename] ~= nil then
+        return _asset_path_cache[filename] or nil
+    end
+
+    local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+    if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+
+    local info = debug.getinfo(1, "S")
+    local dir = (info and info.source and info.source:match("^@(.*[/\\])")) or ""
+    local rel_path = dir .. "assets/" .. filename
+
+    local paths_to_try = { rel_path }
+    local ok_ds, DataStorage = pcall(require, "datastorage")
+    local data_dir = ok_ds and DataStorage and DataStorage.getDataDir and DataStorage:getDataDir()
+    if data_dir then
+        table.insert(paths_to_try, data_dir .. "/" .. rel_path)
+        table.insert(paths_to_try, data_dir .. "/plugins/storefront.koplugin/assets/" .. filename)
+    end
+
+    for _, p in ipairs(paths_to_try) do
+        if ok_lfs and lfs and lfs.attributes and lfs.attributes(p, "mode") == "file" then
+            _asset_path_cache[filename] = p
+            return p
+        end
+        local f = io.open(p, "r")
+        if f then
+            f:close()
+            _asset_path_cache[filename] = p
+            return p
+        end
+    end
+
+    _asset_path_cache[filename] = false
+    return nil
+end
 
 local DeleteUI = {}
 
@@ -111,25 +151,75 @@ function DeleteUI.showDeleteConfirmationDialog(display_name, is_plugin, plugin_i
     local overlay
 
     if is_plugin == true then
-        local function get_check_text()
-            local icon = delete_settings and "☑ " or "☐ "
-            return icon .. _("Also delete plugin settings")
+        local check_icon_sz = ui_font_size + sc(2)
+        local icon_file = getAssetPath(delete_settings and "check-square.svg" or "square.svg")
+        local check_icon_widget
+        if icon_file then
+            check_icon_widget = ImageWidget:new{
+                file = icon_file,
+                width = check_icon_sz,
+                height = check_icon_sz,
+                scale_factor = 0,
+                is_icon = true,
+                alpha = true,
+            }
+        else
+            check_icon_widget = TextWidget:new{
+                text = delete_settings and "☑" or "☐",
+                face = Font:getFace("cfont", check_icon_sz),
+                fgcolor = Blitbuffer.COLOR_BLACK,
+            }
         end
 
-        local check_text_widget = TextBoxWidget:new{
-            text = get_check_text(),
+        local check_label_widget = TextWidget:new{
+            text = _("Also delete plugin settings"),
             face = Font:getFace("cfont", ui_font_size),
             fgcolor = Blitbuffer.COLOR_BLACK,
-            width = inner_w,
-            alignment = "center",
+        }
+
+        local check_row_hg = HorizontalGroup:new{
+            align = "center",
+            check_icon_widget,
+            HorizontalSpan:new{ width = sc(8) },
+            check_label_widget,
         }
 
         local check_frame = FrameContainer:new{
             padding = sc(4),
             bordersize = 0,
             background = Blitbuffer.COLOR_WHITE,
-            check_text_widget,
+            check_row_hg,
         }
+
+        local function update_check_display()
+            local new_icon_file = getAssetPath(delete_settings and "check-square.svg" or "square.svg")
+            if new_icon_file and check_icon_widget.setFile then
+                check_icon_widget:setFile(new_icon_file)
+            elseif check_icon_widget.setText then
+                check_icon_widget:setText(delete_settings and "☑" or "☐")
+            else
+                -- Recreate if widget type differs
+                local new_widget
+                if new_icon_file then
+                    new_widget = ImageWidget:new{
+                        file = new_icon_file,
+                        width = check_icon_sz,
+                        height = check_icon_sz,
+                        scale_factor = 0,
+                        is_icon = true,
+                        alpha = true,
+                    }
+                else
+                    new_widget = TextWidget:new{
+                        text = delete_settings and "☑" or "☐",
+                        face = Font:getFace("cfont", check_icon_sz),
+                        fgcolor = Blitbuffer.COLOR_BLACK,
+                    }
+                end
+                check_icon_widget = new_widget
+                check_row_hg[1] = check_icon_widget
+            end
+        end
 
         check_item = InputContainer:new{
             align = "center",
@@ -172,7 +262,7 @@ function DeleteUI.showDeleteConfirmationDialog(display_name, is_plugin, plugin_i
         end
         check_item.onTapSelect = function(self)
             delete_settings = not delete_settings
-            check_text_widget:setText(get_check_text())
+            update_check_display()
             UIManager:setDirty(self.show_parent or self, "ui")
             if delete_settings and not plugin_instance then
                 UIManager:show(InfoMessage:new{

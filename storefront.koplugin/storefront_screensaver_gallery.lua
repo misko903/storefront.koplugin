@@ -22,6 +22,8 @@ local storefront_theme = require("storefront_theme")
 local StorefrontUtils = require("storefront_utils")
 
 local StorefrontScreensaverMgr = require("storefront_screensaver_mgr")
+local Event = require("ui/event")
+local FocusManager = require("ui/widget/focusmanager")
 local Input = Device and Device.input
 
 local StorefrontScreensaverGallery = {}
@@ -41,7 +43,7 @@ local function formatSize(bytes)
     end
 end
 
-function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_settings_callback)
+function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_settings_callback, initial_selected)
     local sw = Device.screen:getWidth()
     local sh = Device.screen:getHeight()
     local dialog_w = math.min(sw - sc(20), sc(440))
@@ -63,6 +65,7 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
     end
 
     local function openConfig()
+        local cur_selected = overlay and overlay.selected and { x = overlay.selected.x, y = overlay.selected.y }
         if overlay then
             local ov = overlay
             overlay = nil
@@ -70,15 +73,12 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             UIManager:close(ov, "ui")
         end
         if on_settings_callback then
-            on_settings_callback()
+            on_settings_callback(cur_selected)
         else
             local StorefrontScreensaverConfig = require("storefront_screensaver_config")
             StorefrontScreensaverConfig.show(Storefront, on_close_callback)
         end
     end
-
-    local FocusManager = require("ui/widget/focusmanager")
-    local focusable_rows = {}
 
     local function make_tap_item(frame, callback)
         local item = InputContainer:new{ frame }
@@ -118,12 +118,11 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             return true
         end
 
-        table.insert(focusable_rows, item)
         return item
     end
 
-    refresh = function()
-        focusable_rows = {}
+    refresh = function(saved_selected)
+        local cur_selected = saved_selected or (overlay and overlay.selected and { x = overlay.selected.x, y = overlay.selected.y })
         if overlay then
             local ov = overlay
             overlay = nil
@@ -224,7 +223,7 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
         local fixed_list_h = sc(395) -- Exact height for 5 item rows
 
         local function make_action_btn(label_str, bg_color, fg_color, callback)
-            return StorefrontUtils.createButton{
+            local btn = StorefrontUtils.createButton{
                 text = label_str,
                 text_font_size = 12,
                 bold = true,
@@ -236,7 +235,22 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
                 text_font_color = fg_color,
                 callback = callback,
             }
+            local orig_focus = btn.onFocus
+            btn.onFocus = function(self)
+                if orig_focus then orig_focus(self) elseif self.frame then self.frame.invert = true end
+                UIManager:setDirty(self.show_parent or self, "fast")
+                return true
+            end
+            local orig_unfocus = btn.onUnfocus
+            btn.onUnfocus = function(self)
+                if orig_unfocus then orig_unfocus(self) elseif self.frame then self.frame.invert = false end
+                UIManager:setDirty(self.show_parent or self, "fast")
+                return true
+            end
+            return btn
         end
+
+        local layout = {}
 
         if #items == 0 then
             local empty_text = TextBoxWidget:new{
@@ -367,6 +381,7 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
                 local right_actions_vg = VerticalGroup:new{ align = "center" }
                 local is_this_active = is_single_mode and current_item.is_active_single
 
+                local action_item
                 if is_this_active then
                     local active_badge_frame = FrameContainer:new{
                         bordersize = sc(1),
@@ -386,7 +401,11 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
                             }
                         }
                     }
-                    table.insert(right_actions_vg, active_badge_frame)
+                    action_item = make_tap_item(active_badge_frame, function()
+                        local StorefrontToast = require("storefront_toast")
+                        StorefrontToast.show(_("This wallpaper is currently active"), 2)
+                    end)
+                    table.insert(right_actions_vg, action_item)
                 else
                     local set_active_btn = make_action_btn(_("Set Single"), Blitbuffer.Color8(240), Blitbuffer.COLOR_BLACK, function()
                         StorefrontScreensaverMgr.setScreensaverMode("single", { file = current_item.filepath })
@@ -395,6 +414,7 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
                         StorefrontToast.show(_("Set as active single wallpaper!"), 2)
                     end)
                     table.insert(right_actions_vg, set_active_btn)
+                    action_item = set_active_btn
                 end
 
                 table.insert(right_actions_vg, VerticalSpan:new{ width = sc(4) })
@@ -447,6 +467,8 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
                     dimen = Geom:new{ w = dialog_w - sc(4), h = Size.line.thin },
                     background = Blitbuffer.COLOR_LIGHT_GRAY,
                 })
+
+                table.insert(layout, { thumb_tap, action_item, delete_btn })
             end
 
             -- Pad remaining slots so the list area ALWAYS occupies the exact same height
@@ -479,7 +501,7 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             callback = function()
                 if current_page > 1 then
                     current_page = current_page - 1
-                    refresh()
+                    refresh({ x = 1, y = 1 })
                 end
             end,
         }
@@ -505,7 +527,7 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             callback = function()
                 if current_page < total_pages then
                     current_page = current_page + 1
-                    refresh()
+                    refresh({ x = 1, y = 1 })
                 end
             end,
         }
@@ -528,6 +550,36 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             }
         }
         table.insert(content_vg, pag_frame)
+
+        if total_pages > 1 then
+            local orig_prev_focus = prev_btn.onFocus
+            prev_btn.onFocus = function(self)
+                if orig_prev_focus then orig_prev_focus(self) elseif self.frame then self.frame.invert = true end
+                UIManager:setDirty(self.show_parent or self, "fast")
+                return true
+            end
+            local orig_prev_unfocus = prev_btn.onUnfocus
+            prev_btn.onUnfocus = function(self)
+                if orig_prev_unfocus then orig_prev_unfocus(self) elseif self.frame then self.frame.invert = false end
+                UIManager:setDirty(self.show_parent or self, "fast")
+                return true
+            end
+
+            local orig_next_focus = next_btn.onFocus
+            next_btn.onFocus = function(self)
+                if orig_next_focus then orig_next_focus(self) elseif self.frame then self.frame.invert = true end
+                UIManager:setDirty(self.show_parent or self, "fast")
+                return true
+            end
+            local orig_next_unfocus = next_btn.onUnfocus
+            next_btn.onUnfocus = function(self)
+                if orig_next_unfocus then orig_next_unfocus(self) elseif self.frame then self.frame.invert = false end
+                UIManager:setDirty(self.show_parent or self, "fast")
+                return true
+            end
+
+            table.insert(layout, { prev_btn, next_btn })
+        end
 
         -- Bottom Toolbar (Dual Storefront Action Buttons)
         table.insert(content_vg, LineWidget:new{
@@ -568,6 +620,32 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             callback = closeGallery,
         }
 
+        local orig_cfg_focus = config_btn.onFocus
+        config_btn.onFocus = function(self)
+            if orig_cfg_focus then orig_cfg_focus(self) elseif self.frame then self.frame.invert = true end
+            UIManager:setDirty(self.show_parent or self, "fast")
+            return true
+        end
+        local orig_cfg_unfocus = config_btn.onUnfocus
+        config_btn.onUnfocus = function(self)
+            if orig_cfg_unfocus then orig_cfg_unfocus(self) elseif self.frame then self.frame.invert = false end
+            UIManager:setDirty(self.show_parent or self, "fast")
+            return true
+        end
+
+        local orig_close_focus = close_btn.onFocus
+        close_btn.onFocus = function(self)
+            if orig_close_focus then orig_close_focus(self) elseif self.frame then self.frame.invert = true end
+            UIManager:setDirty(self.show_parent or self, "fast")
+            return true
+        end
+        local orig_close_unfocus = close_btn.onUnfocus
+        close_btn.onUnfocus = function(self)
+            if orig_close_unfocus then orig_close_unfocus(self) elseif self.frame then self.frame.invert = false end
+            UIManager:setDirty(self.show_parent or self, "fast")
+            return true
+        end
+
         local btn_row = FrameContainer:new{
             padding = sc(8),
             bordersize = 0,
@@ -583,6 +661,8 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
         }
         table.insert(content_vg, btn_row)
 
+        table.insert(layout, { config_btn, close_btn })
+
         local card = FrameContainer:new{
             padding = 0,
             radius = storefront_theme.radius_window or 0,
@@ -592,12 +672,6 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             width = dialog_w,
             content_vg,
         }
-
-        local layout = {}
-        for _, item in ipairs(focusable_rows) do
-            table.insert(layout, { item })
-        end
-        table.insert(layout, { config_btn, close_btn })
 
         local key_events = {
             Close = { { "Back" }, { "Escape" } },
@@ -630,38 +704,115 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
             }
         }
 
+        local prev_selected = cur_selected or initial_selected
+        local target_y = 1
+        local target_x = 1
+        if prev_selected then
+            target_y = math.max(1, math.min(#layout, prev_selected.y or 1))
+            target_x = math.max(1, math.min(#layout[target_y], prev_selected.x or 1))
+        end
+
         overlay = FocusManager:new{
             align = "center",
             vertical_align = "center",
             dimen = Geom:new{ w = sw, h = sh },
             layout = layout,
-            selected = { x = 1, y = 1 },
-            key_events = key_events,
+            selected = { x = target_x, y = target_y },
             ges_events = ges_events,
             card,
         }
 
-        for _, item in ipairs(focusable_rows) do
-            item.show_parent = overlay
+        overlay.key_events = overlay.key_events or {}
+        overlay.key_events.Close = { { "Back" }, { "Escape" } }
+        overlay.key_events.NextPage = {
+            { "PageDown" },
+            { "RPgFwd" },
+            { "LPgFwd" },
+        }
+        overlay.key_events.PrevPage = {
+            { "PageUp" },
+            { "RPgBack" },
+            { "LPgBack" },
+        }
+        if Input and Input.group then
+            if Input.group.Back then
+                table.insert(overlay.key_events.Close, { Input.group.Back })
+            end
+            if Input.group.PgFwd then
+                table.insert(overlay.key_events.NextPage, { Input.group.PgFwd })
+            end
+            if Input.group.PgBack then
+                table.insert(overlay.key_events.PrevPage, { Input.group.PgBack })
+            end
         end
-        config_btn.show_parent = overlay
-        close_btn.show_parent = overlay
 
-        overlay.onNextPage = function()
+        for _, row in ipairs(layout) do
+            for _, item in ipairs(row) do
+                item.show_parent = overlay
+            end
+        end
+
+        overlay.onPress = function(self)
+            local item = self:getFocusItem()
+            if item then
+                if item.onTapSelect then
+                    return item:onTapSelect()
+                elseif item.callback then
+                    item.callback()
+                    return true
+                end
+            end
+            if FocusManager and FocusManager.onPress then
+                return FocusManager.onPress(self)
+            end
+            return false
+        end
+
+        if prev_selected or Device:hasDPad() then
+            local target_item = layout[target_y] and layout[target_y][target_x]
+            if target_item then
+                if target_item.onFocus then
+                    target_item:onFocus()
+                elseif target_item.handleEvent then
+                    target_item:handleEvent(Event:new("Focus"))
+                end
+            end
+        end
+
+        overlay.onNextPage = function(self)
             if current_page < total_pages then
                 current_page = current_page + 1
-                refresh()
+                refresh({ x = 1, y = 1 })
             end
             return true
         end
 
-        overlay.onPrevPage = function()
+        overlay.onPrevPage = function(self)
             if current_page > 1 then
                 current_page = current_page - 1
-                refresh()
+                refresh({ x = 1, y = 1 })
             end
             return true
         end
+
+        -- Direct onKeyPress/onKeyRepeat fallback to guarantee physical button presses paginate
+        local orig_onKeyPress = overlay.onKeyPress
+        local function handleKey(self, key)
+            if orig_onKeyPress and orig_onKeyPress(self, key) then
+                return true
+            end
+            local k_name = (type(key) == "table" and key.key) or (type(key) == "string" and key) or ""
+            if k_name == "PageDown" or k_name == "RPgFwd" or k_name == "LPgFwd"
+                or (type(key) == "table" and (key.PageDown or key.RPgFwd or key.LPgFwd)) then
+                return self:onNextPage()
+            elseif k_name == "PageUp" or k_name == "RPgBack" or k_name == "LPgBack"
+                or (type(key) == "table" and (key.PageUp or key.RPgBack or key.LPgBack)) then
+                return self:onPrevPage()
+            end
+            return false
+        end
+        overlay.onKeyPress = handleKey
+        overlay.onKeyRepeat = handleKey
 
         overlay.onSwipe = function(self, arg, ges_ev)
             local ev = (type(arg) == "table" and arg) or (type(ges_ev) == "table" and ges_ev)
@@ -685,7 +836,7 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
         UIManager:show(overlay, "ui")
     end
 
-    refresh()
+    refresh(initial_selected)
 end
 
 return StorefrontScreensaverGallery

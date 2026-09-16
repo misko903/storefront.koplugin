@@ -15,6 +15,7 @@ local InputContainer = require("ui/widget/container/inputcontainer")
 local LineWidget = require("ui/widget/linewidget")
 local TextBoxWidget = require("ui/widget/textboxwidget")
 local TextWidget = require("ui/widget/textwidget")
+local ImageWidget = require("ui/widget/imagewidget")
 local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
@@ -24,6 +25,45 @@ local _ = function(key, ...) return Localization:t(key, ...) end
 local storefront_theme = require("storefront_theme")
 local StorefrontUtils = require("storefront_utils")
 local NotificationMgr = require("storefront_notification_mgr")
+
+local _asset_path_cache = {}
+local function getAssetPath(filename)
+    if not filename or filename == "" then return nil end
+    if _asset_path_cache[filename] ~= nil then
+        return _asset_path_cache[filename] or nil
+    end
+
+    local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+    if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+
+    local info = debug.getinfo(1, "S")
+    local dir = (info and info.source and info.source:match("^@(.*[/\\])")) or ""
+    local rel_path = dir .. "assets/" .. filename
+
+    local paths_to_try = { rel_path }
+    local ok_ds, DataStorage = pcall(require, "datastorage")
+    local data_dir = ok_ds and DataStorage and DataStorage.getDataDir and DataStorage:getDataDir()
+    if data_dir then
+        table.insert(paths_to_try, data_dir .. "/" .. rel_path)
+        table.insert(paths_to_try, data_dir .. "/plugins/storefront.koplugin/assets/" .. filename)
+    end
+
+    for _, p in ipairs(paths_to_try) do
+        if ok_lfs and lfs and lfs.attributes and lfs.attributes(p, "mode") == "file" then
+            _asset_path_cache[filename] = p
+            return p
+        end
+        local f = io.open(p, "r")
+        if f then
+            f:close()
+            _asset_path_cache[filename] = p
+            return p
+        end
+    end
+
+    _asset_path_cache[filename] = false
+    return nil
+end
 
 local StorefrontNotificationSettingsDialog = {}
 
@@ -266,14 +306,27 @@ function StorefrontNotificationSettingsDialog.show(Storefront, on_close_callback
             table.insert(content_vg, create_section_header(_("Testing & Preview")))
 
             local is_debug_active = NotificationMgr.isDebugAlwaysTrigger()
-            local debug_check_sym = is_debug_active and "☑" or "☐"
-
-            local check_widget = TextWidget:new{
-                text = debug_check_sym,
-                face = Font:getFace("cfont", ui_font_size + sc(2)),
-                bold = true,
-                fgcolor = Blitbuffer.COLOR_BLACK,
-            }
+            local icon_file = getAssetPath(is_debug_active and "check-square.svg" or "square.svg")
+            local check_widget
+            local check_sz = ui_font_size + sc(2)
+            if icon_file then
+                check_widget = ImageWidget:new{
+                    file = icon_file,
+                    width = check_sz,
+                    height = check_sz,
+                    scale_factor = 0,
+                    is_icon = true,
+                    alpha = true,
+                }
+            else
+                local debug_check_sym = is_debug_active and "☑" or "☐"
+                check_widget = TextWidget:new{
+                    text = debug_check_sym,
+                    face = Font:getFace("cfont", check_sz),
+                    bold = true,
+                    fgcolor = Blitbuffer.COLOR_BLACK,
+                }
+            end
 
             local debug_label = TextWidget:new{
                 text = _("Trigger on every startup (testing)"),

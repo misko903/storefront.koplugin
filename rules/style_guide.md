@@ -372,3 +372,99 @@ Any custom row, toggle card, or list item placed into a `layout` array MUST impl
 ### 8.4 Auto-Scrolling on Focus Change
 In scrollable dialogs (`ScrollableContainer`), when focus moves to an element positioned outside the current visible viewport, the container's scroll offset must automatically adjust to bring the focused widget fully into view.
 
+### 8.5 Paginated Dialog Hardware Page Turn Keys (Required)
+
+Any dialog or view with multi-page pagination **MUST** bind physical hardware page turn buttons (`PgFwd`/`PgBack`, `PageDown`/`PageUp`) in addition to on-screen `‹` / `›` buttons. This ensures readers with physical page-turn hardware buttons (Kindle, Kobo, Onyx Boox, etc.) can paginate without tapping the screen.
+
+> [!CAUTION]
+> **KOReader `FocusManager:_init` Override Caveat**:
+> Passing `key_events = key_events` inside `FocusManager:new{ key_events = ... }` **does not work** in KOReader.
+> KOReader's `FocusManager:_init()` unconditionally executes `self.key_events = util.tableDeepCopy(KEY_EVENTS)`, which overwrites any custom table with default D-pad mappings. Custom key events **MUST** be assigned directly to `overlay.key_events` **after** calling `FocusManager:new{ ... }`.
+
+**Standard Implementation**:
+```lua
+overlay = FocusManager:new{
+    align = "center",
+    vertical_align = "center",
+    dimen = Geom:new{ w = sw, h = sh },
+    layout = layout,
+    selected = { x = 1, y = 1 },
+    ges_events = ges_events,
+    card,
+}
+
+-- Assign key_events directly on overlay AFTER FocusManager:new:
+overlay.key_events = overlay.key_events or {}
+overlay.key_events.Close = { { "Back" }, { "Escape" } }
+overlay.key_events.NextPage = {
+    { "PageDown" },
+    { "RPgFwd" },
+    { "LPgFwd" },
+}
+overlay.key_events.PrevPage = {
+    { "PageUp" },
+    { "RPgBack" },
+    { "LPgBack" },
+}
+local Device_input = require("device").input
+if Device_input and Device_input.group then
+    if Device_input.group.Back then
+        table.insert(overlay.key_events.Close, { Device_input.group.Back })
+    end
+    if Device_input.group.PgFwd then
+        table.insert(overlay.key_events.NextPage, { Device_input.group.PgFwd })
+    end
+    if Device_input.group.PgBack then
+        table.insert(overlay.key_events.PrevPage, { Device_input.group.PgBack })
+    end
+end
+
+-- Wire page change handlers on the overlay:
+overlay.onNextPage = function(self)
+    if current_page < total_pages then
+        current_page = current_page + 1
+        renderPage(true)
+    end
+    return true
+end
+overlay.onPrevPage = function(self)
+    if current_page > 1 then
+        current_page = current_page - 1
+        renderPage(true)
+    end
+    return true
+end
+
+-- Fallback onKeyPress/onKeyRepeat handler to guarantee hardware keys trigger pagination:
+local orig_onKeyPress = overlay.onKeyPress
+local function handleKey(self, key)
+    if orig_onKeyPress and orig_onKeyPress(self, key) then
+        return true
+    end
+    local k_name = (type(key) == "table" and key.key) or (type(key) == "string" and key) or ""
+    if k_name == "PageDown" or k_name == "RPgFwd" or k_name == "LPgFwd"
+        or (type(key) == "table" and (key.PageDown or key.RPgFwd or key.LPgFwd)) then
+        return self:onNextPage()
+    elseif k_name == "PageUp" or k_name == "RPgBack" or k_name == "LPgBack"
+        or (type(key) == "table" and (key.PageUp or key.RPgBack or key.LPgBack)) then
+        return self:onPrevPage()
+    end
+    return false
+end
+overlay.onKeyPress = handleKey
+overlay.onKeyRepeat = handleKey
+```
+
+**Swipe Gesture Fallback**: Also wire left/right swipes so touch users have a natural gesture shortcut:
+```lua
+overlay.onSwipe = function(self, arg, ges_ev)
+    local ev = (type(arg) == "table" and arg) or (type(ges_ev) == "table" and ges_ev)
+    local dir = ev and ev.direction
+    if dir == "left"  or dir == "west"  then return overlay:onNextPage() end
+    if dir == "right" or dir == "east"  then return overlay:onPrevPage() end
+    return false
+end
+```
+
+**Key Rule**: Key events and page turn handlers must be declared inside the `if not overlay then` first-creation block. The overlay is reused across page renders (`card[1] = content_vg` + `UIManager:setDirty`), so key events, `onNextPage`/`onPrevPage`, and `onKeyPress` handlers persist across page flips without re-registration.
+

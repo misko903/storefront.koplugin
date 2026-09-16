@@ -162,6 +162,42 @@ do
         check(string.format("Export dialog row %d has onTap", idx), type(row.onTap) == "function")
         check(string.format("Export dialog row %d has onTapSelect", idx), type(row.onTapSelect) == "function")
     end
+
+    -- Check Version Strategy row (Row 2) has no ugly Unicode gear icon and toggles in-place with focus retained
+    local strat_row = exp_overlay.layout[2][1]
+    local strat_widget = strat_row.strat_widget or (strat_row.frame and strat_row.frame[1])
+    local strat_text = (strat_widget and strat_widget.text) or (strat_widget and strat_widget.args and strat_widget.args.text)
+    check("Version Strategy row has no gear icon ⚙", strat_text and not strat_text:find("⚙"))
+    check("Version Strategy row begins with 'Versions:'", strat_text and strat_text:find("^Versions:") ~= nil)
+    check("Version Strategy row initial text is Latest Releases", strat_text and strat_text:find("Latest Releases") ~= nil)
+
+    -- Focus strategy row and verify invert
+    exp_overlay.selected = { x = 1, y = 2 }
+    strat_row:onFocus()
+    check("Version strategy row is visually inverted on focus", strat_row.frame.invert == true)
+
+    -- Toggle with hardware button (onTapSelect)
+    strat_row:onTapSelect()
+    local updated_text = (strat_widget and strat_widget.text) or (strat_widget and strat_widget.args and strat_widget.args.text)
+    check("Version strategy row text toggled to Pin Current Installed Versions", updated_text and updated_text:find("Pin Current Installed Versions") ~= nil)
+    check("Version strategy row remains highlighted after button toggle", strat_row.frame.invert == true)
+    check("Focus position stayed on row 2 (not reset to row 1)", exp_overlay.selected.y == 2)
+
+    -- Toggle again back to Latest Releases
+    strat_row:onTapSelect()
+    local reverted_text = (strat_widget and strat_widget.text) or (strat_widget and strat_widget.args and strat_widget.args.text)
+    check("Version strategy row text toggled back to Latest Releases", reverted_text and reverted_text:find("Latest Releases") ~= nil)
+    check("Version strategy row remains highlighted after second toggle", strat_row.frame.invert == true)
+    check("Focus position still on row 2", exp_overlay.selected.y == 2)
+
+    -- Test Checkbox row 3 (Include Plugins)
+    local plug_row = exp_overlay.layout[3][1]
+    exp_overlay.selected = { x = 1, y = 3 }
+    plug_row:onFocus()
+    check("Include Plugins row inverted on focus", plug_row.frame.invert == true)
+    plug_row:onTapSelect()
+    check("Include Plugins row remains highlighted after button toggle", plug_row.frame.invert == true)
+    check("Focus position stayed on row 3", exp_overlay.selected.y == 3)
 end
 
 -- 4. Test Diff Dialog Touch Responsiveness
@@ -261,6 +297,31 @@ do
     check("onSwipe west (next) succeeds", swipe_west == true)
     local swipe_east = multi_overlay:onSwipe({ direction = "east" })
     check("onSwipe east (prev) succeeds", swipe_east == true)
+
+    -- Test hardware page turn key presses
+    -- 1. PageDown / PageUp
+    local kp_next = multi_overlay:onKeyPress({ key = "PageDown", PageDown = true })
+    check("onKeyPress PageDown succeeds", kp_next == true)
+    check("PageDown flipped to Page 2", #multi_overlay.layout == 4)
+    local kp_prev = multi_overlay:onKeyPress({ key = "PageUp", PageUp = true })
+    check("onKeyPress PageUp succeeds", kp_prev == true)
+    check("PageUp flipped back to Page 1", #multi_overlay.layout == 10)
+
+    -- 2. Hardware e-reader page buttons (RPgFwd / RPgBack)
+    local kp_rpgfwd = multi_overlay:onKeyPress({ key = "RPgFwd", RPgFwd = true })
+    check("onKeyPress RPgFwd succeeds", kp_rpgfwd == true)
+    check("RPgFwd flipped to Page 2", #multi_overlay.layout == 4)
+    local kp_rpgback = multi_overlay:onKeyPress({ key = "RPgBack", RPgBack = true })
+    check("onKeyPress RPgBack succeeds", kp_rpgback == true)
+    check("RPgBack flipped back to Page 1", #multi_overlay.layout == 10)
+
+    -- 3. Hardware e-reader page buttons (LPgFwd / LPgBack)
+    local kp_lpgfwd = multi_overlay:onKeyPress({ key = "LPgFwd", LPgFwd = true })
+    check("onKeyPress LPgFwd succeeds", kp_lpgfwd == true)
+    check("LPgFwd flipped to Page 2", #multi_overlay.layout == 4)
+    local kp_lpgback = multi_overlay:onKeyPress({ key = "LPgBack", LPgBack = true })
+    check("onKeyPress LPgBack succeeds", kp_lpgback == true)
+    check("LPgBack flipped back to Page 1", #multi_overlay.layout == 10)
 end
 
 print(string.format("=== Single-Modal Settings & Blueprint Touch Tests Complete: %d Failures ===", failures))

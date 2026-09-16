@@ -126,6 +126,43 @@ do
     local overlay = _G.ui_tracker.last_shown
     check("Screensaver Config dialog uses FocusManager", overlay and overlay.type == "FocusManager")
     check("Screensaver Config dialog has 2D layout", overlay and type(overlay.layout) == "table" and #overlay.layout >= 2)
+    check("Row 1 (Single Wallpaper) has 2 items (left item + Change btn)", overlay and overlay.layout[1] and #overlay.layout[1] == 2)
+    check("Row 2 (Folder Shuffle) has 2 items (left item + Collection btn)", overlay and overlay.layout[2] and #overlay.layout[2] == 2)
+    check("Row 3 (Book Cover) has 1 item", overlay and overlay.layout[3] and #overlay.layout[3] == 1)
+    check("Row 4 (Reading Progress) has 1 item", overlay and overlay.layout[4] and #overlay.layout[4] == 1)
+    check("Row 5 (Screensaver Folder) has 2 items (left item + Change btn)", overlay and overlay.layout[5] and #overlay.layout[5] == 2)
+
+    -- Navigation to right button on row 1
+    overlay:onFocusMove({ 1, 0 })
+    check("D-pad Right moves to Row 1 Column 2 (Change button)", overlay.selected.x == 2 and overlay.selected.y == 1)
+
+    -- Navigation down to right button on row 2
+    overlay:onFocusMove({ 0, 1 })
+    check("D-pad Down moves to Row 2 Column 2 (Collection button)", overlay.selected.x == 2 and overlay.selected.y == 2)
+
+    -- Navigation back left to mode item
+    overlay:onFocusMove({ -1, 0 })
+    check("D-pad Left moves back to Row 2 Column 1 (Folder Shuffle item)", overlay.selected.x == 1 and overlay.selected.y == 2)
+
+    -- Test focus preservation on toggle rows (rows 7, 8, 9, 10 etc.)
+    local total_rows = #overlay.layout
+    local toggle_row_idx = total_rows - 2 -- Stretch or banner toggle before Close
+    overlay.selected = { x = 1, y = toggle_row_idx }
+    overlay:onPress()
+
+    local toggled_overlay = _G.ui_tracker.last_shown
+    check("Screensaver Config preserves focused row after pressing Enter to toggle",
+        toggled_overlay and toggled_overlay.selected and toggled_overlay.selected.y == toggle_row_idx and toggled_overlay.selected.x == 1)
+
+    -- Toggle a second time on the next row
+    local next_toggle_idx = toggle_row_idx + 1
+    if next_toggle_idx < total_rows then
+        toggled_overlay.selected = { x = 1, y = next_toggle_idx }
+        toggled_overlay:onPress()
+        local second_toggled = _G.ui_tracker.last_shown
+        check("Screensaver Config preserves focus on subsequent toggle",
+            second_toggled and second_toggled.selected and second_toggled.selected.y == next_toggle_idx and second_toggled.selected.x == 1)
+    end
 end
 
 -- 7. Folder Picker Dialog
@@ -327,6 +364,93 @@ do
     check("Settings Card dialog uses FocusManager", overlay and overlay.type == "FocusManager")
     check("Settings Card dialog has 2D layout", overlay and type(overlay.layout) == "table" and #overlay.layout >= 2)
     check("Settings Card dialog has Close key event", overlay and overlay.key_events and overlay.key_events.Close ~= nil)
+end
+
+-- 16. Screensaver Gallery Dialog
+do
+    _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
+    local StorefrontScreensaverMgr = require("storefront_screensaver_mgr")
+    local orig_list = StorefrontScreensaverMgr.listLocalScreensavers
+    local orig_settings = StorefrontScreensaverMgr.getScreensaverSettings
+
+    StorefrontScreensaverMgr.listLocalScreensavers = function()
+        return {
+            {
+                id = "wp1",
+                title = "Wallpaper One",
+                filename = "wp1.png",
+                filepath = "/tmp/koreader/screensavers/wp1.png",
+                size = 102400,
+                is_active_single = true,
+            },
+            {
+                id = "wp2",
+                title = "Wallpaper Two",
+                filename = "wp2.png",
+                filepath = "/tmp/koreader/screensavers/wp2.png",
+                size = 204800,
+                is_active_single = false,
+            },
+        }
+    end
+    StorefrontScreensaverMgr.getScreensaverSettings = function()
+        return {
+            effective_mode = "single",
+        }
+    end
+
+    local mock_sf = {}
+    StorefrontScreensaverGallery.show(mock_sf)
+    local overlay = _G.ui_tracker.last_shown
+
+    check("Screensaver Gallery dialog uses FocusManager", overlay and overlay.type == "FocusManager")
+    check("Screensaver Gallery dialog has 2D layout", overlay and type(overlay.layout) == "table" and #overlay.layout >= 3)
+    -- Row 1 (wp1): active single wallpaper
+    check("Gallery Row 1 has 3 columns (thumb, active badge, remove btn)", overlay and overlay.layout[1] and #overlay.layout[1] == 3)
+    -- Row 2 (wp2): inactive wallpaper
+    check("Gallery Row 2 has 3 columns (thumb, set single btn, remove btn)", overlay and overlay.layout[2] and #overlay.layout[2] == 3)
+
+    -- Bottom row (Settings, Close)
+    local bottom_row = overlay.layout[#overlay.layout]
+    check("Gallery bottom row has 2 buttons (Settings, Close)", bottom_row and #bottom_row == 2)
+
+    -- Test D-pad navigation
+    -- Start at { x = 1, y = 1 } (Thumb 1)
+    overlay:onFocusMove({ 1, 0 })
+    check("D-pad Right moves to Row 1 Column 2 (Active badge)", overlay.selected.x == 2 and overlay.selected.y == 1)
+
+    overlay:onFocusMove({ 1, 0 })
+    check("D-pad Right moves to Row 1 Column 3 (Remove button)", overlay.selected.x == 3 and overlay.selected.y == 1)
+
+    overlay:onFocusMove({ 0, 1 })
+    check("D-pad Down moves to Row 2 Column 3 (Remove button for wp2)", overlay.selected.x == 3 and overlay.selected.y == 2)
+
+    overlay:onFocusMove({ -1, 0 })
+    check("D-pad Left moves to Row 2 Column 2 (Set Single button for wp2)", overlay.selected.x == 2 and overlay.selected.y == 2)
+
+    -- Press Set Single button on Row 2
+    local set_mode_called = false
+    local orig_set_mode = StorefrontScreensaverMgr.setScreensaverMode
+    StorefrontScreensaverMgr.setScreensaverMode = function(mode, opts)
+        set_mode_called = true
+    end
+    overlay:onPress()
+    check("Pressing Set Single button calls setScreensaverMode", set_mode_called)
+
+    local refreshed_overlay
+    for i = #_G.ui_tracker.shown, 1, -1 do
+        local w = _G.ui_tracker.shown[i]
+        if w and w.type == "FocusManager" then
+            refreshed_overlay = w
+            break
+        end
+    end
+    check("Screensaver Gallery preserves focus coordinates after Set Single",
+        refreshed_overlay and refreshed_overlay.selected and refreshed_overlay.selected.x == 2 and refreshed_overlay.selected.y == 2)
+
+    StorefrontScreensaverMgr.setScreensaverMode = orig_set_mode
+    StorefrontScreensaverMgr.listLocalScreensavers = orig_list
+    StorefrontScreensaverMgr.getScreensaverSettings = orig_settings
 end
 
 print(string.format("=== Non-Touch & FocusManager Tests Complete: %d Failures ===", failures))

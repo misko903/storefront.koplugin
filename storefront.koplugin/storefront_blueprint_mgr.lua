@@ -364,7 +364,15 @@ function M.saveToFile(bp, filepath)
     if not filepath or filepath == "" then
         local safe_name = (bp.name or "setup"):gsub("[^%w%-_]", "_"):lower()
         if safe_name == "" then safe_name = "storefront_setup" end
-        filepath = string.format("%s/%s.blueprint", M.getBlueprintsDir(), safe_name)
+        local dir = M.getBlueprintsDir()
+        local candidate = string.format("%s/%s.blueprint", dir, safe_name)
+        local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+        if not ok_lfs or not lfs then ok_lfs, lfs = pcall(require, "lfs") end
+        if lfs and lfs.attributes and lfs.attributes(candidate, "mode") then
+            -- Avoid clobbering an existing export with the same default name
+            candidate = string.format("%s/%s_%s.blueprint", dir, safe_name, os.date("%H%M%S"))
+        end
+        filepath = candidate
     end
 
     -- Ensure directory exists

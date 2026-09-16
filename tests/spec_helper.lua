@@ -504,6 +504,10 @@ package.loaded["ui/widget/textwidget"] = {
             end
             return { w = w, h = 20 }
         end
+        tw.setText = function(self, text)
+            self.text = text
+            if self.args then self.args.text = text end
+        end
         return tw
     end
 }
