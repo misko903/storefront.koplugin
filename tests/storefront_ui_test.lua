@@ -973,10 +973,10 @@ if ok_browser then
         -- Test Font Origin Filtering on Installed Tab (Issue: default fonts listed as user installed)
         local orig_list_fonts = MainStorefront.listInstalledFonts
         local mock_fonts = {
-            { font_name = "droid", name = "droid" },
-            { font_name = "freefont", name = "freefont" },
-            { font_name = "Bangers", name = "Bangers" },
-            { font_name = "Literata", name = "Literata", owner = "google", download_url = "https://example.com/literata.zip" },
+            { font_name = "droid", name = "droid", is_default = true, is_storefront = false },
+            { font_name = "freefont", name = "freefont", is_default = true, is_storefront = false },
+            { font_name = "Bangers", name = "Bangers", is_default = true, is_storefront = false, unmanaged = true },
+            { font_name = "Literata", name = "Literata", is_storefront = true, owner = "google", download_url = "https://example.com/literata.zip" },
         }
         MainStorefront.listInstalledPlugins = function() return {} end
         MainStorefront.listInstalledPatches = function() return {} end
@@ -991,7 +991,7 @@ if ok_browser then
         for _, e in ipairs(user_font_entries) do user_font_names[e.name] = true end
         check("Installed tab 'User Installed' excludes 'droid'", user_font_names["droid"], nil)
         check("Installed tab 'User Installed' excludes 'freefont'", user_font_names["freefont"], nil)
-        check("Installed tab 'User Installed' includes 'Bangers'", user_font_names["Bangers"], true)
+        check("Installed tab 'User Installed' excludes loose unmanaged 'Bangers'", user_font_names["Bangers"], nil)
         check("Installed tab 'User Installed' includes 'Literata'", user_font_names["Literata"], true)
 
         -- 2. Default only
@@ -1001,7 +1001,7 @@ if ok_browser then
         for _, e in ipairs(def_font_entries) do def_font_names[e.name] = true end
         check("Installed tab 'Default' includes 'droid'", def_font_names["droid"], true)
         check("Installed tab 'Default' includes 'freefont'", def_font_names["freefont"], true)
-        check("Installed tab 'Default' excludes 'Bangers'", def_font_names["Bangers"], nil)
+        check("Installed tab 'Default' includes system font 'Bangers'", def_font_names["Bangers"], true)
         check("Installed tab 'Default' excludes 'Literata'", def_font_names["Literata"], nil)
 
         -- 3. All fonts with kind_label tagging
@@ -1011,7 +1011,6 @@ if ok_browser then
         for _, e in ipairs(all_font_entries) do all_font_map[e.name] = e end
         check("Installed tab 'All' includes all 4 fonts", #all_font_entries, 4)
         check("Installed tab 'droid' kind_label contains 'Default'", all_font_map["droid"] and all_font_map["droid"].kind_label:find("Default") ~= nil, true)
-        check("Installed tab 'Bangers' kind_label does not contain 'Default'", all_font_map["Bangers"] and all_font_map["Bangers"].kind_label:find("Default") == nil, true)
 
         MainStorefront.listInstalledPlugins = orig_list_plugins
         MainStorefront.listInstalledPatches = orig_list_patches
@@ -1995,6 +1994,47 @@ if ok_browser then
 
             ToastModule.show = orig_toast_show
             MainStorefront.promptPluginInstallOptions = orig_prompt
+        end
+
+        -- 6. Test Installed tab User Installed (exclude_default) and Default Only (default_only) font filtering
+        do
+            local sf = {
+                installed_state = {
+                    filter_type = "font",
+                    filter_default = "exclude_default",
+                    filter_status = "all",
+                    search_text = "",
+                    sort_mode = "name_asc",
+                },
+                ensureInstalledState = function(self) end,
+                ensureBrowserState = function(self) end,
+                paginateEntries = function(self, items) return items end,
+                listInstalledPlugins = function() return {} end,
+                listInstalledPatches = function() return {} end,
+                listInstalledFonts = function()
+                    return {
+                        { font_name = "Literata", is_storefront = true, owner = "google", download_url = "http://ex.com/a.zip" },
+                        { font_name = "Bangers", is_storefront = false, unmanaged = true, is_default = true },
+                        { font_name = "droid", is_default = true, is_storefront = false },
+                    }
+                end,
+                collectUpdateSummary = function() return { data = {} } end,
+                collectPatchUpdateSummary = function() return { data = {} } end,
+            }
+            local items = MainStorefront.buildInstalledEntries(sf)
+            local item_names = {}
+            for _, item in ipairs(items or {}) do
+                table.insert(item_names, item.name)
+            end
+            check("User Installed filter includes Storefront-installed font 'Literata'", #item_names == 1 and item_names[1] == "Literata", true)
+
+            sf.installed_state.filter_default = "default_only"
+            local def_items = MainStorefront.buildInstalledEntries(sf)
+            local def_names = {}
+            for _, item in ipairs(def_items or {}) do
+                table.insert(def_names, item.name)
+            end
+            check("Default Only filter includes non-Storefront default fonts Bangers & droid", #def_names == 2, true)
         end
     end
 end

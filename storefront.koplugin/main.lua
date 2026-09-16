@@ -7315,18 +7315,23 @@ function Storefront:buildInstalledEntries(available_list_height)
 
     -- 3. Fonts
     if filter_type == "all" or filter_type == "font" then
-        local installed_fonts = listInstalledFonts()
+        local installed_fonts = (self and type(self.listInstalledFonts) == "function") and self:listInstalledFonts() or listInstalledFonts()
         for i, font_rec in ipairs(installed_fonts) do
             local font_name = font_rec.font_name or font_rec.repo or ""
             if font_name ~= "" then
+                local is_storefront = font_rec.is_storefront == true
+                if font_rec.is_storefront == nil then
+                    is_storefront = (font_rec.owner ~= nil and font_rec.owner ~= "") or (font_rec.download_url ~= nil and font_rec.download_url ~= "") or (font_rec.unmanaged == false)
+                end
+
                 local is_default = font_rec.is_default
                 if is_default == nil then
-                    is_default = isDefaultFont(font_rec)
+                    is_default = not is_storefront or isDefaultFont(font_rec)
                 end
 
                 local match_type = true
-                if filter_default == "exclude_default" and is_default then match_type = false end
-                if filter_default == "default_only" and not is_default then match_type = false end
+                if filter_default == "exclude_default" and not is_storefront then match_type = false end
+                if filter_default == "default_only" and (is_storefront or not is_default) then match_type = false end
 
                 local catalog_repo = nil
                 local ok_cache, Cache2 = pcall(require, "storefront_cache")

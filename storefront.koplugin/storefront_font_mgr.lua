@@ -615,6 +615,7 @@ local function listInstalledFonts()
         if isFontInstalled(font_name, installed_map) or isFontInstalled(rec, installed_map) then
             if not isAlreadySeen(font_name) then
                 markSeen(font_name, rec)
+                rec.is_storefront = true
                 table.insert(result, rec)
             end
         end
@@ -665,7 +666,9 @@ local function listInstalledFonts()
                                         download_url = cat and cat.download_url,
                                         installed_at = os.time(),
                                         version = cat and cat.version or "1.0",
-                                        is_default = is_def,
+                                        is_default = true,
+                                        is_storefront = false,
+                                        unmanaged = true,
                                     })
                                 end
                             end
@@ -690,7 +693,9 @@ local function listInstalledFonts()
                                         download_url = cat and cat.download_url,
                                         installed_at = os.time(),
                                         version = cat and cat.version or "1.0",
-                                        is_default = is_def,
+                                        is_default = true,
+                                        is_storefront = false,
+                                        unmanaged = true,
                                     })
                                 end
                             end
