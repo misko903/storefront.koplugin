@@ -142,15 +142,172 @@ end
 
 
 
+Matcher.CORE_KOREADER_FONTS = {
+    ["droid"] = true,
+    ["droidsans"] = true,
+    ["droidserif"] = true,
+    ["droidsansfallback"] = true,
+    ["droidsansmono"] = true,
+    ["droidmono"] = true,
+    ["freefont"] = true,
+    ["freesans"] = true,
+    ["freeserif"] = true,
+    ["freemono"] = true,
+    ["nerdfonts"] = true,
+    ["symbolsnerdfont"] = true,
+    ["nerdfont"] = true,
+    ["fontawesome"] = true,
+    ["noto"] = true,
+    ["notosans"] = true,
+    ["notoserif"] = true,
+    ["notocjk"] = true,
+    ["notosanscjk"] = true,
+    ["notocoloremoji"] = true,
+    ["notosanscjksc"] = true,
+    ["notosanscjktc"] = true,
+    ["notosanscjkjp"] = true,
+    ["notosanscjk_sc"] = true,
+    ["notosanscjk_tc"] = true,
+    ["notosanscjk_jp"] = true,
+    ["libertine"] = true,
+    ["linuxlibertine"] = true,
+    ["ebgaramond"] = true,
+    ["garamond"] = true,
+    ["charis"] = true,
+    ["charissil"] = true,
+    ["crimson"] = true,
+    ["crimsonpro"] = true,
+    ["baskervald"] = true,
+    ["baskervaldx"] = true,
+    ["andika"] = true,
+    ["tinos"] = true,
+    ["arimo"] = true,
+    ["cousine"] = true,
+    ["xits"] = true,
+    ["c059"] = true,
+    ["d050000l"] = true,
+    ["n019003l"] = true,
+    ["n021003l"] = true,
+    ["n022003l"] = true,
+    ["s050000l"] = true,
+    ["z003034l"] = true,
+    ["host"] = true,
+}
+
+local function cleanFontNameStr(name)
+    if not name or type(name) ~= "string" then return "" end
+    local clean = name:gsub("%.ttf$", ""):gsub("%.otf$", ""):gsub("%.asset$", "")
+    clean = clean:gsub("[%-_%s]?[Ee]xtra[%-_%s]?[Bb]old[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Ee]xtra[%-_%s]?[Bb]old[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Uu]ltra[%-_%s]?[Bb]old[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Uu]ltra[%-_%s]?[Bb]old[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Ss]emi[%-_%s]?[Bb]old[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Ss]emi[%-_%s]?[Bb]old[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Dd]emi[%-_%s]?[Bb]old[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Dd]emi[%-_%s]?[Bb]old[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]old[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]old[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]lack[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]lack[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Mm]edium[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Mm]edium[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Ll]ight[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Ll]ight[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Tt]hin[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Tt]hin[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]ook[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]ook[%-_%s]?[Oo]blique$", "")
+    clean = clean:gsub("[%-_%s]?[Ee]xtra[%-_%s]?[Bb]old$", "")
+    clean = clean:gsub("[%-_%s]?[Uu]ltra[%-_%s]?[Bb]old$", "")
+    clean = clean:gsub("[%-_%s]?[Ss]emi[%-_%s]?[Bb]old$", "")
+    clean = clean:gsub("[%-_%s]?[Dd]emi[%-_%s]?[Bb]old$", "")
+    clean = clean:gsub("[%-_%s]?[Ee]xtra[%-_%s]?[Ll]ight$", "")
+    clean = clean:gsub("[%-_%s]?[Uu]ltra[%-_%s]?[Ll]ight$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]old$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]lack$", "")
+    clean = clean:gsub("[%-_%s]?[Hh]eavy$", "")
+    clean = clean:gsub("[%-_%s]?[Mm]edium$", "")
+    clean = clean:gsub("[%-_%s]?[Ll]ight$", "")
+    clean = clean:gsub("[%-_%s]?[Tt]hin$", "")
+    clean = clean:gsub("[%-_%s]?[Hh]airline$", "")
+    clean = clean:gsub("[%-_%s]?[Bb]ook$", "")
+    clean = clean:gsub("[%-_%s]?[Rr]oman$", "")
+    clean = clean:gsub("[%-_%s]?[Nn]ormal$", "")
+    clean = clean:gsub("[%-_%s]?[Rr]egular$", "")
+    clean = clean:gsub("[%-_%s]?[Ii]talic$", "")
+    clean = clean:gsub("[%-_%s]?[Oo]blique$", "")
+    return clean:lower():gsub("[%s%-_]+", "")
+end
+
+function Matcher.isDefaultFont(font, maybe_font, StorefrontRef)
+    if type(font) == "string" then
+        font = { font_name = font }
+    end
+    if type(maybe_font) == "table" and (maybe_font.font_name or maybe_font.name or maybe_font.font_family or maybe_font.repo) then
+        font = maybe_font
+    elseif type(font) == "table" and not (font.font_name or font.name or font.font_family or font.repo) and type(maybe_font) == "table" then
+        font = maybe_font
+    elseif type(font) == "table" and font.name == "storefront" and type(maybe_font) == "table" then
+        font = maybe_font
+    end
+    if not font or type(font) ~= "table" then return false end
+
+    if font.is_default ~= nil then
+        return font.is_default == true
+    end
+
+    local candidates = {}
+    if font.font_name and font.font_name ~= "" then table.insert(candidates, font.font_name) end
+    if font.name and font.name ~= "" then table.insert(candidates, font.name) end
+    if font.font_family and font.font_family ~= "" then table.insert(candidates, font.font_family) end
+    if font.repo and font.repo ~= "" then table.insert(candidates, font.repo) end
+    if font.full_name and font.full_name ~= "" then table.insert(candidates, font.full_name) end
+    if font.font_file and font.font_file ~= "" then table.insert(candidates, font.font_file) end
+
+    if #candidates == 0 then return false end
+
+    local font_records = (InstallStore.listFonts and InstallStore.listFonts()) or {}
+
+    -- 1. Explicit override check in Storefront records
+    for _, cand in ipairs(candidates) do
+        local clean = cleanFontNameStr(cand)
+        local rec = font_records[cand] or font_records[cand:lower()] or (clean ~= "" and font_records[clean])
+        if rec then
+            if rec.installed_type == "user" or (rec.owner and rec.owner ~= "") or (rec.download_url and rec.download_url ~= "") then
+                return false
+            end
+            if rec.installed_type == "core" or rec.is_default == true then
+                return true
+            end
+        end
+    end
+
+    -- 2. Check known KOReader core bundled fonts set
+    for _, cand in ipairs(candidates) do
+        local low = cand:lower():gsub("%.ttf$", ""):gsub("%.otf$", ""):gsub("%.asset$", "")
+        local clean = cleanFontNameStr(cand)
+        if Matcher.CORE_KOREADER_FONTS[low] or Matcher.CORE_KOREADER_FONTS[clean] then
+            return true
+        end
+    end
+
+    return false
+end
+
 function Matcher.isDefaultPatch(patch)
     return false
 end
 
 function Matcher:init(Storefront)
     Storefront.CORE_KOREADER_PLUGINS = Matcher.CORE_KOREADER_PLUGINS
+    Storefront.CORE_KOREADER_FONTS = Matcher.CORE_KOREADER_FONTS
     
     Storefront.isDefaultPlugin = function(self_or_plugin, plugin, maybe_plugin)
         return Matcher.isDefaultPlugin(self_or_plugin, plugin, maybe_plugin)
+    end
+    
+    Storefront.isDefaultFont = function(self_or_font, font, maybe_font)
+        return Matcher.isDefaultFont(self_or_font, font, maybe_font)
     end
     
     Storefront.isDefaultPatch = function(sf, patch)

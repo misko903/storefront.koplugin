@@ -1139,6 +1139,17 @@ local function isDefaultPatch(patch)
     return Storefront:isDefaultPatch(patch)
 end
 
+local function isDefaultFont(font, maybe_font)
+    if Storefront and type(Storefront.isDefaultFont) == "function" then
+        return Storefront:isDefaultFont(font, maybe_font)
+    end
+    local ok_m, Matcher = pcall(require, "storefront_match")
+    if ok_m and Matcher and Matcher.isDefaultFont then
+        return Matcher.isDefaultFont(font, maybe_font)
+    end
+    return false
+end
+
 
 function Storefront:togglePluginDisabled(dirname, skip_prompt)
     if not dirname or dirname == "" then return false, "" end
@@ -7308,6 +7319,15 @@ function Storefront:buildInstalledEntries(available_list_height)
         for i, font_rec in ipairs(installed_fonts) do
             local font_name = font_rec.font_name or font_rec.repo or ""
             if font_name ~= "" then
+                local is_default = font_rec.is_default
+                if is_default == nil then
+                    is_default = isDefaultFont(font_rec)
+                end
+
+                local match_type = true
+                if filter_default == "exclude_default" and is_default then match_type = false end
+                if filter_default == "default_only" and not is_default then match_type = false end
+
                 local catalog_repo = nil
                 local ok_cache, Cache2 = pcall(require, "storefront_cache")
                 if ok_cache and Cache2 then
@@ -7341,7 +7361,12 @@ function Storefront:buildInstalledEntries(available_list_height)
                     end
                 end
 
-                if match_search then
+                if match_type and match_search then
+                    local kind_parts = { _("Font") }
+                    if is_default then
+                        table.insert(kind_parts, _("Default"))
+                    end
+                    local meta_kind = table.concat(kind_parts, " · ")
 
                     table.insert(items, {
                         name = font_name,
@@ -7349,12 +7374,13 @@ function Storefront:buildInstalledEntries(available_list_height)
                         stars_fmt = (catalog_repo and catalog_repo.stars and tonumber(catalog_repo.stars) and tonumber(catalog_repo.stars) > 0) and tostring(catalog_repo.stars) or nil,
                         updated = formatTimestamp(font_rec.installed_at),
                         mtime = font_rec.installed_at or 0,
-                        kind_label = _("Font"),
-                        description = (catalog_repo and catalog_repo.description) or "",
+                        kind_label = meta_kind,
+                        description = (catalog_repo and catalog_repo.description) or (is_default and _("Pre-installed core KOReader font.") or ""),
                         badge = font_rec.pending_download and _("Offline Regular") or nil,
                         is_entry = true,
                         is_installed_item = true,
                         is_font = true,
+                        is_default = is_default,
                         kind = "font",
                         font_name = font_name,
                         font_family = catalog_repo and catalog_repo.font_family or font_name,
@@ -7366,13 +7392,15 @@ function Storefront:buildInstalledEntries(available_list_height)
                                 owner = font_rec.owner or "",
                                 full_name = font_rec.full_name or font_name,
                                 download_url = font_rec.download_url,
-                                description = "",
+                                description = is_default and _("Pre-installed core KOReader font.") or "",
                                 stars = 0,
                                 font_family = font_name,
+                                is_default = is_default,
                             }
                             if not repo.download_url and catalog_repo then
                                 repo.download_url = catalog_repo.download_url
                             end
+                            repo.is_default = is_default
                             local details_dialog = DetailsDialog:new{
                                 Storefront = self,
                                 repo = repo,
@@ -7388,38 +7416,43 @@ function Storefront:buildInstalledEntries(available_list_height)
 
     -- 4. Screensavers
     if filter_type == "all" or filter_type == "screensaver" then
-        local StorefrontScreensaverMgr = require("storefront_screensaver_mgr")
-        local local_ss = StorefrontScreensaverMgr.listLocalScreensavers()
-        local ss_settings = StorefrontScreensaverMgr.getScreensaverSettings()
+        local match_type = true
+        if filter_default == "default_only" then match_type = false end
 
-        for i, ss_item in ipairs(local_ss) do
-            local is_active_single = ss_item.is_active_single and ss_settings.effective_mode == "single"
-            local is_in_shuffle = ss_settings.effective_mode == "shuffle"
-            local badge_str = is_active_single and _("Active Single") or (is_in_shuffle and _("Shuffle Pool") or nil)
+        if match_type then
+            local StorefrontScreensaverMgr = require("storefront_screensaver_mgr")
+            local local_ss = StorefrontScreensaverMgr.listLocalScreensavers()
+            local ss_settings = StorefrontScreensaverMgr.getScreensaverSettings()
 
-            local match_search = true
-            if search_text ~= "" then
-                local s_title = (ss_item.title or ""):lower()
-                local s_fname = (ss_item.filename or ""):lower()
-                if not (s_title:find(search_text, 1, true) or s_fname:find(search_text, 1, true)) then
-                    match_search = false
+            for i, ss_item in ipairs(local_ss) do
+                local is_active_single = ss_item.is_active_single and ss_settings.effective_mode == "single"
+                local is_in_shuffle = ss_settings.effective_mode == "shuffle"
+                local badge_str = is_active_single and _("Active Single") or (is_in_shuffle and _("Shuffle Pool") or nil)
+
+                local match_search = true
+                if search_text ~= "" then
+                    local s_title = (ss_item.title or ""):lower()
+                    local s_fname = (ss_item.filename or ""):lower()
+                    if not (s_title:find(search_text, 1, true) or s_fname:find(search_text, 1, true)) then
+                        match_search = false
+                    end
                 end
-            end
 
-            if match_search then
-                local desc_str = (ss_item.author and ss_item.author ~= "") and (_("By ") .. ss_item.author) or ss_item.filename
-                table.insert(items, {
-                    name = ss_item.title or ss_item.filename,
-                    owner = ss_item.author or "",
-                    updated = formatTimestamp(ss_item.mtime),
-                    mtime = ss_item.mtime or 0,
-                    kind_label = _("Screensaver"),
-                    description = desc_str,
-                    badge = badge_str,
-                    thumbnail_file = ss_item.thumbnail_file or ss_item.filepath,
-                    is_entry = true,
-                    is_installed_item = true,
-                    is_screensaver = true,
+                if match_search then
+                    local desc_str = (ss_item.author and ss_item.author ~= "") and (_("By ") .. ss_item.author) or ss_item.filename
+                    table.insert(items, {
+                        name = ss_item.title or ss_item.filename,
+                        owner = ss_item.author or "",
+                        updated = formatTimestamp(ss_item.mtime),
+                        mtime = ss_item.mtime or 0,
+                        kind_label = _("Screensaver"),
+                        description = desc_str,
+                        badge = badge_str,
+                        thumbnail_file = ss_item.thumbnail_file or ss_item.filepath,
+                        is_entry = true,
+                        is_installed_item = true,
+                        is_screensaver = true,
+                        is_default = false,
                     kind = "screensaver",
                     filepath = ss_item.filepath,
                     callback = function()
@@ -7449,6 +7482,7 @@ function Storefront:buildInstalledEntries(available_list_height)
                     end,
                 })
             end
+        end
         end
     end
 

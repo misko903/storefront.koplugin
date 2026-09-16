@@ -881,6 +881,9 @@ function StorefrontDetailsDialog:init()
         is_default = self.update_item.is_default
     elseif self.repo and self.repo.is_default ~= nil then
         is_default = self.repo.is_default
+    elseif is_font and self.Storefront and self.Storefront.isDefaultFont then
+        local font_obj = (self.update_item and self.update_item.font) or self.repo
+        is_default = self.Storefront:isDefaultFont(font_obj)
     elseif self.Storefront and self.Storefront.isDefaultPlugin then
         local plugin_obj = (self.update_item and self.update_item.plugin) or self.repo
         is_default = self.Storefront:isDefaultPlugin(plugin_obj)
@@ -888,7 +891,7 @@ function StorefrontDetailsDialog:init()
     if is_default then
         is_installed = true
         if desc_text == "" or desc_text == _("No README available.") then
-            desc_text = _("Pre-installed core KOReader plugin.")
+            desc_text = is_font and _("Pre-installed core KOReader font.") or _("Pre-installed core KOReader plugin.")
         end
     end
 
@@ -1168,7 +1171,22 @@ function StorefrontDetailsDialog:init()
             is_item_disabled = plugins_disabled[p_name] == true
         end
 
-        if is_default then
+        if is_default and is_font then
+            main_action_btn = Button:new{
+                text = _("Pre-installed Font"),
+                text_font_size = 18,
+                text_font_color = Blitbuffer.COLOR_GRAY,
+                bordersize = sc(1),
+                border_color = Blitbuffer.COLOR_GRAY,
+                padding = sc(11),
+                radius = sc(4),
+                width = action_btn_width,
+                show_parent = self,
+                callback = function()
+                    self:onClose()
+                end,
+            }
+        elseif is_default then
             local toggle_btn = Button:new{
                 text = is_item_disabled and _("Enable") or _("Disable"),
                 text_font_size = 18,

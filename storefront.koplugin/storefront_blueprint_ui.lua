@@ -1850,9 +1850,22 @@ function StorefrontBlueprintUI.batchInstall(Storefront, queue, on_complete)
                 title = _("Installation Complete"),
                 text = msg .. "\n\n" .. _("Restart KOReader now to activate the new plugins and patches?"),
                 ok_text = _("Restart Now"),
-                cancel_text = _("Later"),
                 ok_callback = function()
-                    UIManager:restart()
+                    local sf = (Storefront and (Storefront.instance or Storefront))
+                    if sf then
+                        if sf.closeBrowserMenu then pcall(function() sf:closeBrowserMenu() end) end
+                        if sf.closeUpdatesDialog then pcall(function() sf:closeUpdatesDialog(true) end) end
+                        if sf.closePatchUpdatesDialog then pcall(function() sf:closePatchUpdatesDialog(true) end) end
+                    end
+
+                    local Event = require("ui/event")
+                    UIManager:nextTick(function()
+                        if UIManager.broadcastEvent then
+                            UIManager:broadcastEvent(Event:new("Restart"))
+                        elseif UIManager.restartKOReader then
+                            UIManager:restartKOReader()
+                        end
+                    end)
                 end,
                 cancel_callback = function()
                     if on_complete then on_complete() end

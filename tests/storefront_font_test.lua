@@ -1,5 +1,3 @@
--- storefront_font_test.lua
--- Unit tests for Storefront Font Installation, Sync Queue & InstallStore logic
 package.path = "plugins/storefront.koplugin/?.lua;storefront.koplugin/?.lua;../?.lua;?.lua;" .. package.path
 
 local failures = 0
@@ -29,6 +27,12 @@ package.loaded["socketutil"] = {
 package.loaded["ltn12"] = {
     sink = { table = function() return function() end end }
 }
+package.loaded["ui/uimanager"] = { show = function() end, close = function() end }
+package.loaded["ui/widget/infomessage"] = { new = function(_, o) return o end }
+package.loaded["ui/widget/inputdialog"] = { new = function(_, o) return o end }
+package.loaded["ui/widget/multiinputdialog"] = { new = function(_, o) return o end }
+package.loaded["ffi/blitbuffer"] = { COLOR_WHITE = 0xFFFFFF, COLOR_BLACK = 0x000000, COLOR_GRAY = 0x888888 }
+package.loaded["gettext"] = function(s) return s end
 
 local ok_json, real_json = pcall(require, "json")
 if not ok_json or not real_json or type(real_json.decode) ~= "function" then
@@ -74,7 +78,14 @@ end
 package.loaded["logger"] = { dbg = function() end, info = function() end, warn = function() end, err = function() end }
 package.loaded["datastorage"] = { getSettingsDir = function() return "/tmp" end, getDataDir = function() return "/tmp" end }
 package.loaded["ffi/blitbuffer"] = { COLOR_BLACK = 0, COLOR_WHITE = 1, Color8 = function(g) return g end }
-package.loaded["ffi/util"] = { realpath = function(p) return p end, purgeDir = function() end }
+package.loaded["ffi/util"] = {
+    realpath = function(p) return p end,
+    purgeDir = function() end,
+    joinPath = function(...)
+        local parts = { ... }
+        return table.concat(parts, "/"):gsub("//+", "/")
+    end,
+}
 package.loaded["ffi/utf8proc"] = {}
 package.loaded["ui/font"] = { getFace = function() return {} end }
 package.loaded["ui/geometry"] = { new = function(a, b) return b or a end }
@@ -99,6 +110,14 @@ package.loaded["gettext"] = setmetatable({
 }, {
     __call = function(_, s) return s end,
 })
+
+local ok_util, util = pcall(require, "util")
+if ok_util and util and not util.joinPath then
+    util.joinPath = function(...)
+        local parts = { ... }
+        return table.concat(parts, "/"):gsub("//+", "/")
+    end
+end
 
 print("=== Running Font System Unit Tests ===")
 
@@ -237,6 +256,39 @@ if ok_fm and FontMgr then
     }
     check("isFontInstalled matches 'Gentium Plus' when 'NV_Gentium' is on disk", FontMgr.isFontInstalled("Gentium Plus", mock_nv_map) == true)
     check("isFontInstalled matches table repo Gentium Plus when nvgentium is on disk", FontMgr.isFontInstalled({ name = "Gentium Plus", font_family = "Gentium Plus" }, mock_nv_map) == true)
+end
+
+-- Test 11: Default Font Classification (isDefaultFont)
+local ok_match, Matcher = pcall(require, "storefront_match")
+check("storefront_match requires cleanly", ok_match and Matcher ~= nil)
+if ok_match and Matcher then
+    check("isDefaultFont identifies 'droid' as core default font", Matcher.isDefaultFont("droid") == true)
+    check("isDefaultFont identifies 'freefont' as core default font", Matcher.isDefaultFont("freefont") == true)
+    check("isDefaultFont identifies 'nerdfonts' as core default font", Matcher.isDefaultFont("nerdfonts") == true)
+    check("isDefaultFont identifies 'FreeSerif' as core default font", Matcher.isDefaultFont("FreeSerif") == true)
+    check("isDefaultFont identifies 'Noto Sans' as core default font", Matcher.isDefaultFont("Noto Sans") == true)
+    check("isDefaultFont identifies table with name 'droid' as core default font", Matcher.isDefaultFont({ name = "droid" }) == true)
+    
+    check("isDefaultFont rejects user font 'Bangers'", Matcher.isDefaultFont("Bangers") == false)
+    check("isDefaultFont rejects user font 'Caveat'", Matcher.isDefaultFont("Caveat") == false)
+    check("isDefaultFont rejects user font 'Inter'", Matcher.isDefaultFont("Inter") == false)
+    check("isDefaultFont rejects user font table 'Bangers'", Matcher.isDefaultFont({ name = "Bangers", font_name = "Bangers" }) == false)
+
+    -- User installed font via InstallStore with owner/url should not be core default
+    InstallStore.upsertFont("custom_droid", {
+        font_name = "custom_droid",
+        owner = "user123",
+        download_url = "https://example.com/custom_droid.zip",
+        full_installed = true,
+    })
+    check("isDefaultFont rejects font with explicit user owner/download_url", Matcher.isDefaultFont("custom_droid") == false)
+    InstallStore.removeFont("custom_droid")
+end
+
+-- Test 12: Font Manager isDefaultFont delegation
+if ok_fm and FontMgr and FontMgr.isDefaultFont then
+    check("FontMgr.isDefaultFont identifies 'droid'", FontMgr.isDefaultFont("droid") == true)
+    check("FontMgr.isDefaultFont rejects 'Bangers'", FontMgr.isDefaultFont("Bangers") == false)
 end
 
 print("=== Font System Unit Tests Summary ===")

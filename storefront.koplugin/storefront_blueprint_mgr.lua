@@ -250,8 +250,16 @@ function M.generateBlueprint(options)
             end
         end
 
+        local ok_match, Matcher = pcall(require, "storefront_match")
+        local isDefaultFont = function(f)
+            if ok_match and Matcher and Matcher.isDefaultFont then
+                return Matcher.isDefaultFont(f)
+            end
+            return false
+        end
+
         for font_key, frec in pairs(raw_fonts) do
-            if type(frec) == "table" and (not disk_fonts_map or disk_fonts_map[font_key:lower()] or (frec.name and disk_fonts_map[frec.name:lower()])) then
+            if type(frec) == "table" and not isDefaultFont(frec) and not isDefaultFont(font_key) and (not disk_fonts_map or disk_fonts_map[font_key:lower()] or (frec.name and disk_fonts_map[frec.name:lower()])) then
                 local font_entry = {
                     name = frec.name or font_key,
                     family = frec.family or frec.name or font_key,

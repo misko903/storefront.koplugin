@@ -965,13 +965,59 @@ if ok_browser then
         MainStorefront.installed_state.filter_type = "all"
         MainStorefront.installed_state.filter_default = "all"
         MainStorefront.installed_state.filter_status = "all"
-        if MainStorefront.browser_state then MainStorefront.browser_state.search_text = "" end
         MainStorefront.listInstalledPlugins = function() return { meta_plugin } end
         MainStorefront.listInstalledPatches = function() return {} end
         local meta_entries = MainStorefront:buildInstalledEntries()
+        check("buildInstalledEntries uses meta.fullname for display name", meta_entries[1] and meta_entries[1].name, "Neo Quick Settings")
+
+        -- Test Font Origin Filtering on Installed Tab (Issue: default fonts listed as user installed)
+        local orig_list_fonts = MainStorefront.listInstalledFonts
+        local mock_fonts = {
+            { font_name = "droid", name = "droid" },
+            { font_name = "freefont", name = "freefont" },
+            { font_name = "Bangers", name = "Bangers" },
+            { font_name = "Literata", name = "Literata", owner = "google", download_url = "https://example.com/literata.zip" },
+        }
+        MainStorefront.listInstalledPlugins = function() return {} end
+        MainStorefront.listInstalledPatches = function() return {} end
+        MainStorefront.listInstalledFonts = function() return mock_fonts end
+
+        -- 1. Exclude default (User Installed)
+        MainStorefront.installed_state.filter_type = "font"
+        MainStorefront.installed_state.filter_default = "exclude_default"
+        MainStorefront.installed_state.search_text = ""
+        local user_font_entries = MainStorefront:buildInstalledEntries()
+        local user_font_names = {}
+        for _, e in ipairs(user_font_entries) do user_font_names[e.name] = true end
+        check("Installed tab 'User Installed' excludes 'droid'", user_font_names["droid"], nil)
+        check("Installed tab 'User Installed' excludes 'freefont'", user_font_names["freefont"], nil)
+        check("Installed tab 'User Installed' includes 'Bangers'", user_font_names["Bangers"], true)
+        check("Installed tab 'User Installed' includes 'Literata'", user_font_names["Literata"], true)
+
+        -- 2. Default only
+        MainStorefront.installed_state.filter_default = "default_only"
+        local def_font_entries = MainStorefront:buildInstalledEntries()
+        local def_font_names = {}
+        for _, e in ipairs(def_font_entries) do def_font_names[e.name] = true end
+        check("Installed tab 'Default' includes 'droid'", def_font_names["droid"], true)
+        check("Installed tab 'Default' includes 'freefont'", def_font_names["freefont"], true)
+        check("Installed tab 'Default' excludes 'Bangers'", def_font_names["Bangers"], nil)
+        check("Installed tab 'Default' excludes 'Literata'", def_font_names["Literata"], nil)
+
+        -- 3. All fonts with kind_label tagging
+        MainStorefront.installed_state.filter_default = "all"
+        local all_font_entries = MainStorefront:buildInstalledEntries()
+        local all_font_map = {}
+        for _, e in ipairs(all_font_entries) do all_font_map[e.name] = e end
+        check("Installed tab 'All' includes all 4 fonts", #all_font_entries, 4)
+        check("Installed tab 'droid' kind_label contains 'Default'", all_font_map["droid"] and all_font_map["droid"].kind_label:find("Default") ~= nil, true)
+        check("Installed tab 'Bangers' kind_label does not contain 'Default'", all_font_map["Bangers"] and all_font_map["Bangers"].kind_label:find("Default") == nil, true)
+
         MainStorefront.listInstalledPlugins = orig_list_plugins
         MainStorefront.listInstalledPatches = orig_list_patches
-        check("buildInstalledEntries uses meta.fullname for display name", meta_entries[1] and meta_entries[1].name, "Neo Quick Settings")
+        MainStorefront.listInstalledFonts = orig_list_fonts
+        MainStorefront.installed_state.filter_type = "all"
+        MainStorefront.installed_state.filter_default = "all"
 
         -- Test StorefrontListItem instantiation with badge_icon and badge_text
         local StorefrontListItem = require("storefront_list_item")
