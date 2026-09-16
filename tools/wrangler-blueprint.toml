@@ -1,0 +1,9 @@
+name = "storefront-blueprint"
+main = "blueprint-worker.js"
+compatibility_date = "2024-01-01"
+
+# Bind to Cloudflare D1 database:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "storefront-db"
+# database_id = "<YOUR_D1_DATABASE_ID>"

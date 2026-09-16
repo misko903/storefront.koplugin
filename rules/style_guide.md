@@ -12,7 +12,7 @@ This style guide establishes consistent layout, typography, borders, and colors 
 
 Always reference design tokens from `storefront_theme` and `Screen:scaleBySize(val)` (aliased as `sc(val)`) to maintain visual consistency across all e-ink screen sizes and DPIs:
 
-| Token / Property | Reference Value | Description / Usage |
+| Token/Property | Reference Value | Description/Usage |
 |---|---|---|
 | `sc(val)` | `Device.screen:scaleBySize(val)` | Scales pixel sizes dynamically to device DPI |
 | `color_bg` | `Blitbuffer.COLOR_WHITE` | Card and modal background color |
@@ -24,10 +24,10 @@ Always reference design tokens from `storefront_theme` and `Screen:scaleBySize(v
 | `radius_window` | `0` | Clean sharp corner radius for modals & cards |
 | `radius_btn` | `sc(4)` | Pill/button corner radius |
 | `gap` | `sc(8)` | Standard vertical/horizontal spacing |
-| `face_label_size` | `18` | Standard body / setting row font size (`cfont`) |
+| `face_label_size` | `18` | Standard body/setting row font size (`cfont`) |
 | `title_font_size` | `22` | Modal card header title font size (`NotoSerif-Regular.ttf` or `cfont`) |
 | `subtext_font_size` | `16` | Secondary values, status indicators, and subtitles |
-| `section_header_font_size` | `16` | Category / section header font size (`cfont`, bold) |
+| `section_header_font_size` | `16` | Category/section header font size (`cfont`, bold) |
 
 ---
 
@@ -53,9 +53,9 @@ To guarantee high legibility across E-ink devices (e.g. Kindle, Kobo, Onyx Boox)
 To ensure clean, professional, and consistent typography across UI components, settings, and web catalog interfaces:
 
 1. **No Spaces Around Slashes (`/`)**:
-   - **Strict Rule**: NEVER place spaces around a slash in UI labels, option lists, button titles, headers, or technical copy.
-   - **Correct**: `Creator/Artist`, `Tags/Keywords`, `Import/Export`, `Enable/Disable`, `Ctrl+V/Cmd+V`, `Reason/Additional Notes`, `Report/Change Type`.
-   - **Incorrect**: `Creator / Artist`, `Tags / Keywords`, `Import / Export`.
+   - **Strict Rule**: NEVER place spaces around a slash in UI labels, option lists, button titles, dialog headers, documentation, or technical copy. Slashes must be directly adjacent to their bounding terms.
+   - **Correct**: `Creator/Artist`, `Wallpaper/Screensavers`, `Border Fill/Background`, `Reading Progress/Summary`, `Night Mode/Dark Background`, `Tags/Keywords`, `Import/Export`, `Enable/Disable`, `Ctrl+V/Cmd+V`, `Reason/Additional Notes`, `Report/Change Type`.
+   - **Incorrect**: `Creator / Artist`, `Wallpaper / Screensavers`, `Border Fill / Background`, `Reading Progress / Summary`, `Tags / Keywords`, `Import / Export`.
    - *Exception*: Spaces around slashes are reserved strictly for poetry line breaks (e.g. *"Roses are red / Violets are blue"*).
 
 2. **Colons & Key-Value Pairs**:
@@ -133,7 +133,7 @@ In settings cards and list dialogs where rows have left labels and optional righ
 
 Dialog action buttons must follow a clear primary vs. secondary visual hierarchy. Use the unified `StorefrontUtils.createButton(opts)` helper to ensure perfect 4-sided high-contrast borders, dynamic text scaling to fit translations without clipping, and touch event handling across all KOReader devices.
 
-### 3.1 Primary Action Buttons (Confirm / Delete / Apply / Update All / Restart now / Clear All)
+### 3.1 Primary Action Buttons (Confirm/Delete/Apply/Update All/Restart now/Clear All)
 - **Visual Style**: High-contrast inverted button (black background with crisp white text in Light Mode, inverted cleanly in Night Mode).
 - **Inversion Mechanism**: `StorefrontUtils.createButton` uses KOReader's native `preselect = true` and `FrameContainer.invert = true` to guarantee proper color reversal for both `TextWidget` and `TextBoxWidget` across all display themes.
 - **Typography**: `Font:getFace("cfont", ui_font_size)`, `bold = true`
@@ -157,7 +157,7 @@ local primary_btn = StorefrontUtils.createButton{
 }
 ```
 
-### 3.2 Secondary Action Buttons (Cancel / Settings / Back / Close / Restart later / Clear)
+### 3.2 Secondary Action Buttons (Cancel/Settings/Back/Close/Restart later/Clear)
 - **Background**: `Blitbuffer.COLOR_WHITE` (standard unselected)
 - **Text Color**: `Blitbuffer.COLOR_BLACK`
 - **Typography**: `Font:getFace("cfont", ui_font_size)`, `bold = true`
@@ -184,14 +184,14 @@ local cancel_btn = StorefrontUtils.createButton{
 - Action buttons in list rows or dialogs must specify sufficient width (e.g., `sc(116)` for longer action strings like `_("Clear All")`) to prevent multi-line overflow.
 - All buttons with variable or translated text should allow font scaling down to 9–10pt to fit comfortably on one line without truncation or wrapping.
 
-### 3.3 Multi-Button Action Rows
+### 3.4 Multi-Button Action Rows
 When placing buttons side-by-side:
 - Use `HorizontalGroup` with `align = "center"`.
 - Split width equally: `btn_w = math.floor((inner_w - btn_gap) / 2)` with `HorizontalSpan:new{ width = btn_gap }` (`btn_gap = sc(8)` to `sc(12)`).
 
 ---
 
-## 4. Option Picker / Radio Button Groups
+## 4. Option Picker/Radio Button Groups
 
 Radio button groups and single-select pickers use structured horizontal rows with visual selection indicators:
 
@@ -199,33 +199,43 @@ Radio button groups and single-select pickers use structured horizontal rows wit
 - **Selected**: Solid border (`bordersize = sc(2)`), solid bullet indicator (`●`).
 - **Unselected**: Light gray border (`bordersize = sc(1)`), empty circle indicator (`○`).
 
-### Layout & Hit-Testing Rules
-1. Use `TextBoxWidget` for option text labels (constrained width `dialog_w - sc(72)`) to allow text wrapping for translations without clipping.
-2. Measure hit-testing regions using explicit `GestureRange` with `getSize()` or `dimen` bounding boxes:
 ```lua
-local item = InputContainer:new{ frame }
-local row_size = frame:getSize() or { w = dialog_w - sc(4), h = 0 }
-item.ges_events = {
+local bullet_str = is_selected and "● " or "○ "
+```
+
+### Focusable Interaction Protocol
+Each option row must be instantiated as an `InputContainer` wrapping a `FrameContainer`. It must define `ges_events.Tap`, `onTap`, `isFocusable`, `onFocus`, `onUnfocus`, and `onTapSelect` so both touch gestures and physical D-pad navigation cycle choices cleanly:
+
+```lua
+row.ges_events = {
     Tap = {
         GestureRange:new{
             ges = "tap",
-            range = function()
-                local dim = item.dimen
-                if not dim then
-                    return Geom:new{ x = -1, y = -1, w = 1, h = 1 }
-                end
-                return Geom:new{
-                    x = dim.x or 0,
-                    y = dim.y or 0,
-                    w = row_size.w or (dialog_w - sc(4)),
-                    h = row_size.h or 0,
-                }
-            end
+            range = function() return row.dimen or frame:getSize() end,
         }
     }
 }
-item.onTap = function()
-    callback()
+row.onTap = function()
+    selectOption(opt.key)
+    return true
+end
+row.isFocusable = function() return true end
+row.onFocus = function(self)
+    if self.frame then
+        self.frame.bordersize = sc(2)
+        UIManager:setDirty(self.show_parent or self, "fast")
+    end
+    return true
+end
+row.onUnfocus = function(self)
+    if self.frame then
+        self.frame.bordersize = is_selected and sc(2) or sc(1)
+        UIManager:setDirty(self.show_parent or self, "fast")
+    end
+    return true
+end
+row.onTapSelect = function(self)
+    selectOption(opt.key)
     return true
 end
 ```
@@ -234,9 +244,12 @@ end
 
 ## 5. Overlay Dismissal Behavior & Toast Stacking
 
-- Modals and settings cards should require deliberate actions to close (clicking an explicit "Close" / "Back" button or pressing the hardware Back key).
+- Modals and settings cards should require deliberate actions to close (clicking an explicit "Close"/"Back" button or pressing the hardware Back key).
 - Avoid full-screen `Tap` event catchers on modal background overlays, preventing accidental background taps from misfiring onto underlying e-ink hit targets.
-- **Toast Stacking Order**: When an action in a modal refreshes the dialog (e.g. removing an item or setting a wallpaper), ALWAYS call `refresh()` FIRST to rebuild the dialog overlay, and THEN call `Toast.show(...)`. Calling `Toast.show(...)` before `refresh()` will place the toast behind the newly shown dialog overlay.
+- **Toast Stacking Order**: When an action in a modal refreshes the dialog (e.g. removing an item or setting a wallpaper) or when an asynchronous operation finishes/fails and returns to a parent modal:
+  1. ALWAYS present/refresh the destination modal dialog FIRST (`refresh()`, `StorefrontBlueprintUI.showBlueprintsMenu(...)`, or `on_done()`).
+  2. ALWAYS schedule the notification toast inside `UIManager:nextTick(function() Toast:show() end)` or defer it after modal display.
+  3. **Strict Rule**: NEVER call `Toast:show()` before popping or showing a modal overlay in `UIManager`. Because KOReader renders the window stack from bottom to top, showing a toast before pushing a modal dialog causes the modal to be layered ON TOP of the toast, obscuring the feedback message.
 
 ---
 
@@ -248,12 +261,13 @@ Storefront uses vector SVG icons from the **Feather Icons** library stored under
 
 | Icon Asset | Visual Concept | Usage in Storefront |
 |---|---|---|
-| `zap.svg` | Lightning Bolt | Storefront plugin header branding logo |
-| `settings.svg` | Gear / Cog | Open main settings card |
+| `zap.svg` | Lightning Bolt | Storefront plugin header branding logo & "About Storefront" settings row |
+| `settings.svg` | Gear/Cog | Open main settings card |
 | `search.svg` | Magnifying Glass | Search input & filter actions |
-| `rotate-cw.svg` / `refresh-cw.svg` | Refresh Arrow | Refresh cache button (browser header & settings) |
-| `info.svg` | Info Circle | "About Storefront" settings row & info popups |
-| `square.svg` / `check-square.svg` | Checkboxes | Unchecked / checked list filter states |
+| `rotate-cw.svg`/`refresh-cw.svg` | Refresh Arrow | Refresh cache button (browser header & settings) |
+| `info.svg` | Info Circle | Info popups & metadata |
+| `send.svg` | Paper Airplane | "Blueprints" settings row & sharing actions |
+| `square.svg`/`check-square.svg` | Checkboxes | Unchecked/checked list filter states |
 
 ### Asset Resolution & Rendering Rules
 

@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ultimatejimmy.github.io/storefront.koplugin/schema/v1.blueprint.json",
+  "title": "Storefront Blueprint",
+  "description": "Declarative configuration specification for KOReader customizations managed by Storefront.",
+  "type": "object",
+  "required": ["$schema", "generator", "format_version", "name"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URI pointing to this JSON schema specification."
+    },
+    "generator": {
+      "type": "string",
+      "enum": ["Storefront"],
+      "description": "Identifier of the application that produced this blueprint."
+    },
+    "format_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Format version of the blueprint specification."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the blueprint setup."
+    },
+    "author": {
+      "type": "string",
+      "description": "Author or device owner who created the blueprint."
+    },
+    "created_at": {
+      "type": "integer",
+      "description": "Unix timestamp when the blueprint was generated."
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Version string of Storefront that created the blueprint."
+    },
+    "version_strategy": {
+      "type": "string",
+      "enum": ["latest", "pinned", "mixed"],
+      "default": "latest",
+      "description": "Default strategy for resolving extension versions during installation."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of what this setup contains."
+    },
+    "plugins": {
+      "type": "array",
+      "description": "List of KOReader plugins included in this blueprint.",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string", "description": "Plugin folder or identifier (e.g. readimer.koplugin)." },
+          "name": { "type": "string", "description": "Display name of the plugin." },
+          "repo": { "type": "string", "description": "GitHub repository in owner/repo format." },
+          "version": { "type": "string", "description": "Desired version or 'latest'." },
+          "pinned_tag": { "type": "string", "description": "Specific Git tag if pinned." },
+          "pinned_sha": { "type": "string", "description": "Commit SHA if pinned." },
+          "source": { "type": "string", "description": "Install source (e.g. release, branch)." },
+          "preferred_asset": { "type": "string", "description": "Preferred asset variant filename if applicable." }
+        }
+      }
+    },
+    "patches": {
+      "type": "array",
+      "description": "List of KOReader user patches included in this blueprint.",
+      "items": {
+        "type": "object",
+        "required": ["filename"],
+        "properties": {
+          "filename": { "type": "string", "description": "Numbered patch filename (e.g. 1-margins.lua)." },
+          "name": { "type": "string", "description": "Display name of the user patch." },
+          "repo": { "type": "string", "description": "Source repository." },
+          "version": { "type": "string", "description": "Version or 'latest'." },
+          "pinned_sha": { "type": "string", "description": "Exact commit SHA if pinned." }
+        }
+      }
+    },
+    "fonts": {
+      "type": "array",
+      "description": "List of fonts included in this blueprint.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "description": "Font display name (e.g. Literata)." },
+          "family": { "type": "string", "description": "Font family name." },
+          "source": { "type": "string", "description": "Source provider or catalog entry." }
+        }
+      }
+    },
+    "screensavers": {
+      "type": "array",
+      "description": "List of screensavers or wallpaper collections included.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "description": "Name or title of the screensaver image." },
+          "category": { "type": "string", "description": "Screensaver category or folder." },
+          "filename": { "type": "string", "description": "Relative filename of the screensaver." }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Portable configuration preferences for Storefront and extensions.",
+      "properties": {
+        "storefront": {
+          "type": "object",
+          "properties": {
+            "include_zero_star_forks": { "type": "boolean" },
+            "notifications_enabled": { "type": "boolean" },
+            "notification_frequency": { "type": "string" },
+            "catalog_mode": { "type": "string" },
+            "screensaver_mode": { "type": "string" }
+          }
+        },
+        "plugins": {
+          "type": "object",
+          "description": "Optional plugin-specific configuration settings."
+        }
+      }
+    }
+  }
+}

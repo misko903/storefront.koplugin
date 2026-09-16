@@ -8833,6 +8833,16 @@ function Storefront:showBrowser(kind)
                     text = _("Filter..."),
                     callback = function() self:showInstalledFilter() end
                 })
+                table.insert(toolbar_buttons, {
+                    id = "blueprints",
+                    text = _("Blueprint"),
+                    callback = function()
+                        local ok_bp, BlueprintUI = pcall(require, "storefront_blueprint_ui")
+                        if ok_bp and BlueprintUI and BlueprintUI.showBlueprintsMenu then
+                            BlueprintUI.showBlueprintsMenu(self)
+                        end
+                    end
+                })
                 end -- show_filter_bar_installed
             elseif current_tab == "Screensavers" then
                 is_ss_filter_active = self:hasActiveFilters("Screensavers")
@@ -10475,6 +10485,12 @@ function Storefront:addToMainMenu(menu_items)
 end
 
 function Storefront:onDispatcherRegisterActions()
+    Dispatcher:registerAction("storefront_blueprints", {
+        category = "none",
+        event = "StorefrontBlueprints",
+        title = _("Storefront: Blueprints"),
+        general = true,
+    })
     Dispatcher:registerAction("storefront_open", {
         category = "none",
         event = "StorefrontOpen",
@@ -10488,6 +10504,29 @@ function Storefront:onStorefrontOpen()
         self:showBrowser()
     end)
     return true
+end
+
+function Storefront:onStorefrontBlueprints()
+    UIManager:nextTick(function()
+        local ok_bp, BlueprintUI = pcall(require, "storefront_blueprint_ui")
+        if ok_bp and BlueprintUI and BlueprintUI.showBlueprintsMenu then
+            BlueprintUI.showBlueprintsMenu(self)
+        end
+    end)
+    return true
+end
+
+function Storefront:applyBlueprintFile(filepath)
+    local ok_mgr, BlueprintMgr = pcall(require, "storefront_blueprint_mgr")
+    local ok_ui, BlueprintUI = pcall(require, "storefront_blueprint_ui")
+    if ok_mgr and ok_ui and BlueprintMgr and BlueprintUI then
+        local ok, bp = BlueprintMgr.loadFromFile(filepath)
+        if ok and bp then
+            BlueprintUI.showDiffDialog(self, bp)
+            return true
+        end
+    end
+    return false
 end
 
 Storefront.listInstalledPlugins = listInstalledPlugins

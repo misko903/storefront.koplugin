@@ -146,6 +146,13 @@ local function runTests()
     local ok_loc_suite, loc_err = pcall(dofile, script_dir .. "storefront_localization_test.lua")
     assertTest(ok_loc_suite, "Localization Test Suite Execution", loc_err)
 
+    -- ----------------------------------------------------
+    -- TEST 6: Blueprint Suite Run
+    -- ----------------------------------------------------
+    print("\n--- TEST 6: Blueprint Suite ---")
+    local ok_bp_suite, bp_err = pcall(dofile, script_dir .. "storefront_blueprint_test.lua")
+    assertTest(ok_bp_suite, "Blueprint Test Suite Execution", bp_err)
+
     print("\n==================================================")
     print(string.format("  SUMMARY: %d Passed, %d Failed", passed, failed))
     print("==================================================")

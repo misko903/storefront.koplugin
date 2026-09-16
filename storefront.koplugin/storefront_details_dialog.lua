@@ -2221,7 +2221,7 @@ tr:nth-child(even) td { background-color: #f5f5f5 !important; }
                     table.insert(branch_right_hg_items, branch_icon_w)
                     local branch_right_hg = HorizontalGroup:new{
                         align = "center",
-                        table.unpack(branch_right_hg_items)
+                        (table.unpack or unpack)(branch_right_hg_items)
                     }
                     local branch_row = OverlapGroup:new{
                         dimen = Geom:new{ w = readme_w - sc(24), h = sc(28) },

@@ -393,7 +393,10 @@ local FALLBACKS = {
     ["Solid fill for screen margins & letterboxing"] = "Solid fill for screen margins & letterboxing",
     ["Show reading progress banner overlay"] = "Show reading progress banner overlay",
     ["Stretch image to fill entire screen"] = "Stretch image to fill entire screen",
-    ["Invert colors (night mode / dark background)"] = "Invert colors (night mode / dark background)",
+    ["Invert colors (night mode/dark background)"] = "Invert colors (night mode/dark background)",
+    ["Border Fill/Background"] = "Border Fill/Background",
+    ["Reading Progress/Summary"] = "Reading Progress/Summary",
+    ["Include Wallpaper/Screensavers"] = "Include Wallpaper/Screensavers",
 
     -- Settings & About
     menu_settings = "Storefront Settings",

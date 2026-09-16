@@ -13,6 +13,7 @@ local ScrollableContainer = require("ui/widget/container/scrollablecontainer")
 local Size = require("ui/size")
 local TextBoxWidget = require("ui/widget/textboxwidget")
 local TextWidget = require("ui/widget/textwidget")
+local ImageWidget = require("ui/widget/imagewidget")
 local Button = require("ui/widget/button")
 local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
@@ -22,6 +23,45 @@ local _ = function(key, ...) return Localization:t(key, ...) end
 local storefront_theme = require("storefront_theme")
 
 local StorefrontScreensaverMgr = require("storefront_screensaver_mgr")
+
+local _asset_path_cache = {}
+local function getAssetPath(filename)
+    if not filename or filename == "" then return nil end
+    if _asset_path_cache[filename] ~= nil then
+        return _asset_path_cache[filename] or nil
+    end
+
+    local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+    if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+
+    local info = debug.getinfo(1, "S")
+    local dir = (info and info.source and info.source:match("^@(.*[/\\])")) or ""
+    local rel_path = dir .. "assets/" .. filename
+
+    local paths_to_try = { rel_path }
+    local ok_ds, DataStorage = pcall(require, "datastorage")
+    local data_dir = ok_ds and DataStorage and DataStorage.getDataDir and DataStorage:getDataDir()
+    if data_dir then
+        table.insert(paths_to_try, data_dir .. "/" .. rel_path)
+        table.insert(paths_to_try, data_dir .. "/plugins/storefront.koplugin/assets/" .. filename)
+    end
+
+    for _, p in ipairs(paths_to_try) do
+        if ok_lfs and lfs and lfs.attributes and lfs.attributes(p, "mode") == "file" then
+            _asset_path_cache[filename] = p
+            return p
+        end
+        local f = io.open(p, "r")
+        if f then
+            f:close()
+            _asset_path_cache[filename] = p
+            return p
+        end
+    end
+
+    _asset_path_cache[filename] = false
+    return nil
+end
 
 local StorefrontScreensaverConfig = {}
 
@@ -302,13 +342,26 @@ function StorefrontScreensaverConfig.show(Storefront, on_close_callback)
         end
 
         local function create_toggle_row(checked, label_text, on_toggle)
-            local icon_str = checked and "☑" or "☐"
-            local icon_w = TextWidget:new{
-                text = icon_str,
-                face = Font:getFace("cfont", icon_font_size),
-                bold = checked,
-                fgcolor = Blitbuffer.COLOR_BLACK,
-            }
+            local icon_file = getAssetPath(checked and "check-square.svg" or "square.svg")
+            local icon_w
+            if icon_file then
+                icon_w = ImageWidget:new{
+                    file = icon_file,
+                    width = icon_font_size,
+                    height = icon_font_size,
+                    scale_factor = 0,
+                    is_icon = true,
+                    alpha = true,
+                }
+            else
+                local icon_str = checked and "☑" or "☐"
+                icon_w = TextWidget:new{
+                    text = icon_str,
+                    face = Font:getFace("cfont", icon_font_size),
+                    bold = checked,
+                    fgcolor = Blitbuffer.COLOR_BLACK,
+                }
+            end
             local label_w = TextBoxWidget:new{
                 text = label_text,
                 face = Font:getFace("cfont", ui_font_size),
@@ -373,7 +426,7 @@ function StorefrontScreensaverConfig.show(Storefront, on_close_callback)
         })
 
         -- Reading Progress Mode
-        table.insert(scroll_vg, create_mode_row("book_status", _("Reading Progress / Summary"), _("Shows reading stats, percentage, and chapter progress"), nil, nil))
+        table.insert(scroll_vg, create_mode_row("book_status", _("Reading Progress/Summary"), _("Shows reading stats, percentage, and chapter progress"), nil, nil))
 
         -- SECTION 2: SCREENSAVER FOLDER
         table.insert(scroll_vg, create_section_header(_("Screensaver Folder")))
@@ -521,7 +574,7 @@ function StorefrontScreensaverConfig.show(Storefront, on_close_callback)
         -- SECTION 3: DISPLAY OPTIONS
         table.insert(scroll_vg, create_section_header(_("Display Options")))
 
-        -- Border Fill & Background (Black / White / No Fill)
+        -- Border Fill & Background (Black/White/No Fill)
         local fill_labels = {
             black = _("Black Fill"),
             white = _("White Fill"),
@@ -544,7 +597,7 @@ function StorefrontScreensaverConfig.show(Storefront, on_close_callback)
         end
 
         local fill_title = TextWidget:new{
-            text = _("Border Fill / Background"),
+            text = _("Border Fill/Background"),
             face = Font:getFace("cfont", ui_font_size),
             bold = true,
             fgcolor = Blitbuffer.COLOR_BLACK,
@@ -601,7 +654,7 @@ function StorefrontScreensaverConfig.show(Storefront, on_close_callback)
         end))
 
         -- Invert toggle
-        table.insert(scroll_vg, create_toggle_row(settings.invert, _("Invert colors (night mode / dark background)"), function()
+        table.insert(scroll_vg, create_toggle_row(settings.invert, _("Invert colors (night mode/dark background)"), function()
             StorefrontScreensaverMgr.setScreensaverMode(settings.effective_mode, { invert = not settings.invert })
         end))
 

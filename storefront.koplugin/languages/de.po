@@ -13,6 +13,10 @@ msgstr "\"Mein lieber Mr. Bennet\", sagte seine Frau eines Tages zu ihm, \"haben
 msgid "%d Categories"
 msgstr "%d Kategorien"
 
+# en-hash: 430ab9ecc3e885b5ef157014db4d22f9
+msgid "%d missing · %d updates · %d installed"
+msgstr "%d fehlend · %d Updates · %d installiert"
+
 # en-hash: 7c23d2c4c06ff10d27bdaad6897814f6
 msgid "%d patches"
 msgstr "%d Patches"
@@ -24,10 +28,6 @@ msgstr "%d Plugins"
 # en-hash: 2462ceb6cb35cddddc731719d5c1372a
 msgid "%d updates available"
 msgstr "%d Updates verfügbar"
-
-# en-hash: fa6eebde796e7a0cd580534b810334a7
-msgid "%d wallpapers"
-msgstr "%d Hintergrundbilder"
 
 # en-hash: 6e1b6414c34df5efe842362cbf885e9f
 msgid "%d wallpapers found in this folder"
@@ -48,6 +48,10 @@ msgstr "%d Hintergrundbilder · Modus: Buchcover"
 # en-hash: 31e9831ff2c4b2a11920333cae5cc350
 msgid "%d wallpapers · Single mode active"
 msgstr "%d Hintergrundbilder · Einzelbild-Modus aktiv"
+
+# en-hash: 9c4c2c2c30b579ac55b74696862d4c70
+msgid "%d wallpapers ›"
+msgstr "%d Hintergrundbilder ›"
 
 # en-hash: 15fd4d0b221f644846168f217c6f9f9b
 msgid "%s and %s"
@@ -209,6 +213,10 @@ msgstr "Alle Plugins"
 msgid "All plugins are already matched."
 msgstr "Alle Plugins sind bereits verknüpft."
 
+# en-hash: 2752d26362a92d6c6ca9729c93910dcb
+msgid "All selected items are already installed."
+msgstr "Alle ausgewählten Elemente sind bereits installiert."
+
 # en-hash: 6836fa6186eda79c3e6b4e081e1e3af7
 msgid "Allow pre-release updates"
 msgstr "Pre-Release-Updates zulassen"
@@ -241,6 +249,14 @@ msgstr "App Store · Installierte Plugins"
 msgid "Apply"
 msgstr "Anwenden"
 
+# en-hash: cf63cda9763d301ae6657ddd7f2fe497
+msgid "Apply Blueprint from Storage…"
+msgstr "Blueprint aus Speicher anwenden…"
+
+# en-hash: 4f5af0c479ee2ed6c6e7ea2ee74e5e7a
+msgid "Apply Selected"
+msgstr "Ausgewählte anwenden"
+
 # en-hash: 722c4b9ffb24735792c14251f8d6c824
 msgid "Assets — %s"
 msgstr "Dateien — %s"
@@ -269,12 +285,36 @@ msgstr "Schwarz füllen"
 msgid "Blank"
 msgstr "Leer"
 
+# en-hash: c541c9ccbbaae85fe31e5a1813ec7968
+msgid "Blueprint"
+msgstr "Entwurf"
+
+# en-hash: 30a5f9d450d126d1525d76d93e292965
+msgid "Blueprint Name"
+msgstr "Blueprint-Name"
+
+# en-hash: bd25a5d9d3a7cdbf5c16a3a850cbafe5
+msgid "Blueprint Setup"
+msgstr "Blueprint-Einrichtung"
+
+# en-hash: db2e6dc928d69ae2e9192d0794fd3c11
+msgid "Blueprint Shared!"
+msgstr "Blueprint geteilt!"
+
+# en-hash: 74fd7dea4f0ba0fc7853583b554d6d55
+msgid "Blueprint applied: %d installed, %d failed."
+msgstr "Blueprint angewendet: %d installiert, %d fehlgeschlagen."
+
+# en-hash: def6402b3a6f30cb2eb363cd5cefb20d
+msgid "Blueprints"
+msgstr "Entwürfe"
+
 # en-hash: 03ea37a723d863ca6c1918209c5c1a6f
 msgid "Book Cover"
 msgstr "Buchcover"
 
-# en-hash: 64a05ab3190946ed2cad23d79eb426cf
-msgid "Border Fill / Background"
+# en-hash: 3b1927eb713be995f8bf12edf7706d2a
+msgid "Border Fill/Background"
 msgstr "Randfüllung / Hintergrund"
 
 # en-hash: b2ac03f07c134d4a823d4b8dc55699b1
@@ -288,6 +328,10 @@ msgstr "Branch: %s"
 # en-hash: 261dba00113a7f7e9754902b83293f85
 msgid "Browse Wallpapers in Storefront"
 msgstr "Hintergrundbilder in Storefront durchsuchen"
+
+# en-hash: 69bd82cabfffcd18404ed9a508bf9cc6
+msgid "Browse saved .blueprint files to inspect and install"
+msgstr "Gespeicherte .blueprint-Dateien durchsuchen und installieren"
 
 # en-hash: 2520852b211aecbd3c50faecf65d7725
 msgid "By "
@@ -333,9 +377,9 @@ msgstr "Quelldatei kann nicht gelesen werden."
 msgid "Cannot write destination file."
 msgstr "Zieldatei kann nicht geschrieben werden."
 
-# en-hash: d204ef2d8d79afda131b1fc21a677416
-msgid "Catalog & Cache"
-msgstr "Katalog & Cache"
+# en-hash: 5d46ba3267b1e5eb9a026325536220de
+msgid "Catalog & Search"
+msgstr "Katalog & Suche"
 
 # en-hash: d31b6ab3c216a7f4c21b8c9bdae226e9
 msgid "Catalog refresh cancelled."
@@ -344,6 +388,10 @@ msgstr "Katalogaktualisierung abgebrochen."
 # en-hash: d08b63f6583dcd5bb36142564f1b3ff4
 msgid "Catalog refresh is already in progress in the background."
 msgstr "Katalog-Aktualisierung läuft bereits im Hintergrund."
+
+# en-hash: 01472251a1d3654e8d4b147c91ecd613
+msgid "Catalog refresh is already in progress."
+msgstr "Katalogaktualisierung läuft bereits."
 
 # en-hash: 646e1f1324e200b3910e35ea3f015960
 msgid "Catalog source"
@@ -493,6 +541,10 @@ msgstr "Bildschirmschoner-Vorschaubilder geleert (%s freigegeben)."
 msgid "Close"
 msgstr "Schließen"
 
+# en-hash: c9c5f75bbe255faa01e89b3c05d77d87
+msgid "Cloud upload failed: "
+msgstr "Cloud-Upload fehlgeschlagen: "
+
 # en-hash: d15b505cce09406de9f918cb1f8c641c
 msgid "Collection"
 msgstr "Sammlung"
@@ -581,6 +633,10 @@ msgstr "Releases für dieses Repository konnten nicht abgerufen werden."
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Plugin-Ordner (_meta.lua) im Archiv nicht gefunden."
 
+# en-hash: c795dfff10a7c952f4c5438951e9ece9
+msgid "Cover"
+msgstr "Cover"
+
 # en-hash: 686e697538050e4664636337cc3b834f
 msgid "Create"
 msgstr "Erstellen"
@@ -592,6 +648,10 @@ msgstr "Unterordner in '%s' erstellen:"
 # en-hash: e6818edb27f4a7711ea452befaa5efd4
 msgid "Created '%s'"
 msgstr "'%s' erstellt"
+
+# en-hash: 025b44a447cfbb3039efbf871c238fbc
+msgid "Created by %s · %s items"
+msgstr "Erstellt von %s · %s Elemente"
 
 # en-hash: 691494205febafc531e883e2eea58253
 msgid "Custom folder"
@@ -705,6 +765,10 @@ msgstr "Zeigt im Ruhezustand ein statisches Hintergrundbild an"
 msgid "Done"
 msgstr "Fertig"
 
+# en-hash: 801ab24683a4a8c433c6eb40c48bcd9d
+msgid "Download"
+msgstr "Herunterladen"
+
 # en-hash: 938a7f69f98b48f241a295717988ac23
 msgid "Download & Set Active"
 msgstr "Herunterladen & aktivieren"
@@ -797,6 +861,14 @@ msgstr "Plugin aktivieren"
 msgid "Enabled"
 msgstr "Aktiviert"
 
+# en-hash: dd72a5c6ae853ddc70895e7eca4e0f50
+msgid "Enter Blueprint Code"
+msgstr "Blueprint-Code eingeben"
+
+# en-hash: a28d3b00fc3b49cd01c0c6c219354f35
+msgid "Enter Cloud Code to Download…"
+msgstr "Cloud-Code zum Herunterladen eingeben…"
+
 # en-hash: a5e686002851661852b063c72d3690d6
 msgid "Enter item number"
 msgstr "Elementnummer eingeben"
@@ -804,6 +876,14 @@ msgstr "Elementnummer eingeben"
 # en-hash: 888bd819da7fe02d3297018a56143a94
 msgid "Enter plugin number"
 msgstr "Plugin-Nummer eingeben"
+
+# en-hash: fe8de34692fd5f8fb2f887a047905c30
+msgid "Enter the 6-character shortcode (e.g. A8K2M9) to download the setup:"
+msgstr "Geben Sie den 6-stelligen Code (z. B. A8K2M9) ein, um die Einrichtung herunterzuladen:"
+
+# en-hash: 38da7384b1a13055751da461c950c047
+msgid "Enter this 6-character code on any device in Storefront to instantly download and install this setup."
+msgstr "Geben Sie diesen 6-stelligen Code auf einem beliebigen Gerät in Storefront ein, um diese Einrichtung sofort herunterzuladen und zu installieren."
 
 # en-hash: 48bf14c419a1d441412510faf39c326d
 msgid "Every day"
@@ -820,6 +900,14 @@ msgstr "Jeden Monat"
 # en-hash: 64863d871b7d8ecb1eb689ceb3595cb5
 msgid "Every week"
 msgstr "Jede Woche"
+
+# en-hash: 26a642586eabd970eef36b052ef5e7f3
+msgid "Export Blueprint"
+msgstr "Blueprint exportieren"
+
+# en-hash: 17e6570531f869f5a964e2a2017f4e23
+msgid "Export Blueprint…"
+msgstr "Blueprint exportieren…"
 
 # en-hash: 006ec38349cf69bccea24bc63924ae72
 msgid "Failed to check %s: %s"
@@ -881,6 +969,10 @@ msgstr "Fehler beim Abrufen der Patch-Liste."
 msgid "Failed to fetch repository '%s/%s': %s"
 msgstr "Repository '%s/%s' konnte nicht abgerufen werden: %s"
 
+# en-hash: 71bfe776ce6f9542c58288a1b96aceee
+msgid "Failed to load blueprint: "
+msgstr "Fehler beim Laden des Blueprints: "
+
 # en-hash: afbf1b132f9abe2de5f51f83c510215f
 msgid "Failed to open downloaded archive."
 msgstr "Heruntergeladenes Archiv konnte nicht geöffnet werden."
@@ -889,9 +981,17 @@ msgstr "Heruntergeladenes Archiv konnte nicht geöffnet werden."
 msgid "Failed to save downloaded file"
 msgstr "Heruntergeladene Datei konnte nicht gespeichert werden"
 
+# en-hash: 387f6e75b833f78beb60d3d10980f040
+msgid "Failed to save: %s"
+msgstr "Fehler beim Speichern: %s"
+
 # en-hash: b2b70bea56298693ab867c3578f69689
 msgid "Failed to toggle patch status."
 msgstr "Patch-Status konnte nicht geändert werden."
+
+# en-hash: 32aa147344a73b401d36cbba44e08434
+msgid "Fetching blueprint…"
+msgstr "Blueprint wird abgerufen…"
 
 # en-hash: d4478c7c3ecd901d07cc947b819a69df
 msgid "Fetching branch information…"
@@ -1025,6 +1125,10 @@ msgstr "Speicherplatz auf dem Gerät freigeben. Gecachte Elemente werden bei Bed
 msgid "Frequency"
 msgstr "Häufigkeit"
 
+# en-hash: e9fd06db4a5d0a2af753acbef92bdb6b
+msgid "GitHub API"
+msgstr "GitHub-API"
+
 # en-hash: 4da7aff05cb0f2c3407a7c1614f4bdfc
 msgid "GitHub API rate limit exceeded. Add a GitHub token in Storefront settings to increase the limit (10→30 req/min)."
 msgstr "GitHub API-Ratenlimit überschritten. Fügen Sie ein GitHub-Token in den Storefront-Einstellungen hinzu, um das Limit zu erhöhen (10→30 Anfr./Min.)."
@@ -1085,6 +1189,26 @@ msgstr "Bildansicht"
 msgid "Include 0-star forks"
 msgstr "0-Sterne-Forks einschließen"
 
+# en-hash: 4b605c6271db1207aaddcbb7af991cdc
+msgid "Include Fonts"
+msgstr "Schriftarten einschließen"
+
+# en-hash: d9105245ea9a8daaf1e11ce617453303
+msgid "Include Plugins"
+msgstr "Plugins einbeziehen"
+
+# en-hash: 05df3a76b632fddb72c3f0f8754344d2
+msgid "Include Storefront Settings"
+msgstr ""
+
+# en-hash: cd361e5db92b3fb3a2a1e6b1740fd7ea
+msgid "Include User Patches"
+msgstr "Benutzer-Patches einbeziehen"
+
+# en-hash: 76d79b39b576d1d82d4c63a3d7a9f429
+msgid "Include Wallpaper/Screensavers"
+msgstr "Hintergrundbilder / Bildschirmschoner einbeziehen"
+
 # en-hash: 349838fb1d851d3e2014b9fe39203275
 msgid "Install"
 msgstr "Installieren"
@@ -1120,6 +1244,10 @@ msgstr "Im Standardordner installieren?"
 # en-hash: c53b3ab057b8ccbb521328307551f56e
 msgid "Install to default"
 msgstr "Auf Standard installieren"
+
+# en-hash: bd9ac3f5efcb8d845b66aaff183e4df2
+msgid "Installation Complete"
+msgstr "Installation abgeschlossen"
 
 # en-hash: d351bd4c3f855c9189c2b9ba8fa0a470
 msgid "Installation failed: "
@@ -1169,6 +1297,10 @@ msgstr "Plugin \"%s\" (Version %s) installiert."
 msgid "Installed plugin \"%s\"."
 msgstr "Plugin \"%s\" installiert."
 
+# en-hash: ee4f62a76d993e6c511eb20873325760
+msgid "Installing %d of %d: %s…"
+msgstr "Installiere %d von %d: %s…"
+
 # en-hash: c98f920c29f4d2f367f11f8aad8c6b98
 msgid "Installing %s…"
 msgstr "%s wird installiert…"
@@ -1189,8 +1321,8 @@ msgstr "Ungültiger Ziel-Dateiname für Patch."
 msgid "Invalid selection."
 msgstr "Ungültige Auswahl."
 
-# en-hash: 1554833122e9bc723e16d2f1b927dc98
-msgid "Invert colors (night mode / dark background)"
+# en-hash: c3541be1e49256e679f5650c9df4f580
+msgid "Invert colors (night mode/dark background)"
 msgstr "Farben invertieren (Nachtmodus / dunkler Hintergrund)"
 
 # en-hash: 3a6bec8da59fdc67759959fa32ec296c
@@ -1453,6 +1585,10 @@ msgstr "Name (Z-A)"
 msgid "Name, description, topic"
 msgstr "Name, Beschreibung, Thema"
 
+# en-hash: ade219425cdcce278c9c6f52dcb942d6
+msgid "Name: "
+msgstr "Name: "
+
 # en-hash: 7bd1b01e2b3f3738a5df3d196bd8fd24
 msgid "Needs update"
 msgstr "Update erforderlich"
@@ -1541,6 +1677,10 @@ msgstr "Keine Einträge entsprechen den aktuellen Filtern."
 msgid "No installed items found."
 msgstr "Keine installierten Elemente gefunden."
 
+# en-hash: 8e6919a580d6a21f4169b05592f31cbe
+msgid "No items found in this blueprint."
+msgstr ""
+
 # en-hash: bc4c1050aeeb3ff4240c4894b98f32a9
 msgid "No items found."
 msgstr "Keine Elemente gefunden."
@@ -1609,6 +1749,10 @@ msgstr "Keine Releases für dieses Repository gefunden."
 msgid "No remote version info for %s."
 msgstr "Keine Remote-Versionsinfo für %s."
 
+# en-hash: 96889b189748a90225fe6b53b40389b2
+msgid "No saved blueprints found in koreader/blueprints/"
+msgstr "Keine gespeicherten Blueprints in koreader/blueprints/ gefunden"
+
 # en-hash: b62bf861cefe4425e699aa2eea1c5df0
 msgid "No screensavers match this filter."
 msgstr "Keine Bildschirmschoner entsprechen diesem Filter."
@@ -1657,6 +1801,10 @@ msgstr "Benachrichtigungen"
 msgid "OK"
 msgstr "OK"
 
+# en-hash: d15305d7a4e34e02489c74a5ef542f36
+msgid "Off"
+msgstr "Aus"
+
 # en-hash: 3153c6cc9bfae333965e0f6ce3b2097c
 msgid "Offline Regular"
 msgstr "Offline-Normal"
@@ -1673,9 +1821,9 @@ msgstr "Hintergrundbild-Galerie öffnen"
 msgid "Open details"
 msgstr "Details öffnen"
 
-# en-hash: bc134584494d4e13143f406c85e00718
-msgid "Optional. Raises the GitHub API rate limit. Generate one (classic, 'public_repo' scope is enough) at github.com/settings/tokens, then paste it here."
-msgstr "Optional. Erhöht das GitHub-API-Ratenlimit. Erstelle einen Token (classic, 'public_repo'-Bereich reicht aus) unter github.com/settings/tokens und füge ihn hier ein."
+# en-hash: ea4f433fccde16a966c38244ee6fafdf
+msgid "Optional. Raises GitHub API rate limits."
+msgstr "Optional. Erhöht die GitHub-API-Limits."
 
 # en-hash: efbc241d60f2ad92aea2e5ca3fd8a839
 msgid "Options ▾"
@@ -1773,6 +1921,10 @@ msgstr "Gefundene Patches: %d"
 msgid "Path: %s"
 msgstr "Pfad: %s"
 
+# en-hash: 4ecd9ea249709f32b909f972969058fb
+msgid "Please enter a valid code"
+msgstr "Bitte geben Sie einen gültigen Code ein"
+
 # en-hash: 409c1892b68cb394799262ac57f6d4f1
 msgid "Plugin"
 msgstr "Plugin"
@@ -1865,8 +2017,8 @@ msgstr "Leseprobe"
 msgid "Reading Progress"
 msgstr "Lesefortschritt"
 
-# en-hash: 09d465b122ab48dbe5cad73d4656d4e1
-msgid "Reading Progress / Summary"
+# en-hash: 1f147eee6942ee2a2cf6b6b53feac2ac
+msgid "Reading Progress/Summary"
 msgstr "Lesefortschritt / Zusammenfassung"
 
 # en-hash: d7a84a9fb236df685f29540da550488c
@@ -2049,6 +2201,14 @@ msgstr "Auf Standard-Bildschirmschonerordner zurücksetzen"
 msgid "Reset to defaults"
 msgstr "Zurücksetzen"
 
+# en-hash: b4b7e07793cb3e43bf8d0d9998ae6309
+msgid "Restart KOReader now to activate the new plugins and patches?"
+msgstr "KOReader jetzt neu starten, um die neuen Plugins und Patches zu aktivieren?"
+
+# en-hash: 2d9c2140c53daf05855033aaceeaa8fd
+msgid "Restart Now"
+msgstr "Jetzt neu starten"
+
 # en-hash: 606c44bdcc18bc4cd3d17f3e55dc190a
 msgid "Restart later"
 msgstr "Später neu starten"
@@ -2068,6 +2228,22 @@ msgstr "Beispieltext"
 # en-hash: c9cc8cce247e49bae79f15173ce97354
 msgid "Save"
 msgstr "Speichern"
+
+# en-hash: 5bdf5ba9c1b80bf8d20a47991dae7597
+msgid "Save File"
+msgstr "Datei speichern"
+
+# en-hash: 106444a49519cca6fa85f4019282e315
+msgid "Save current plugins, patches, fonts & settings"
+msgstr "Aktuelle Plugins, Patches, Schriften & Einstellungen speichern"
+
+# en-hash: f7db1a0e10a95eda5a3bed4dace9dcb2
+msgid "Saved blueprint to %s"
+msgstr "Blueprint gespeichert unter %s"
+
+# en-hash: 94701bb3dbffefdaacaed21c82e9e424
+msgid "Scan Blueprint QR Code"
+msgstr "Blueprint-QR-Code scannen"
 
 # en-hash: 603fcc0a702da1e164d6d14e0ca47782
 msgid "Screensaver"
@@ -2117,10 +2293,6 @@ msgstr "Suchen"
 msgid "Search \"%s\""
 msgstr "\"%s\" suchen"
 
-# en-hash: 02aebab4da8f3c3506b5f7841b74771e
-msgid "Search & API"
-msgstr "Suche & API"
-
 # en-hash: ff39b7ff718f007859f0505525457425
 msgid "Search filter (\"%s\") is not applied to Updates."
 msgstr "Suchfilter (\"%s\") wird nicht auf Updates angewendet."
@@ -2148,6 +2320,10 @@ msgstr "Ordner auswählen"
 # en-hash: 9b834c9f23888e04d5ec898aa174eecc
 msgid "Select Screensaver Folder"
 msgstr "Bildschirmschonerordner auswählen"
+
+# en-hash: e3c4cdf2bd4eb901d3662bda25dffab4
+msgid "Select a Blueprint"
+msgstr "Einen Blueprint auswählen"
 
 # en-hash: 9f3ac6dac42e1c9f63901bd946e13f8c
 msgid "Select a repository patch entry to match with the chosen file."
@@ -2196,6 +2372,14 @@ msgstr "Als aktives Einzel-Hintergrundbild festgelegt!"
 # en-hash: f4f70727dc34561dfde1a3c529b6205c
 msgid "Settings"
 msgstr "Einstellungen"
+
+# en-hash: c97019c72762b5c875c8d1cfd88acde1
+msgid "Share Cloud"
+msgstr "Cloud-Freigabe"
+
+# en-hash: 35be8140ffe5151fd34b9524c440cfba
+msgid "Share via Cloud Shortcode…"
+msgstr "Über Cloud-Shortcode teilen…"
 
 # en-hash: e07a73b7f6a6887a98684040bfebc396
 msgid "Show needs update"
@@ -2329,6 +2513,10 @@ msgstr "Storefront-Aktualisierung fehlgeschlagen: "
 msgid "Storefront · Updates"
 msgstr "Storefront · Updates"
 
+# en-hash: c828a67d4c1987f9e8f7945fac1763ce
+msgid "Storefront: Blueprints"
+msgstr "Storefront: Entwürfe"
+
 # en-hash: 5620a897002239dbdf1fb1d697e36ffe
 msgid "Storefront: Open"
 msgstr "Storefront: Öffnen"
@@ -2444,6 +2632,10 @@ msgstr "Bei jedem Start auslösen (Testen)"
 # en-hash: a1fa27779242b4902f7ae3bdd5c6d508
 msgid "Type"
 msgstr "Typ"
+
+# en-hash: 3defe398d1b994bd1c763be4773dba9b
+msgid "Type a 6-character code to fetch and install a setup"
+msgstr "Geben Sie einen 6-stelligen Code ein, um ein Setup abzurufen und zu installieren"
 
 # en-hash: 7802fb36da7e75034a308a4571ef56f5
 msgid "Unable to load wiki page. Tap refresh to retry."
@@ -2573,6 +2765,26 @@ msgstr "Updates ignoriert"
 msgid "Updating [%d/%d]: %s…\nTap screen to cancel."
 msgstr "Aktualisierung [%d/%d]: %s…\nZum Abbrechen tippen."
 
+# en-hash: 974462d8ffbadf9b7487e5b519d14e1a
+msgid "Upload blueprint to get a 6-character sharing code"
+msgstr "Blueprint hochladen, um einen 6-stelligen Freigabecode zu erhalten"
+
+# en-hash: 280a19c3441346944253ff6b8de5d1ce
+msgid "Upload failed: "
+msgstr "Hochladen fehlgeschlagen: "
+
+# en-hash: 3fc7c125d7f23a8f400852b8b6857806
+msgid "Uploading blueprint to cloud…"
+msgstr "Lade Blueprint in die Cloud hoch…"
+
+# en-hash: 3bb5dcae0034b6961071ef51b0cb4ba0
+msgid "Uploading to Cloudflare…"
+msgstr "Lade zu Cloudflare hoch…"
+
+# en-hash: 8f9bfe9d1345237cb3b2b205864da075
+msgid "User"
+msgstr "Benutzer"
+
 # en-hash: a07df8665a5e8ade90f822d03b1ad148
 msgid "User Installed"
 msgstr "Benutzer"
@@ -2588,6 +2800,18 @@ msgstr "Version"
 # en-hash: 9e69db6d28a0ec32d28e2c9e327fd40a
 msgid "Versions"
 msgstr "Versionen"
+
+# en-hash: 2292f948832894bb7149d992d45b916f
+msgid "Versions: Latest Releases (Recommended)"
+msgstr "Versionen: Neueste Releases (Empfohlen)"
+
+# en-hash: b245c3afd3df53d2fed9533070c7aa16
+msgid "Versions: Pin Current Installed Versions"
+msgstr "Versionen: Aktuell installierte Versionen beibehalten"
+
+# en-hash: 2a1b83911694eadd9705b7faf25b4db0
+msgid "View QR Code"
+msgstr "QR-Code anzeigen"
 
 # en-hash: ea4021361394f56beeae77c394271b11
 msgid "View README"
@@ -2673,9 +2897,21 @@ msgstr "[ Vorschau wird geladen... ]"
 msgid "[ Wallpaper Preview Loading... ]"
 msgstr "[ Hintergrundbild-Vorschau wird geladen... ]"
 
+# en-hash: 77d6e537851aaf31957e552b71818f15
+msgid "[INSTALLED]"
+msgstr "[INSTALLIERT]"
+
 # en-hash: f29a8499c7d11cf44a0787e0fd1e3900
 msgid "[Ignored]"
 msgstr "[Ignoriert]"
+
+# en-hash: 0435fcc1de0df94367611295d6a0131c
+msgid "[NEW]"
+msgstr "[NEU]"
+
+# en-hash: dc0a33b21850d5f15d69786f9ff2b530
+msgid "[UPDATE]"
+msgstr "[AKTUALISIERUNG]"
 
 # en-hash: d633fec4eb7598d17886e92c10438dcc
 msgid "[draft]"
@@ -3056,6 +3292,10 @@ msgstr "aktualisiert %s (%s)"
 # en-hash: 176848afabe6f93c3e23a470037ab74f
 msgid "·"
 msgstr "·"
+
+# en-hash: dc106d31a4c7c59d085f09ecd0572570
+msgid "‹ Back"
+msgstr "‹ Zurück"
 
 # en-hash: a565c660107f7ea24918e8be382b38bd
 msgid "≥ %s ⭐"

@@ -142,6 +142,20 @@ function Run-Workflow {
         Write-Host "Branch Install Tests FAILED." -ForegroundColor Red
         return $false
     }
+    Write-Host "Running Menu & Blueprint Touch unit tests..."
+    $TouchTestCmd = "cd $AppDir && LUA_PATH='{0}/?.lua;./?.lua;./?/init.lua;frontend/?.lua;frontend/?/init.lua;libs/?.lua;common/?.lua;common/?/init.lua;;' ./luajit {0}/tests/storefront_menu_blueprint_touch_test.lua" -f $WSLDest
+    wsl bash -c `"$TouchTestCmd`"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Menu & Blueprint Touch Tests FAILED." -ForegroundColor Red
+        return $false
+    }
+    Write-Host "Running Blueprint System unit tests..."
+    $BlueprintTestCmd = "cd $AppDir && LUA_PATH='{0}/?.lua;./?.lua;./?/init.lua;frontend/?.lua;frontend/?/init.lua;libs/?.lua;common/?.lua;common/?/init.lua;;' ./luajit {0}/tests/storefront_blueprint_test.lua" -f $WSLDest
+    wsl bash -c `"$BlueprintTestCmd`"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Blueprint System Tests FAILED." -ForegroundColor Red
+        return $false
+    }
     Write-Host "Tests PASSED" -ForegroundColor Green
 
     # 3. Restart KOReader

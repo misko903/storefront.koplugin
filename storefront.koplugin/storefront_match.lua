@@ -55,7 +55,15 @@ Matcher.CORE_KOREADER_PLUGINS = {
 }
 
 function Matcher.isDefaultPlugin(plugin, maybe_plugin, StorefrontRef)
-    if type(plugin) == "table" and plugin.name == "storefront" then
+    -- Normalize arguments: extract the actual plugin table or string
+    if type(plugin) == "string" then
+        plugin = { dirname = plugin }
+    end
+    if type(maybe_plugin) == "table" and (maybe_plugin.dirname or maybe_plugin.dir or maybe_plugin.root or maybe_plugin.shortname) then
+        plugin = maybe_plugin
+    elseif type(plugin) == "table" and not (plugin.dirname or plugin.dir or plugin.root or plugin.shortname) and type(maybe_plugin) == "table" then
+        plugin = maybe_plugin
+    elseif type(plugin) == "table" and plugin.name == "storefront" and type(maybe_plugin) == "table" then
         plugin = maybe_plugin
     end
     if not plugin or type(plugin) ~= "table" then return false end
@@ -110,7 +118,7 @@ function Matcher.isDefaultPlugin(plugin, maybe_plugin, StorefrontRef)
         local clean = cand:gsub("%.koplugin$", ""):lower()
         local koplugin_key = clean .. ".koplugin"
         local rec = records[cand] or records[clean] or records[koplugin_key]
-        if rec and (rec.owner or rec.repo_full_name or rec.repo_id) then
+        if rec and (rec.owner or rec.repo or rec.repo_full_name or rec.repo_id) then
             return false
         end
     end
@@ -142,11 +150,7 @@ function Matcher:init(Storefront)
     Storefront.CORE_KOREADER_PLUGINS = Matcher.CORE_KOREADER_PLUGINS
     
     Storefront.isDefaultPlugin = function(self_or_plugin, plugin, maybe_plugin)
-        if self_or_plugin == Storefront or (type(self_or_plugin) == "table" and self_or_plugin.name == "storefront") then
-            return Matcher.isDefaultPlugin(plugin or maybe_plugin, nil, self_or_plugin)
-        else
-            return Matcher.isDefaultPlugin(self_or_plugin, plugin, nil)
-        end
+        return Matcher.isDefaultPlugin(self_or_plugin, plugin, maybe_plugin)
     end
     
     Storefront.isDefaultPatch = function(sf, patch)
@@ -184,6 +188,41 @@ function Matcher:init(Storefront)
 
         local installed_plugins = sf:listInstalledPlugins()
         local records = (InstallStore.list and InstallStore.list()) or {}
+
+        -- Scrub orphan records from InstallStore that no longer exist on disk
+        local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+        if not ok_lfs or not lfs then ok_lfs, lfs = pcall(require, "lfs") end
+        local disk_plugin_set = {}
+        for _, plugin in ipairs(installed_plugins) do
+            if plugin.dirname then
+                disk_plugin_set[plugin.dirname] = true
+                disk_plugin_set[plugin.dirname:gsub("%.koplugin$", "")] = true
+            end
+            if plugin.shortname then
+                disk_plugin_set[plugin.shortname] = true
+            end
+        end
+
+        local lookup_roots = (PluginPaths and PluginPaths.getLookupPaths and PluginPaths.getLookupPaths()) or {}
+        for rec_key, _ in pairs(records) do
+            local clean_key = rec_key:gsub("%.koplugin$", "")
+            if not disk_plugin_set[rec_key] and not disk_plugin_set[clean_key] then
+                local exists_on_disk = false
+                if ok_lfs and lfs and lfs.attributes then
+                    for _, root in ipairs(lookup_roots) do
+                        if lfs.attributes(root .. "/" .. rec_key, "mode") == "directory"
+                           or lfs.attributes(root .. "/" .. clean_key .. ".koplugin", "mode") == "directory" then
+                            exists_on_disk = true
+                            break
+                        end
+                    end
+                end
+                if not exists_on_disk then
+                    InstallStore.remove(rec_key)
+                    InstallStore.remove(clean_key)
+                end
+            end
+        end
 
         local unmatched_plugins = {}
         for _, plugin in ipairs(installed_plugins) do

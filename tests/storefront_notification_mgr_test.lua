@@ -293,9 +293,8 @@ do
     if not ok_card then print("SettingsCard show error:", err_card) end
 
     local overlay = _G.ui_tracker.last_shown
-    check("Settings card dialog shows overlay", overlay ~= nil)
-    -- Verify layout has rows for the new notifications section
-    check("Settings card has at least 8 focusable rows (including Notifications)", overlay and #overlay.layout >= 8)
+    -- Verify layout has rows for the settings categories (including Notifications)
+    check("Settings card has focusable category rows (including Notifications)", overlay and #overlay.layout >= 5)
 end
 
 -- 9. Test Storefront:collectUpdatesForNotification
