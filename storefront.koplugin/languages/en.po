@@ -1931,6 +1931,9 @@ msgstr "The quick brown fox jumps over the lazy dog."
 msgid "This action cannot be undone.\n\nChanges will take effect after restart."
 msgstr "This action cannot be undone.\n\nChanges will take effect after restart."
 
+msgid "This wallpaper is currently active"
+msgstr "This wallpaper is currently active"
+
 msgid "This wallpaper is currently set as your active screensaver."
 msgstr "This wallpaper is currently set as your active screensaver."
 

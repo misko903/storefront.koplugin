@@ -1199,7 +1199,7 @@ msgstr "包含插件"
 
 # en-hash: 05df3a76b632fddb72c3f0f8754344d2
 msgid "Include Storefront Settings"
-msgstr ""
+msgstr "包含 Storefront 设置"
 
 # en-hash: cd361e5db92b3fb3a2a1e6b1740fd7ea
 msgid "Include User Patches"
@@ -1679,7 +1679,7 @@ msgstr "未找到已安装的项目。"
 
 # en-hash: 8e6919a580d6a21f4169b05592f31cbe
 msgid "No items found in this blueprint."
-msgstr ""
+msgstr "在此蓝图中未找到项目。"
 
 # en-hash: bc4c1050aeeb3ff4240c4894b98f32a9
 msgid "No items found."
@@ -2572,6 +2572,10 @@ msgstr "天地玄黄，宇宙洪荒。日月盈昃，辰宿列张。"
 # en-hash: a26abb5b7dd05b79763d7799a9f6ecbb
 msgid "This action cannot be undone.\n\nChanges will take effect after restart."
 msgstr "此操作无法撤销。\n\n更改将在重启后生效。"
+
+# en-hash: f7b72e6131c8e92924bc1b034165a691
+msgid "This wallpaper is currently active"
+msgstr "此壁纸当前正在使用"
 
 # en-hash: c3ab64f00eece9eed797129cb54da718
 msgid "This wallpaper is currently set as your active screensaver."

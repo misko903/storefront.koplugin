@@ -1199,7 +1199,7 @@ msgstr "تضمين الإضافات"
 
 # en-hash: 05df3a76b632fddb72c3f0f8754344d2
 msgid "Include Storefront Settings"
-msgstr ""
+msgstr "تضمين إعدادات Storefront"
 
 # en-hash: cd361e5db92b3fb3a2a1e6b1740fd7ea
 msgid "Include User Patches"
@@ -1679,7 +1679,7 @@ msgstr "لم يتم العثور على عناصر مثبتة."
 
 # en-hash: 8e6919a580d6a21f4169b05592f31cbe
 msgid "No items found in this blueprint."
-msgstr ""
+msgstr "لم يتم العثور على عناصر في هذا المخطط."
 
 # en-hash: bc4c1050aeeb3ff4240c4894b98f32a9
 msgid "No items found."
@@ -2572,6 +2572,10 @@ msgstr "صوت صفير البلبل هيج قلبي الثمل."
 # en-hash: a26abb5b7dd05b79763d7799a9f6ecbb
 msgid "This action cannot be undone.\n\nChanges will take effect after restart."
 msgstr "لا يمكن التراجع عن هذا الإجراء.\n\nستسري التغييرات بعد إعادة التشغيل."
+
+# en-hash: f7b72e6131c8e92924bc1b034165a691
+msgid "This wallpaper is currently active"
+msgstr "هذه الخلفية نشطة حالياً"
 
 # en-hash: c3ab64f00eece9eed797129cb54da718
 msgid "This wallpaper is currently set as your active screensaver."

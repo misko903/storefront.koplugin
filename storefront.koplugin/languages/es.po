@@ -1199,7 +1199,7 @@ msgstr "Incluir complementos"
 
 # en-hash: 05df3a76b632fddb72c3f0f8754344d2
 msgid "Include Storefront Settings"
-msgstr ""
+msgstr "Incluir configuración de Storefront"
 
 # en-hash: cd361e5db92b3fb3a2a1e6b1740fd7ea
 msgid "Include User Patches"
@@ -1679,7 +1679,7 @@ msgstr "No se encontraron elementos instalados."
 
 # en-hash: 8e6919a580d6a21f4169b05592f31cbe
 msgid "No items found in this blueprint."
-msgstr ""
+msgstr "No se encontraron elementos en este plano."
 
 # en-hash: bc4c1050aeeb3ff4240c4894b98f32a9
 msgid "No items found."
@@ -2572,6 +2572,10 @@ msgstr "El veloz murciélago hindú comía feliz cardo y kiwi. La cigüeña toca
 # en-hash: a26abb5b7dd05b79763d7799a9f6ecbb
 msgid "This action cannot be undone.\n\nChanges will take effect after restart."
 msgstr "Esta acción no se puede deshacer.\n\nLos cambios surtirán efecto tras reiniciar."
+
+# en-hash: f7b72e6131c8e92924bc1b034165a691
+msgid "This wallpaper is currently active"
+msgstr "Este fondo de pantalla está activo actualmente"
 
 # en-hash: c3ab64f00eece9eed797129cb54da718
 msgid "This wallpaper is currently set as your active screensaver."
