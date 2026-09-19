@@ -49,7 +49,7 @@ local function runTests()
     end
     Localization:init(path)
 
-    assertTest(#Localization.available_languages == 18, "Discovered 18 Languages", "Found " .. tostring(#Localization.available_languages))
+    assertTest(#Localization.available_languages == 19, "Discovered 19 Languages", "Found " .. tostring(#Localization.available_languages))
     assertTest(Localization:languageExists("en"), "Language 'en' Exists")
     assertTest(Localization:languageExists("de"), "Language 'de' Exists")
     assertTest(Localization:languageExists("es"), "Language 'es' Exists")
