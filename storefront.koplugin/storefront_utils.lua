@@ -221,7 +221,7 @@ end
 
 function storefront_utils.getMappedScreensaverCategories(cat_input)
     if not cat_input then
-        return { "Fine Art" }
+        return { "Art" }
     end
 
     local raw_list = {}
@@ -239,14 +239,14 @@ function storefront_utils.getMappedScreensaverCategories(cat_input)
             end
         end
     elseif type(cat_input) == "string" then
-        if cat_input == "" then return { "Fine Art" } end
+        if cat_input == "" then return { "Art" } end
         for part in string.gmatch(cat_input, "[^,]+") do
             table.insert(raw_list, part)
         end
     end
 
     if #raw_list == 0 then
-        return { "Fine Art" }
+        return { "Art" }
     end
 
     local result = {}
@@ -275,13 +275,13 @@ function storefront_utils.getMappedScreensaverCategories(cat_input)
         elseif c:find("quote") then
             mapped = "Quotes"
         elseif c:find("art") or c:find("ceramic") or c:find("drawing") or c:find("paint") or c:find("print") or c:find("sculpture") or c:find("installation") or c:find("funerary") then
-            mapped = "Fine Art"
+            mapped = "Art"
         else
             local clean = part:match("^%s*(.-)%s*$")
             if clean ~= "" then
                 mapped = clean:sub(1,1):upper() .. clean:sub(2):lower()
             else
-                mapped = "Fine Art"
+                mapped = "Art"
             end
         end
         if mapped and not seen[mapped:lower()] then
@@ -289,7 +289,7 @@ function storefront_utils.getMappedScreensaverCategories(cat_input)
             table.insert(result, mapped)
         end
     end
-    if #result == 0 then table.insert(result, "Fine Art") end
+    if #result == 0 then table.insert(result, "Art") end
     return result
 end
 

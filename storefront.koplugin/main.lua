@@ -107,6 +107,7 @@ local MAX_SHA1_FILE_BYTES = 20 * 1024 * 1024
 local _session_bg_checks_done = false
 local _catalog_retry_timer_fn = nil
 local _catalog_show_timer_fn = nil
+local _notification_timer_fn = nil
 
 local PluginPaths = require("storefront_plugin_paths")
 local PATCHES_ROOT = DataStorage:getDataDir() .. "/patches"
@@ -8672,14 +8673,20 @@ function Storefront:maybeCheckCatalogBackground()
         StorefrontLogger.info(msg)
 
         local CatalogClient = require("storefront_net_catalog")
-        CatalogClient.fetchAndUpdateCacheAsync(nil, function(ok, err)
+        CatalogClient.fetchAndUpdateCacheAsync(nil, function(ok, status_or_err)
             if ok then
-                logger.info("Storefront: background catalog update finished")
-                StorefrontLogger.info("Storefront: background catalog update finished")
-                self:softRefreshCurrentBrowserView()
+                logger.info("Storefront: background catalog update finished (" .. tostring(status_or_err) .. ")")
+                StorefrontLogger.info("Storefront: background catalog update finished (" .. tostring(status_or_err) .. ")")
+                if status_or_err == "updated" then
+                    self:refreshCurrentBrowserTab()
+                    local ok_toast, StorefrontToast = pcall(require, "storefront_toast")
+                    if ok_toast and StorefrontToast and StorefrontToast.show then
+                        StorefrontToast.show(_("Catalog updated"), 2)
+                    end
+                end
             else
-                logger.warn("Storefront: background catalog update failed: " .. tostring(err))
-                StorefrontLogger.warn("Storefront: background catalog update failed: " .. tostring(err))
+                logger.warn("Storefront: background catalog update failed: " .. tostring(status_or_err))
+                StorefrontLogger.warn("Storefront: background catalog update failed: " .. tostring(status_or_err))
             end
         end)
     else
@@ -8699,25 +8706,26 @@ function Storefront:showBrowser(kind)
     end
     local current_tab = self.browser_state.tab or "Plugins"
     
-    -- Schedule deferred update and catalog background checks ONCE per session on launch (zero launch delay)
+    -- Schedule deferred update checks ONCE per session on launch (zero launch delay)
     if not _session_bg_checks_done then
         _session_bg_checks_done = true
         UIManager:nextTick(function()
             pcall(function() self:syncPendingFontDownloads() end)
             pcall(function() self:maybeAutoCheckUpdates() end)
         end)
+    end
 
-        local now = os.time()
-        if not self._last_catalog_check_time or (now - self._last_catalog_check_time) >= MIN_CATALOG_CHECK_INTERVAL then
-            if _catalog_show_timer_fn then
-                UIManager:unschedule(_catalog_show_timer_fn)
-            end
-            _catalog_show_timer_fn = function()
-                _catalog_show_timer_fn = nil
-                pcall(function() self:maybeCheckCatalogBackground() end)
-            end
-            UIManager:scheduleIn(1.5, _catalog_show_timer_fn)
+    -- Check catalog if never checked or if MIN_CATALOG_CHECK_INTERVAL has elapsed
+    local now = os.time()
+    if not self._last_catalog_check_time or (now - self._last_catalog_check_time) >= MIN_CATALOG_CHECK_INTERVAL then
+        if _catalog_show_timer_fn then
+            UIManager:unschedule(_catalog_show_timer_fn)
         end
+        _catalog_show_timer_fn = function()
+            _catalog_show_timer_fn = nil
+            pcall(function() self:maybeCheckCatalogBackground() end)
+        end
+        UIManager:scheduleIn(1.5, _catalog_show_timer_fn)
     end
 
     local title = "Storefront"
@@ -8917,9 +8925,18 @@ function Storefront:showBrowser(kind)
                             if v and k ~= "all" then
                                 local c_name = k:sub(1,1):upper() .. k:sub(2)
                                 if k == "scifi" or k == "sci-fi" then c_name = "Sci-Fi" end
-                                if k == "fine art" then c_name = "Fine Art" end
+                                if k == "fine art" or k == "art" then c_name = "Art" end
                                 if k == "pop culture" then c_name = "Pop Culture" end
-                                table.insert(active_cat_names, c_name)
+                                local already_present = false
+                                for _, existing_c in ipairs(active_cat_names) do
+                                    if existing_c == c_name then
+                                        already_present = true
+                                        break
+                                    end
+                                end
+                                if not already_present then
+                                    table.insert(active_cat_names, c_name)
+                                end
                             end
                         end
                         table.sort(active_cat_names)
@@ -9143,7 +9160,6 @@ function Storefront:showBrowser(kind)
             self:saveBrowserState()
             self:dismissProgressMessage()
             self.browser_menu = nil
-            self._session_bg_checks_done = nil
             self._ss_thumb_task_id = (self._ss_thumb_task_id or 0) + 1
         end,
     }
@@ -10415,12 +10431,12 @@ function Storefront:init()
             logger.info(msg)
             StorefrontLogger.info(msg)
             local CatalogClient = require("storefront_net_catalog")
-            CatalogClient.fetchAndUpdateCacheAsync(nil, function(ok, err)
+            CatalogClient.fetchAndUpdateCacheAsync(nil, function(ok, status_or_err)
                 if ok then
-                    logger.info("Storefront init: background catalog update finished")
-                    StorefrontLogger.info("Storefront init: background catalog update finished")
-                    if Storefront.instance and Storefront.instance.browser_menu then
-                        Storefront.instance:reopenBrowser()
+                    logger.info("Storefront init: background catalog update finished (" .. tostring(status_or_err) .. ")")
+                    StorefrontLogger.info("Storefront init: background catalog update finished (" .. tostring(status_or_err) .. ")")
+                    if status_or_err == "updated" and Storefront.instance and Storefront.instance.browser_menu then
+                        Storefront.instance:refreshCurrentBrowserTab()
                     end
                     pcall(function()
                         if Storefront.checkStartupNotifications then
@@ -10428,8 +10444,8 @@ function Storefront:init()
                         end
                     end)
                 else
-                    logger.warn("Storefront init: background catalog update failed: " .. tostring(err))
-                    StorefrontLogger.warn("Storefront init: background catalog update failed: " .. tostring(err))
+                    logger.warn("Storefront init: background catalog update failed: " .. tostring(status_or_err))
+                    StorefrontLogger.warn("Storefront init: background catalog update failed: " .. tostring(status_or_err))
                     if Cache.countRepos("plugin") == 0 then
                         logger.info("Storefront init: catalog cache empty after fetch error, loading bundled catalog fallback")
                         CatalogClient.loadBundledCatalog()
@@ -10447,12 +10463,12 @@ function Storefront:init()
                             _catalog_retry_timer_fn = nil
                             logger.info("Storefront init: retrying background catalog update after delay...")
                             if StorefrontLogger then StorefrontLogger.info("Storefront init: retrying background catalog update after delay...") end
-                            CatalogClient.fetchAndUpdateCacheAsync(nil, function(retry_ok, retry_err)
+                            CatalogClient.fetchAndUpdateCacheAsync(nil, function(retry_ok, retry_status_or_err)
                                 if retry_ok then
-                                    logger.info("Storefront init: background catalog update retry succeeded")
-                                    if StorefrontLogger then StorefrontLogger.info("Storefront init: background catalog update retry succeeded") end
-                                    if Storefront.instance and Storefront.instance.browser_menu then
-                                        Storefront.instance:reopenBrowser()
+                                    logger.info("Storefront init: background catalog update retry succeeded (" .. tostring(retry_status_or_err) .. ")")
+                                    if StorefrontLogger then StorefrontLogger.info("Storefront init: background catalog update retry succeeded (" .. tostring(retry_status_or_err) .. ")") end
+                                    if retry_status_or_err == "updated" and Storefront.instance and Storefront.instance.browser_menu then
+                                        Storefront.instance:refreshCurrentBrowserTab()
                                     end
                                     pcall(function()
                                         if Storefront.checkStartupNotifications then
@@ -10460,8 +10476,8 @@ function Storefront:init()
                                         end
                                     end)
                                 else
-                                    logger.warn("Storefront init: background catalog update retry failed: " .. tostring(retry_err))
-                                    if StorefrontLogger then StorefrontLogger.warn("Storefront init: background catalog update retry failed: " .. tostring(retry_err)) end
+                                    logger.warn("Storefront init: background catalog update retry failed: " .. tostring(retry_status_or_err))
+                                    if StorefrontLogger then StorefrontLogger.warn("Storefront init: background catalog update retry failed: " .. tostring(retry_status_or_err)) end
                                     if Cache.countRepos("plugin") == 0 then
                                         CatalogClient.loadBundledCatalog()
                                     end
@@ -10483,6 +10499,85 @@ function Storefront:init()
             end)
         end
     end)
+
+    pcall(function() self:scheduleNotificationTimer() end)
+end
+
+function Storefront:scheduleNotificationTimer()
+    local ok_nm, NotificationMgr = pcall(require, "storefront_notification_mgr")
+    if not (ok_nm and NotificationMgr) then return end
+
+    local UIManager = require("ui/uimanager")
+    if _notification_timer_fn then
+        UIManager:unschedule(_notification_timer_fn)
+        _notification_timer_fn = nil
+    end
+
+    if not NotificationMgr.isEnabled() then
+        return
+    end
+
+    local interval = NotificationMgr.getFrequencySeconds() or 86400
+    local last_check = NotificationMgr.getLastChecked()
+    local now = os.time()
+    local delay = interval
+    if last_check > 0 then
+        local elapsed = now - last_check
+        if elapsed < interval then
+            delay = math.max(60, interval - elapsed)
+        else
+            delay = 300
+        end
+    else
+        delay = 300
+    end
+
+    _notification_timer_fn = function()
+        _notification_timer_fn = nil
+        pcall(function()
+            if not NotificationMgr.isEnabled() then return end
+            local is_online = NotificationMgr.isNetworkConnected()
+            if is_online and NotificationMgr.shouldCheckNow() then
+                local CatalogClient = require("storefront_net_catalog")
+                CatalogClient.fetchAndUpdateCacheAsync(nil, function(ok, status)
+                    if ok then
+                        if status == "updated" and Storefront.instance and Storefront.instance.browser_menu then
+                            Storefront.instance:refreshCurrentBrowserTab()
+                        end
+                        pcall(function()
+                            if Storefront.checkStartupNotifications then
+                                Storefront:checkStartupNotifications(true)
+                            end
+                        end)
+                    end
+                end)
+            end
+        end)
+        if Storefront.instance and Storefront.instance.scheduleNotificationTimer then
+            Storefront.instance:scheduleNotificationTimer()
+        end
+    end
+
+    UIManager:scheduleIn(delay, _notification_timer_fn)
+end
+
+function Storefront:onNetworkConnected()
+    local ok_nm, NotificationMgr = pcall(require, "storefront_notification_mgr")
+    if ok_nm and NotificationMgr and NotificationMgr.isEnabled() and NotificationMgr.shouldCheckNow(nil, true) then
+        local CatalogClient = require("storefront_net_catalog")
+        CatalogClient.fetchAndUpdateCacheAsync(nil, function(ok, status)
+            if ok then
+                if status == "updated" and Storefront.instance and Storefront.instance.browser_menu then
+                    Storefront.instance:refreshCurrentBrowserTab()
+                end
+                pcall(function()
+                    if Storefront.checkStartupNotifications then
+                        Storefront:checkStartupNotifications(true)
+                    end
+                end)
+            end
+        end)
+    end
 end
 
 

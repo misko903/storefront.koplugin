@@ -137,7 +137,6 @@ def parse_release_dict(rel):
         "published_at": rel.get("published_at") or "",
         "download_url": download_url,
         "name": rel.get("name") or "",
-        "body": rel.get("body") or "",
         "prerelease": rel.get("prerelease", False),
         "assets": parsed_assets,
     }
@@ -379,13 +378,13 @@ def main():
     }
     
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(catalog, f, indent=2, ensure_ascii=False)
+        json.dump(catalog, f, separators=(",", ":"), ensure_ascii=False)
         
     inner_output_path = os.path.abspath(os.path.join(script_dir, "..", "storefront.koplugin", "catalog.json"))
     if os.path.exists(os.path.dirname(inner_output_path)):
         try:
             with open(inner_output_path, "w", encoding="utf-8") as f:
-                json.dump(catalog, f, indent=2, ensure_ascii=False)
+                json.dump(catalog, f, separators=(",", ":"), ensure_ascii=False)
             print(f"Synced catalog.json to inner plugin folder at {inner_output_path}")
         except Exception as e:
             print(f"Warning: could not write inner catalog.json: {e}")

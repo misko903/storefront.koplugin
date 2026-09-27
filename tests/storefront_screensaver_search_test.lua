@@ -218,7 +218,7 @@ local sample_catalog = {
         title = "The Rhinoceros",
         author = "Albrecht Dürer",
         attribution = "The Metropolitan Museum of Art",
-        category = "Fine Art",
+        category = "Art",
         tags = { "fine art", "woodcut", "historic", "rhino" },
     },
 }
@@ -324,6 +324,11 @@ Storefront.browser_state.search_text = "pines"
 Storefront.browser_state.screensaver_categories = { minimalist = true }
 items = Storefront:buildScreensaverEntries()
 check("Search 'pines' in Minimalist category finds 0 entries", #items[1].cards, 0)
+
+resetState()
+Storefront.browser_state.screensaver_categories = { art = true }
+items = Storefront:buildScreensaverEntries()
+check("Category filter 'art' finds 1 entry", #items[1].cards, 1)
 
 -- Test 8: hasActiveFilters for Screensavers
 resetState()

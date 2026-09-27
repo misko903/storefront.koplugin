@@ -626,6 +626,9 @@ function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
             -- Row 1: Toggle
             add_row(content_vg, notif_icon, _("Update notifications"), nil, function()
                 NotificationMgr.setEnabled(not notif_enabled)
+                if Storefront and Storefront.scheduleNotificationTimer then
+                    Storefront:scheduleNotificationTimer()
+                end
                 renderView("notifications")
             end)
 

@@ -206,6 +206,9 @@ function StorefrontNotificationSettingsDialog.show(Storefront, on_close_callback
             row_item.frame = frame
             row_item.callback = function()
                 NotificationMgr.setFrequency(item.key)
+                if Storefront and Storefront.scheduleNotificationTimer then
+                    Storefront:scheduleNotificationTimer()
+                end
                 refresh()
             end
             row_item.ges_events = {

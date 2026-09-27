@@ -30,6 +30,27 @@ local USER_AGENT = "Mozilla/5.0 (compatible; KOReader-Storefront/1.0)"
 
 local StorefrontSettings = require("storefront_settings")
 local CATALOG_URL_KEY = "catalog_url"
+local CATALOG_ETAG_KEY = "catalog_etag"
+
+function CatalogClient.getStoredEtag()
+    local saved = StorefrontSettings:readSetting(CATALOG_ETAG_KEY)
+    if type(saved) == "string" and saved ~= "" then
+        return saved
+    end
+    return nil
+end
+
+function CatalogClient.setStoredEtag(etag)
+    if type(etag) == "string" and etag ~= "" then
+        StorefrontSettings:saveSetting(CATALOG_ETAG_KEY, etag)
+        StorefrontSettings:flush()
+    end
+end
+
+function CatalogClient.clearStoredEtag()
+    StorefrontSettings:delSetting(CATALOG_ETAG_KEY)
+    StorefrontSettings:flush()
+end
 
 function CatalogClient.getCatalogUrl()
     local saved = StorefrontSettings:readSetting(CATALOG_URL_KEY)
@@ -49,6 +70,7 @@ function CatalogClient.setCatalogUrl(url)
     else
         StorefrontSettings:saveSetting(CATALOG_URL_KEY, url)
     end
+    CatalogClient.clearStoredEtag()
     StorefrontSettings:flush()
 end
 
@@ -63,7 +85,7 @@ end
 
 local FALLBACK_CATALOG_URL = "https://raw.githubusercontent.com/ultimatejimmy/storefront.koplugin/main/catalog.json"
 
-local function requestWithRedirects(target_url, sink_fn)
+local function requestWithRedirects(target_url, sink_fn, extra_headers)
     local socketutil = require("socketutil")
     local current_url = target_url
     local max_redirects = 5
@@ -82,6 +104,11 @@ local function requestWithRedirects(target_url, sink_fn)
                 ["Accept"] = "application/json",
                 ["User-Agent"] = USER_AGENT,
             }
+            if extra_headers then
+                for k, v in pairs(extra_headers) do
+                    headers[k] = v
+                end
+            end
 
             local sink = sink_fn()
             if not sink then
@@ -107,8 +134,8 @@ local function requestWithRedirects(target_url, sink_fn)
             last_headers_res = response_headers
 
             local code = tonumber(res_code) or 0
-            if ok_req and code == 200 then
-                return true, 200, response_headers
+            if ok_req and (code == 200 or code == 304) then
+                return true, code, response_headers
             elseif ok_req and (code == 301 or code == 302 or code == 303 or code == 307 or code == 308) then
                 break
             end
@@ -149,6 +176,11 @@ function CatalogClient.fetchCatalog(url_to_fetch)
         table.insert(urls_to_try, FALLBACK_CATALOG_URL)
     end
 
+    local etag = nil
+    if Cache.countRepos("plugin") > 0 then
+        etag = CatalogClient.getStoredEtag()
+    end
+
     local last_err = "No catalog URLs attempted"
     for _, target_url in ipairs(urls_to_try) do
         logger.info("Storefront: fetching static catalog from", target_url)
@@ -158,9 +190,21 @@ function CatalogClient.fetchCatalog(url_to_fetch)
             return newTableSink(response_body)
         end
 
-        local ok, res_code = requestWithRedirects(target_url, sink_fn)
+        local extra_headers = nil
+        if etag and etag ~= "" and target_url == primary_url then
+            extra_headers = { ["If-None-Match"] = etag }
+        end
+
+        local ok, res_code, res_headers = requestWithRedirects(target_url, sink_fn, extra_headers)
         local code = tonumber(res_code) or 0
-        if ok and code == 200 then
+        if ok and code == 304 then
+            logger.info("Storefront: catalog unchanged (HTTP 304) from", target_url)
+            return "not_modified", nil
+        elseif ok and code == 200 then
+            local new_etag = res_headers and (res_headers.etag or res_headers.ETag or res_headers["etag"])
+            if type(new_etag) == "string" and new_etag ~= "" then
+                CatalogClient.setStoredEtag(new_etag)
+            end
             local body = table.concat(response_body)
             local ok_dec, parsed = pcall(json.decode, body)
             if ok_dec and type(parsed) == "table" and parsed.plugins then
@@ -233,6 +277,11 @@ function CatalogClient.fetchCatalogToFile(url_to_fetch, dest_path)
         table.insert(urls_to_try, FALLBACK_CATALOG_URL)
     end
 
+    local etag = nil
+    if Cache.countRepos("plugin") > 0 then
+        etag = CatalogClient.getStoredEtag()
+    end
+
     local last_err = "No catalog URLs attempted"
     for _, target_url in ipairs(urls_to_try) do
         logger.info("Storefront: fetching catalog to file from", target_url)
@@ -249,12 +298,25 @@ function CatalogClient.fetchCatalogToFile(url_to_fetch, dest_path)
             return require("socketutil").file_sink(f)
         end
 
-        local ok, res_code = requestWithRedirects(target_url, sink_fn)
+        local extra_headers = nil
+        if etag and etag ~= "" and target_url == primary_url then
+            extra_headers = { ["If-None-Match"] = etag }
+        end
+
+        local ok, res_code, res_headers = requestWithRedirects(target_url, sink_fn, extra_headers)
         if current_file then pcall(function() current_file:close() end); current_file = nil end
 
         local code = tonumber(res_code) or 0
-        if ok and code == 200 then
-            return true, nil
+        if ok and code == 304 then
+            os.remove(dest_path)
+            logger.info("Storefront: catalog unchanged (HTTP 304 Not Modified) from", target_url)
+            return true, "not_modified"
+        elseif ok and code == 200 then
+            local new_etag = res_headers and (res_headers.etag or res_headers.ETag or res_headers["etag"])
+            if type(new_etag) == "string" and new_etag ~= "" then
+                CatalogClient.setStoredEtag(new_etag)
+            end
+            return true, "updated"
         else
             os.remove(dest_path)
             local err_str = tonumber(res_code) and ("HTTP " .. tostring(res_code)) or tostring(res_code)
@@ -516,9 +578,13 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
     if not (ok_ffi and ffiutil and ffiutil.runInSubProcess) then
         logger.warn("Storefront: ffiutil.runInSubProcess unavailable, falling back to sync catalog fetch")
         local ok_dl, catalog_data_or_err = pcall(function() return CatalogClient.fetchCatalog(target_url) end)
-        if ok_dl and catalog_data_or_err then
+        if ok_dl and catalog_data_or_err == "not_modified" then
+            logger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)")
+            if StorefrontLogger then StorefrontLogger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)") end
+            if callback then callback(true, "not_modified") end
+        elseif ok_dl and catalog_data_or_err then
             local ok_update, err_update = CatalogClient.updateCacheFromCatalog(catalog_data_or_err)
-            if callback then callback(ok_update, type(err_update) == "string" and err_update or tostring(err_update)) end
+            if callback then callback(ok_update, ok_update and "updated" or (type(err_update) == "string" and err_update or tostring(err_update))) end
         else
             local err_str = type(catalog_data_or_err) == "string" and catalog_data_or_err or tostring(catalog_data_or_err)
             if callback then callback(false, "Sync catalog fetch failed: " .. err_str) end
@@ -529,9 +595,13 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
     -- Run download AND JSON decoding AND disk writing inside child subprocess
     local pid, parent_read_fd = ffiutil.runInSubProcess(function(pid, child_write_fd)
         local ok, err = xpcall(function()
-            local ok_dl, dl_err = CatalogClient.fetchCatalogToFile(target_url, staging_raw_catalog)
+            local ok_dl, dl_status_or_err = CatalogClient.fetchCatalogToFile(target_url, staging_raw_catalog)
+            if ok_dl and dl_status_or_err == "not_modified" then
+                if child_write_fd then ffiutil.writeToFD(child_write_fd, "OK_NOT_MODIFIED", true) end
+                return
+            end
             if not ok_dl then
-                logger.warn("Storefront: remote catalog download failed (" .. tostring(dl_err) .. "), attempting fallback to bundled catalog")
+                logger.warn("Storefront: remote catalog download failed (" .. tostring(dl_status_or_err) .. "), attempting fallback to bundled catalog")
                 local bundled_path = CatalogClient.getBundledCatalogPath()
                 if bundled_path then
                     local bf = io.open(bundled_path, "rb")
@@ -661,11 +731,15 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
             local ok_swap_pt = safeReplace(staging_patches_file, final_patches_file)
             local ok_swap_f = safeReplace(staging_fonts_file, final_fonts_file)
 
-            if child_msg == "OK" and (ok_swap_p or ok_swap_pt or ok_swap_f) then
+            if child_msg == "OK_NOT_MODIFIED" then
+                logger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)")
+                if StorefrontLogger then StorefrontLogger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)") end
+                if callback then callback(true, "not_modified") end
+            elseif child_msg == "OK" and (ok_swap_p or ok_swap_pt or ok_swap_f) then
                 Cache.invalidate()
                 logger.info("Storefront: background catalog update finished and cache swap complete")
                 if StorefrontLogger then StorefrontLogger.info("Storefront: background catalog update finished and cache swap complete") end
-                if callback then callback(true, nil) end
+                if callback then callback(true, "updated") end
             else
                 os.remove(staging_plugins_file)
                 os.remove(staging_patches_file)
@@ -765,6 +839,9 @@ function CatalogClient.fetchAndUpdateCache(url_to_fetch)
         return false, "Direct API mode active"
     end
     local catalog, err = CatalogClient.fetchCatalog(url_to_fetch)
+    if catalog == "not_modified" then
+        return true, "not_modified"
+    end
     if not catalog then
         logger.info("Storefront: remote catalog fetch failed, attempting fallback to bundled catalog.json")
         return CatalogClient.loadBundledCatalog()
@@ -773,7 +850,7 @@ function CatalogClient.fetchAndUpdateCache(url_to_fetch)
     if not ok then
         return false, update_err
     end
-    return true, nil
+    return true, "updated"
 end
 
 function CatalogClient.syncMissingFromBundledCatalog()

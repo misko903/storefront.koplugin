@@ -258,6 +258,11 @@ function StorefrontScreensavers.fetchThumbnail(item, callback)
     end
 
     local ok, code = requestWithRedirects(fetch_url, sink_fn)
+    -- Graceful fallback: If transparent pluginThumbnailUrl failed (e.g. 404), try standard thumbnailUrl
+    if (not ok or code ~= 200) and is_transparent and item.pluginThumbnailUrl and item.thumbnailUrl and item.thumbnailUrl ~= fetch_url then
+        ok, code = requestWithRedirects(item.thumbnailUrl, sink_fn)
+    end
+
     if ok and code == 200 then
         local tmp_path = thumb_path .. ".tmp"
         local file = io.open(tmp_path, "wb")
