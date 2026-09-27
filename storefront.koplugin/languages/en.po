@@ -77,6 +77,12 @@ msgstr "+ Add to Shuffle Pool"
 msgid "+ New"
 msgstr "+ New"
 
+msgid "+%d more"
+msgstr "+%d more"
+
+msgid "+1 more"
+msgstr "+1 more"
+
 msgid ".. (Parent Folder)"
 msgstr ".. (Parent Folder)"
 

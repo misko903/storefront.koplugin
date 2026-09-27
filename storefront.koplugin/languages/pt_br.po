@@ -101,6 +101,14 @@ msgstr "+ Adicionar à lista aleatória"
 msgid "+ New"
 msgstr "+ Novo"
 
+# en-hash: 29a572c2a49d00d40c4aafb6a1af35e4
+msgid "+%d more"
+msgstr "+%d mais"
+
+# en-hash: 1c56fa8e2f28c474b43f2194cf276301
+msgid "+1 more"
+msgstr "+1 mais"
+
 # en-hash: d28fdd75f93893891fb2d7e3b40683de
 msgid ".. (Parent Folder)"
 msgstr ".. (Pasta superior)"
