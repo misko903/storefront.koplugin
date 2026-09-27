@@ -261,6 +261,106 @@ do
     local overlay_long = _G.ui_tracker.last_shown
     check("Long item name dialog shows overlay", overlay_long ~= nil)
 
+    -- Test Helper: recursively verify no ScrollableContainer in widget tree
+    local function containsScrollableContainer(node, seen)
+        seen = seen or {}
+        if not node or type(node) ~= "table" or seen[node] then return false end
+        seen[node] = true
+        if node.type == "ScrollableContainer" then return true end
+        for i = 1, #node do
+            if containsScrollableContainer(node[i], seen) then return true end
+        end
+        for k, v in pairs(node) do
+            if type(v) == "table" and k ~= "parent" and k ~= "show_parent" and k ~= "_G" then
+                if containsScrollableContainer(v, seen) then return true end
+            end
+        end
+        return false
+    end
+
+    -- Helper to recursively extract all TextWidget / TextBoxWidget text
+    local function collectAllText(node, seen, texts)
+        seen = seen or {}
+        texts = texts or {}
+        if not node or type(node) ~= "table" or seen[node] then return texts end
+        seen[node] = true
+        if node.text and type(node.text) == "string" then
+            table.insert(texts, node.text)
+        end
+        for i = 1, #node do
+            collectAllText(node[i], seen, texts)
+        end
+        for k, v in pairs(node) do
+            if type(v) == "table" and k ~= "parent" and k ~= "show_parent" and k ~= "_G" then
+                collectAllText(v, seen, texts)
+            end
+        end
+        return texts
+    end
+
+    -- Test 5 updates: exactly fits cap, all 5 displayed, no scrollbars, no overflow indicator
+    local five_updates = {
+        { name = "Plugin One", version = "v1.0" },
+        { name = "Plugin Two", version = "v2.0" },
+        { name = "Plugin Three", version = "v3.0" },
+        { name = "Plugin Four", version = "v4.0" },
+        { name = "Plugin Five", version = "v5.0" },
+    }
+    local ok_five = pcall(function()
+        NotificationUI.show(dummy_sf, five_updates)
+    end)
+    check("NotificationUI.show with 5 updates executes without error", ok_five)
+    local overlay_five = _G.ui_tracker.last_shown
+    check("5 updates dialog shows overlay", overlay_five ~= nil)
+    check("5 updates has no ScrollableContainer", not containsScrollableContainer(overlay_five))
+    local five_texts = collectAllText(overlay_five)
+    local five_texts_joined = table.concat(five_texts, " ")
+    check("5 updates shows Plugin One", five_texts_joined:find("Plugin One") ~= nil)
+    check("5 updates shows Plugin Five", five_texts_joined:find("Plugin Five") ~= nil)
+    check("5 updates does not show overflow text", five_texts_joined:find("%+.*more") == nil)
+
+    -- Test 6 updates (user screenshot case): shows 5 items + '+1 more', zero scrollbars
+    local six_updates = {
+        { name = "Simple UI", version = "v2.7.1" },
+        { name = "X-Ray", version = "v26.9.17" },
+        { name = "Bookshelf", version = "v5.2.2" },
+        { name = "Burrow", version = "v0.4.12-beta.7" },
+        { name = "Auto-Frontlight", version = "v1.0.0" },
+        { name = "Cover Browser", version = "v3.1.4" },
+    }
+    local ok_six = pcall(function()
+        NotificationUI.show(dummy_sf, six_updates)
+    end)
+    check("NotificationUI.show with 6 updates executes without error", ok_six)
+    local overlay_six = _G.ui_tracker.last_shown
+    check("6 updates dialog shows overlay", overlay_six ~= nil)
+    check("6 updates has no ScrollableContainer", not containsScrollableContainer(overlay_six))
+    local six_texts = collectAllText(overlay_six)
+    local six_texts_joined = table.concat(six_texts, " ")
+    check("6 updates shows Simple UI", six_texts_joined:find("Simple UI") ~= nil)
+    check("6 updates shows Auto-Frontlight (5th item)", six_texts_joined:find("Auto%-Frontlight") ~= nil)
+    check("6 updates does not show 6th item name directly", six_texts_joined:find("Cover Browser") == nil)
+    check("6 updates shows '+1 more' overflow indicator", six_texts_joined:find("%+1 more") ~= nil)
+
+    -- Test 10 updates: shows 5 items + '+5 more', zero scrollbars
+    local ten_updates = {}
+    for i = 1, 10 do
+        table.insert(ten_updates, { name = "Item " .. i, version = "v1." .. i })
+    end
+    local ok_ten = pcall(function()
+        NotificationUI.show(dummy_sf, ten_updates)
+    end)
+    check("NotificationUI.show with 10 updates executes without error", ok_ten)
+    local overlay_ten = _G.ui_tracker.last_shown
+    check("10 updates dialog shows overlay", overlay_ten ~= nil)
+    check("10 updates has no ScrollableContainer", not containsScrollableContainer(overlay_ten))
+    local ten_texts = collectAllText(overlay_ten)
+    local ten_texts_joined = table.concat(ten_texts, " ")
+    check("10 updates shows Item 1", ten_texts_joined:find("Item 1") ~= nil)
+    check("10 updates shows Item 5", ten_texts_joined:find("Item 5") ~= nil)
+    check("10 updates does not show Item 6 directly", ten_texts_joined:find("Item 6") == nil)
+    check("10 updates shows '+5 more' overflow indicator", ten_texts_joined:find("%+5 more") ~= nil)
+
     -- Test Styled Storefront Snooze Picker
     local snooze_cb_called = false
     local ok_snooze, err_snooze = pcall(function()

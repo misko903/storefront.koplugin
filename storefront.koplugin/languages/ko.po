@@ -397,6 +397,10 @@ msgstr "카탈로그 새로 고침이 이미 진행 중입니다."
 msgid "Catalog source"
 msgstr "카탈로그 소스"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "카탈로그가 업데이트됨"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "카탈로그 업데이트됨: 플러그인 %d개, 패치 %d개, 글꼴 %d개, 화면 보호기 %d개."

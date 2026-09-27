@@ -7806,10 +7806,12 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
                 local dla = dl_scores[a] or 0
                 local dlb = dl_scores[b] or 0
                 if dla ~= dlb then return dla > dlb end
+                local ta = (a.title or a.name or ""):lower()
+                local tb = (b.title or b.name or ""):lower()
+                if ta ~= tb then return ta < tb end
                 local ca = a._catalog_index or 0
                 local cb = b._catalog_index or 0
-                if ca ~= cb then return ca > cb end
-                return (a.title or a.name or "") < (b.title or b.name or "")
+                return ca < cb
             end)
         elseif ss_sort == "downloads" then
             local dl_scores = {}
@@ -7833,10 +7835,12 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
                 local sa = scores[a] or 0
                 local sb = scores[b] or 0
                 if sa ~= sb then return sa > sb end
+                local ta = (a.title or a.name or ""):lower()
+                local tb = (b.title or b.name or ""):lower()
+                if ta ~= tb then return ta < tb end
                 local ca = a._catalog_index or 0
                 local cb = b._catalog_index or 0
-                if ca ~= cb then return ca > cb end
-                return (a.title or a.name or "") < (b.title or b.name or "")
+                return ca < cb
             end)
         elseif ss_sort == "recent" or ss_sort == "newest" then
             table.sort(filtered, function(a, b)

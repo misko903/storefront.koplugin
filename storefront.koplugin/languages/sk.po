@@ -287,7 +287,7 @@ msgstr "Prázdne"
 
 # en-hash: c541c9ccbbaae85fe31e5a1813ec7968
 msgid "Blueprint"
-msgstr "Blueprint"
+msgstr "Náčrt"
 
 # en-hash: 30a5f9d450d126d1525d76d93e292965
 msgid "Blueprint Name"
@@ -396,6 +396,10 @@ msgstr "Obnovenie katalógu už prebieha."
 # en-hash: 646e1f1324e200b3910e35ea3f015960
 msgid "Catalog source"
 msgstr "Zdroj katalógu"
+
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "Katalóg bol aktualizovaný"
 
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
@@ -1807,7 +1811,7 @@ msgstr "Vypnuté"
 
 # en-hash: 3153c6cc9bfae333965e0f6ce3b2097c
 msgid "Offline Regular"
-msgstr "Offline Regular"
+msgstr "Bežný offline"
 
 # en-hash: c3bf447eabe632720a3aa1a7ce401274
 msgid "Open"
@@ -1863,7 +1867,7 @@ msgstr "Ukážka pangramu"
 
 # en-hash: 156e10596fdc76ee5300bab931d89c0f
 msgid "Patch"
-msgstr "Patch"
+msgstr "Záplata"
 
 # en-hash: 096539a30b886b6f8afdc93f15f3241c
 msgid "Patch %s has been %s."
@@ -1903,7 +1907,7 @@ msgstr "Párovanie patchu zrušené."
 
 # en-hash: 91721799c8121092a4379d08001d803e
 msgid "Patch: %s"
-msgstr "Patch: %s"
+msgstr "Záplata: %s"
 
 # en-hash: c4d283323af70979073f5cb6145f3a4b
 msgid "Patches"
@@ -1927,7 +1931,7 @@ msgstr "Zadajte platný kód"
 
 # en-hash: 409c1892b68cb394799262ac57f6d4f1
 msgid "Plugin"
-msgstr "Plugin"
+msgstr "Zásuvný modul"
 
 # en-hash: 55660a9f279ae6e277eb8c16a0f3f013
 msgid "Plugin %s has been %s."
@@ -3179,11 +3183,11 @@ msgstr "nenájdené"
 
 # en-hash: e5c5e6dae38b284e8cf0bd1fb0efac03
 msgid "patch"
-msgstr "patch"
+msgstr "záplata"
 
 # en-hash: a24bcf2198b1b13ad985304483f7f324
 msgid "plugin"
-msgstr "plugin"
+msgstr "zásuvný modul"
 
 # en-hash: c360639f51cb2625a9439974e865a683
 msgid "progress_please_wait"

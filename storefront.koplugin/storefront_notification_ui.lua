@@ -14,7 +14,6 @@ local HorizontalSpan = require("ui/widget/horizontalspan")
 local ImageWidget = require("ui/widget/imagewidget")
 local InputContainer = require("ui/widget/container/inputcontainer")
 local LineWidget = require("ui/widget/linewidget")
-local ScrollableContainer = require("ui/widget/container/scrollablecontainer")
 local TextBoxWidget = require("ui/widget/textboxwidget")
 local TextWidget = require("ui/widget/textwidget")
 local UIManager = require("ui/uimanager")
@@ -358,7 +357,13 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
 
     local list_indent = sc(6)
     local inner_w = dialog_w - (pad_h * 2) - list_indent - sc(8)
-    for _, item in ipairs(updates) do
+
+    local MAX_DISPLAY_CAP = 5
+    local total_count = #updates
+    local show_count = math.min(total_count, MAX_DISPLAY_CAP)
+
+    for i = 1, show_count do
+        local item = updates[i]
         local bullet = TextWidget:new{
             text = "• ",
             face = Font:getFace("cfont", ui_font_size),
@@ -382,8 +387,7 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
         }
         local ver_w = (ver_widget.getSize and ver_widget:getSize().w) or sc(50)
 
-        local name_w = inner_w - bullet_w - ver_w - sc(14)
-        if name_w < sc(60) then name_w = sc(60) end
+        local name_w = math.max(sc(40), inner_w - bullet_w - ver_w - sc(14))
 
         local name_widget = TextWidget:new{
             text = item.name or _("Unknown item"),
@@ -414,6 +418,39 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
         })
     end
 
+    -- If there are remaining updates beyond the cap of 5, add simple summary row
+    if total_count > show_count then
+        local remaining = total_count - show_count
+        local more_text = (remaining == 1)
+            and _("+1 more")
+            or string.format(_("+%d more"), remaining)
+
+        local more_bullet = TextWidget:new{
+            text = "• ",
+            face = Font:getFace("cfont", ui_font_size),
+            bold = true,
+            fgcolor = storefront_theme.color_label_dim,
+        }
+        local more_label = TextWidget:new{
+            text = more_text,
+            face = Font:getFace("cfont", subtext_font_size),
+            fgcolor = storefront_theme.color_label_dim,
+        }
+        local more_row = HorizontalGroup:new{
+            align = "center",
+            more_bullet,
+            more_label,
+        }
+        table.insert(items_vg, FrameContainer:new{
+            padding_top = sc(4),
+            padding_bottom = sc(4),
+            padding_left = 0,
+            padding_right = 0,
+            bordersize = 0,
+            more_row,
+        })
+    end
+
     local list_container = FrameContainer:new{
         padding_top = sc(2),
         padding_bottom = sc(10),
@@ -423,18 +460,8 @@ function StorefrontNotificationUI.show(Storefront, updates, opts)
         items_vg,
     }
 
-    -- Scrollable if many items
-    local max_list_h = sc(180)
-    local items_sz = list_container:getSize()
-    if items_sz.h > max_list_h then
-        local scroller = ScrollableContainer:new{
-            dimen = Geom:new{ w = dialog_w - sc(4), h = max_list_h },
-            list_container,
-        }
-        table.insert(content_vg, scroller)
-    else
-        table.insert(content_vg, list_container)
-    end
+    -- Accommodate directly without scrollbars
+    table.insert(content_vg, list_container)
 
     -- Divider before buttons
     table.insert(content_vg, LineWidget:new{

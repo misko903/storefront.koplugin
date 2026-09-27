@@ -397,6 +397,10 @@ msgstr "目录正在刷新中。"
 msgid "Catalog source"
 msgstr "目录来源"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "目录已更新"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "目录已更新：%d 个插件，%d 个补丁，%d 种字体，%d 张屏保。"

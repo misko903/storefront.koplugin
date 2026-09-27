@@ -397,6 +397,10 @@ msgstr "A katalógus frissítése már folyamatban van."
 msgid "Catalog source"
 msgstr "Katalógus forrása"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "Katalógus frissítve"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "Katalógus frissítve: %d bővítmény, %d javítás, %d betűtípus, %d képernyővédő."

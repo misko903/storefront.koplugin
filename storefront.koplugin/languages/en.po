@@ -299,6 +299,9 @@ msgstr "Catalog refresh is already in progress."
 msgid "Catalog source"
 msgstr "Catalog source"
 
+msgid "Catalog updated"
+msgstr "Catalog updated"
+
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 

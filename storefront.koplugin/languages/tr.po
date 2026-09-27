@@ -397,6 +397,10 @@ msgstr "Katalog yenilemesi zaten devam ediyor."
 msgid "Catalog source"
 msgstr "Katalog kaynağı"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "Katalog güncellendi"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "Katalog güncellendi: %d eklenti, %d yama, %d yazı tipi, %d ekran koruyucu."

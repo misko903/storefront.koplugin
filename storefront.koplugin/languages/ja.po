@@ -397,6 +397,10 @@ msgstr "カタログの更新はすでに実行中です。"
 msgid "Catalog source"
 msgstr "カタログソース"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "カタログが更新されました"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "カタログを更新しました: %d個のプラグイン、%d個のパッチ、%d個のフォント、%d個のスクリーンセーバー"

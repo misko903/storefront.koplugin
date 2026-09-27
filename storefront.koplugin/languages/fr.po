@@ -397,6 +397,10 @@ msgstr "La mise à jour du catalogue est déjà en cours."
 msgid "Catalog source"
 msgstr "Source du catalogue"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "Catalogue mis à jour"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "Catalogue mis à jour : %d extensions, %d correctifs, %d polices, %d économiseurs d'écran."

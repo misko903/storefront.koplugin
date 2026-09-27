@@ -397,6 +397,10 @@ msgstr "تحديث الكتالوج جاري بالفعل."
 msgid "Catalog source"
 msgstr "مصدر الكتالوج"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "تم تحديث الكتالوج"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "تم تحديث الكتالوج: %d إضافة، %d رقعة، %d خط، %d شاشة توقف."

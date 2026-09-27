@@ -66,13 +66,6 @@ export default {
       );
     }
 
-    // Ensure database tables exist
-    try {
-      await initSchema(db);
-    } catch (e) {
-      // Schema initialization failover
-    }
-
     // GET /ratings or /stats - Fetch all aggregated ratings & downloads
     if (request.method === "GET" && (url.pathname === "/ratings" || url.pathname === "/" || url.pathname === "/stats")) {
       try {
@@ -106,14 +99,30 @@ export default {
 
         return new Response(JSON.stringify(ratingsMap), {
           status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Cache-Control": "public, max-age=300, s-maxage=1800, stale-while-revalidate=86400",
+          },
         });
       } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        // Return empty map on D1 limit or transient outage to allow client fallback gracefully
+        return new Response(JSON.stringify({}), {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Cache-Control": "public, max-age=60",
+          },
         });
       }
+    }
+
+    // Ensure database tables exist on write requests only
+    try {
+      await initSchema(db);
+    } catch (e) {
+      // Schema initialization failover
     }
 
     // POST /download or POST /vote

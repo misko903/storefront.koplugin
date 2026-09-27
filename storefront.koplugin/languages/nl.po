@@ -397,6 +397,10 @@ msgstr "Catalogus wordt al vernieuwd."
 msgid "Catalog source"
 msgstr "Catalogusbron"
 
+# en-hash: 0db3cfad0f99c7fc644a186845871ec9
+msgid "Catalog updated"
+msgstr "Catalogus bijgewerkt"
+
 # en-hash: 4249cd63253ab5d3dd2627b96ddeff03
 msgid "Catalog updated: %d plugins, %d patches, %d fonts, %d screensavers."
 msgstr "Catalogus bijgewerkt: %d plugins, %d patches, %d lettertypen, %d screensavers."
