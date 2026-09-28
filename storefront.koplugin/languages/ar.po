@@ -3337,3 +3337,19 @@ msgstr "⚙ الإعدادات"
 msgid "✓ Current"
 msgstr "✓ الحالي"
 
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "تقييمات وإحصاءات المجتمع"
+
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "مسح ذاكرة التخزين المؤقت للتقييمات؟"
+
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "سيؤدي هذا إلى حذف تقييمات المجتمع وأعداد التنزيل المخزنة مؤقتًا (%s)."
+
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "تم مسح ذاكرة التخزين المؤقت للتقييمات (تم تحرير %s)."

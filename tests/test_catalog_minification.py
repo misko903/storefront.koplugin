@@ -62,5 +62,19 @@ class TestCatalogMinification(unittest.TestCase):
         self.assertIn('StorefrontToast.show(_("Catalog updated"), 2)', content)
         self.assertNotIn("self._session_bg_checks_done = nil", content)
 
+    def test_screensaver_catalog_refresh_support(self):
+        net_content = (self.plugin_dir / "storefront_net_catalog.lua").read_text(encoding="utf-8")
+        self.assertIn("function CatalogClient.getStoredScreensaverEtag()", net_content)
+        self.assertIn("function CatalogClient.setStoredScreensaverEtag(etag)", net_content)
+        self.assertIn("function CatalogClient.clearStoredScreensaverEtag()", net_content)
+        self.assertIn("function CatalogClient.fetchScreensaverCatalogToFile(dest_path)", net_content)
+        self.assertIn("function CatalogClient.fetchScreensaverCatalog(url_to_fetch)", net_content)
+        self.assertIn("staging_screensavers_file", net_content)
+        self.assertIn("ok_swap_ss", net_content)
+
+        ss_content = (self.plugin_dir / "storefront_screensavers_ui.lua").read_text(encoding="utf-8")
+        self.assertIn("function StorefrontScreensavers.invalidateMemCache()", ss_content)
+        self.assertIn("function StorefrontScreensavers.getLastFetched()", ss_content)
+
 if __name__ == "__main__":
     unittest.main()

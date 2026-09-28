@@ -50,6 +50,20 @@ async function initSchema(db) {
   ]);
 }
 
+async function purgeRatingsCache(origin) {
+  try {
+    if (typeof caches !== "undefined" && caches.default) {
+      await Promise.all([
+        caches.default.delete(new Request(`${origin}/ratings`)),
+        caches.default.delete(new Request(`${origin}/`)),
+        caches.default.delete(new Request(`${origin}/stats`)),
+      ]);
+    }
+  } catch (e) {
+    // Cache API failover
+  }
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") {
@@ -102,7 +116,7 @@ export default {
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
-            "Cache-Control": "public, max-age=300, s-maxage=1800, stale-while-revalidate=86400",
+            "Cache-Control": "public, max-age=60, s-maxage=1800, stale-while-revalidate=300",
           },
         });
       } catch (err) {
@@ -137,6 +151,36 @@ export default {
         });
       }
 
+      // Handle Reset Endpoint (Admin/Maintenance)
+      if (url.pathname === "/admin/reset" || url.pathname === "/reset") {
+        try {
+          await db.batch([
+            db.prepare("DELETE FROM votes WHERE repo_id IN ('1102096716', '1033827759', '1304319884')"),
+            db.prepare(`
+              INSERT INTO ratings (repo_id, up, down, wilson) VALUES
+                ('1304319884', 65, 0, 0.945),
+                ('1102096716', 6, 0, 0.610),
+                ('1033827759', 8, 0, 0.676)
+              ON CONFLICT(repo_id) DO UPDATE SET up = excluded.up, down = excluded.down, wilson = excluded.wilson
+            `),
+            db.prepare("UPDATE downloads SET count = 0 WHERE repo_id IN ('1102096716', '1033827759')"),
+            db.prepare("UPDATE downloads SET count = 120 WHERE repo_id = '1304319884'"),
+          ]);
+
+          await purgeRatingsCache(url.origin);
+
+          return new Response(
+            JSON.stringify({ success: true, message: "Ratings and downloads reset successfully" }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        } catch (err) {
+          return new Response(JSON.stringify({ error: err.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       // Handle Download Counter Endpoint
       if (url.pathname === "/download" || body.action === "download" || body.event_type === "download") {
         const repo_id = String(body.repo_id || "");
@@ -159,6 +203,8 @@ export default {
 
           const row = await db.prepare("SELECT count FROM downloads WHERE repo_id = ?").bind(repo_id).first();
           const count = row ? row.count : 1;
+
+          await purgeRatingsCache(url.origin);
 
           return new Response(
             JSON.stringify({ success: true, repo_id, downloads: count }),
@@ -239,6 +285,8 @@ export default {
             .bind(repo_id, up, down, wilson)
             .run();
         }
+
+        await purgeRatingsCache(url.origin);
 
         return new Response(
           JSON.stringify({ success: true, repo_id, up, down, wilson }),

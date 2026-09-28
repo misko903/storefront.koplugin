@@ -2,6 +2,61 @@
 
 local spec_helper = require("tests/spec_helper")
 
+local describe = _G.describe
+local it = _G.it
+local setup = _G.setup
+local teardown = _G.teardown
+local luassert = {}
+if type(_G.assert) == "table" then
+    luassert = _G.assert
+else
+    setmetatable(luassert, {
+        __call = function(_, cond, msg)
+            return _G.assert(cond, msg)
+        end
+    })
+    luassert.equals = function(expected, actual)
+        if expected ~= actual then
+            error(string.format("Expected %s, got %s", tostring(expected), tostring(actual)), 2)
+        end
+    end
+    luassert.is_true = function(val)
+        if not val then error("Expected true, got " .. tostring(val), 2) end
+    end
+    luassert.is_string = function(val)
+        if type(val) ~= "string" then error("Expected string, got " .. type(val), 2) end
+    end
+    luassert.is_nil = function(val)
+        if val ~= nil then error("Expected nil, got " .. tostring(val), 2) end
+    end
+    luassert.is_not_nil = function(val)
+        if val == nil then error("Expected not nil, got nil", 2) end
+    end
+    luassert.is_table = function(val)
+        if type(val) ~= "table" then error("Expected table, got " .. type(val), 2) end
+    end
+    luassert.is_number = function(val)
+        if type(val) ~= "number" then error("Expected number, got " .. type(val), 2) end
+    end
+end
+local assert = luassert
+
+if not describe then
+    local passed = 0
+    describe = function(name, fn)
+        print("=== Running " .. name .. " Test Suite ===")
+        fn()
+        print("=== " .. name .. " Tests Complete: 0 Failures ===")
+    end
+    it = function(desc, fn)
+        fn()
+        passed = passed + 1
+        print("PASS\t" .. desc)
+    end
+    setup = function(fn) fn() end
+    teardown = function(fn) fn() end
+end
+
 describe("storefront_ratings", function()
     local StorefrontRatings
 
@@ -70,5 +125,51 @@ describe("storefront_ratings", function()
         StorefrontRatings.saveUserVote(repoA, "none")
         assert.is_nil(StorefrontRatings.getUserVote(repoA))
         assert.is_nil(StorefrontRatings.getUserVote(repoB))
+    end)
+
+    it("should make live server ratings authoritative over base catalog", function()
+        local item = {
+            id = 555555,
+            repo_id = 555555,
+            name = "test.koplugin",
+            user_thumbs_up = 100,
+            user_thumbs_down = 2,
+            downloads = 50,
+        }
+
+        -- With no live ratings cached, catalog fallback is used
+        StorefrontRatings.liveRatings = {}
+        local r1 = StorefrontRatings.getRating(item)
+        assert.equals(100, r1.up)
+        assert.equals(2, r1.down)
+        assert.equals(50, r1.downloads)
+
+        -- When live server ratings are available, they override catalog even if lower
+        StorefrontRatings.liveRatings["555555"] = {
+            up = 6,
+            down = 0,
+            wilson = 0.61,
+            downloads = 5,
+        }
+        local r2 = StorefrontRatings.getRating(item)
+        assert.equals(6, r2.up)
+        assert.equals(0, r2.down)
+        assert.equals(5, r2.downloads)
+    end)
+
+    it("should clear cache and report stats correctly", function()
+        assert.is_table(StorefrontRatings.getCacheStats())
+        local stats_before = StorefrontRatings.getCacheStats()
+        assert.is_number(stats_before.files)
+        assert.is_number(stats_before.bytes)
+
+        StorefrontRatings.liveRatings["test_repo"] = { up = 1, down = 0 }
+        assert.is_not_nil(StorefrontRatings.liveRatings["test_repo"])
+
+        local res = StorefrontRatings.clearCache()
+        assert.is_table(res)
+        assert.is_number(res.removed)
+        assert.is_number(res.bytes)
+        assert.is_nil(StorefrontRatings.liveRatings["test_repo"])
     end)
 end)

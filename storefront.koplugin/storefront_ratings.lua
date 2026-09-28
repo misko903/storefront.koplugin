@@ -172,6 +172,54 @@ local last_fetch_time = 0
 local session_ratings_fetched = false
 local FETCH_COOLDOWN = 3600 -- seconds (1 hour)
 
+--- Returns file count and total size in bytes of the local ratings cache file.
+--- @return table { files = number, bytes = number }
+function StorefrontRatings.getCacheStats()
+    local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+    if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+
+    if ok_lfs and lfs and lfs.attributes and lfs.attributes(RATINGS_CACHE_FILE, "mode") == "file" then
+        local attr = lfs.attributes(RATINGS_CACHE_FILE)
+        return {
+            files = 1,
+            bytes = (attr and attr.size) or 0,
+        }
+    end
+
+    local f = io.open(RATINGS_CACHE_FILE, "r")
+    if f then
+        local content = f:read("*a")
+        local sz = content and #content or 0
+        f:close()
+        return { files = 1, bytes = sz }
+    end
+
+    return { files = 0, bytes = 0 }
+end
+
+--- Deletes the local ratings cache file and clears all cached live ratings in memory.
+--- @return table { removed = number, bytes = number }
+function StorefrontRatings.clearCache()
+    local stats = StorefrontRatings.getCacheStats()
+    local freed_bytes = stats.bytes or 0
+    local removed = 0
+
+    pcall(function()
+        os.remove(RATINGS_CACHE_FILE)
+    end)
+
+    StorefrontRatings.liveRatings = {}
+    session_ratings_fetched = false
+    last_fetch_time = 0
+
+    local check_stats = StorefrontRatings.getCacheStats()
+    if check_stats.files == 0 then
+        removed = stats.files
+    end
+
+    return { removed = removed, bytes = freed_bytes }
+end
+
 --- Fetches all live ratings from the Cloudflare D1 backend asynchronously.
 --- @param callback function|nil Called with (success, ratings_table)
 --- @param force_refresh boolean|nil If true, bypasses session cache & cooldown
@@ -185,6 +233,9 @@ function StorefrontRatings.fetchRatings(callback, force_refresh)
             if callback then UIManager:scheduleIn(0, function() callback(true, StorefrontRatings.liveRatings) end) end
             return
         end
+    else
+        session_ratings_fetched = false
+        last_fetch_time = 0
     end
 
     session_ratings_fetched = true
@@ -446,13 +497,10 @@ function StorefrontRatings.getRating(item_or_id, entry)
         local num_k = tonumber(key)
         local r = StorefrontRatings.liveRatings[key] or (num_k and StorefrontRatings.liveRatings[num_k])
         if type(r) == "table" then
-            local r_up = tonumber(r.up) or 0
-            local r_down = tonumber(r.down) or 0
-            local r_dl = tonumber(r.downloads) or 0
-            if r_up > base_up then base_up = r_up end
-            if r_down > base_down then base_down = r_down end
-            if r_dl > base_downloads then base_downloads = r_dl end
-            if (tonumber(r.wilson) or 0) > wilson then wilson = tonumber(r.wilson) or 0 end
+            base_up = tonumber(r.up) or 0
+            base_down = tonumber(r.down) or 0
+            base_downloads = tonumber(r.downloads) or base_downloads
+            wilson = tonumber(r.wilson) or StorefrontRatings.computeWilsonScore(base_up, base_down)
             break
         end
     end
@@ -462,12 +510,18 @@ function StorefrontRatings.getRating(item_or_id, entry)
 
     local vote_rec = StorefrontRatings.getUserVoteRecord(item_or_id)
     if vote_rec and vote_rec.direction then
+        local cat_up = tonumber(vote_rec.catalog_up_at_vote) or 0
+        local cat_down = tonumber(vote_rec.catalog_down_at_vote) or 0
+        -- Sanitize historical baseline if catalog was corrected downward
+        if cat_up > base_up + 1 then cat_up = base_up end
+        if cat_down > base_down + 1 then cat_down = base_down end
+
         if vote_rec.direction == "up" then
-            if base_up <= (tonumber(vote_rec.catalog_up_at_vote) or 0) then
+            if base_up <= cat_up then
                 final_up = base_up + 1
             end
         elseif vote_rec.direction == "down" then
-            if base_down <= (tonumber(vote_rec.catalog_down_at_vote) or 0) then
+            if base_down <= cat_down then
                 final_down = base_down + 1
             end
         end
@@ -558,11 +612,22 @@ function StorefrontRatings.saveUserVote(item_or_id, direction, catalog_up, catal
         }
     end
 
+    -- Check if we have scoped keys (numeric ID or owner/name)
+    local has_scoped = false
     for _, key in ipairs(candidate_keys) do
-        votes[key] = vote_rec
-        local num_k = tonumber(key)
-        if num_k then
-            votes[num_k] = vote_rec
+        if key:find("/") or key:match("^%d+$") then
+            has_scoped = true
+            break
+        end
+    end
+
+    for _, key in ipairs(candidate_keys) do
+        if not has_scoped or key:find("/") or key:match("^%d+$") then
+            votes[key] = vote_rec
+            local num_k = tonumber(key)
+            if num_k then
+                votes[num_k] = vote_rec
+            end
         end
     end
 
@@ -717,13 +782,17 @@ function StorefrontRatings.submitVote(item_or_id, direction, item_kind, callback
                             local ok_dec, res_data = pcall(json.decode, raw_msg)
                             if ok_dec and res_data and res_data.ok then
                                 local parsed = res_data.result
-                                for _, k in ipairs(candidate_keys) do
-                                    StorefrontRatings.liveRatings[k] = {
-                                        up = tonumber(parsed.up) or 0,
-                                        down = tonumber(parsed.down) or 0,
-                                        wilson = tonumber(parsed.wilson) or 0,
-                                    }
-                                end
+                                local canon_k = tostring(repo_id)
+                                local num_k = tonumber(repo_id)
+                                local cur_entry = StorefrontRatings.liveRatings[canon_k] or (num_k and StorefrontRatings.liveRatings[num_k])
+                                local entry_val = {
+                                    up = tonumber(parsed.up) or 0,
+                                    down = tonumber(parsed.down) or 0,
+                                    wilson = tonumber(parsed.wilson) or StorefrontRatings.computeWilsonScore(tonumber(parsed.up) or 0, tonumber(parsed.down) or 0),
+                                    downloads = (cur_entry and cur_entry.downloads) or 0,
+                                }
+                                StorefrontRatings.liveRatings[canon_k] = entry_val
+                                if num_k then StorefrontRatings.liveRatings[num_k] = entry_val end
                                 saveLocalRatingsFile(StorefrontRatings.liveRatings)
                                 logger.info("StorefrontRatings: vote submitted successfully", repo_id)
                                 if callback then callback(true, nil) end
@@ -745,13 +814,17 @@ function StorefrontRatings.submitVote(item_or_id, direction, item_kind, callback
         -- Fallback to sync
         local ok, result = execute_sync()
         if ok then
-            for _, k in ipairs(candidate_keys) do
-                StorefrontRatings.liveRatings[k] = {
-                    up = tonumber(result.up) or 0,
-                    down = tonumber(result.down) or 0,
-                    wilson = tonumber(result.wilson) or 0,
-                }
-            end
+            local canon_k = tostring(repo_id)
+            local num_k = tonumber(repo_id)
+            local cur_entry = StorefrontRatings.liveRatings[canon_k] or (num_k and StorefrontRatings.liveRatings[num_k])
+            local entry_val = {
+                up = tonumber(result.up) or 0,
+                down = tonumber(result.down) or 0,
+                wilson = tonumber(result.wilson) or StorefrontRatings.computeWilsonScore(tonumber(result.up) or 0, tonumber(result.down) or 0),
+                downloads = (cur_entry and cur_entry.downloads) or 0,
+            }
+            StorefrontRatings.liveRatings[canon_k] = entry_val
+            if num_k then StorefrontRatings.liveRatings[num_k] = entry_val end
             UIManager:scheduleIn(1, function() saveLocalRatingsFile(StorefrontRatings.liveRatings) end)
             logger.info("StorefrontRatings: vote submitted successfully", repo_id)
             if callback then UIManager:scheduleIn(0, function() callback(true, nil) end) end
@@ -867,11 +940,12 @@ function StorefrontRatings.trackDownload(item_or_id, item_kind, callback)
                             local ok_dec, res_data = pcall(json.decode, raw_msg)
                             if ok_dec and res_data and res_data.ok then
                                 local parsed = res_data.result
-                                for _, k in ipairs(candidate_keys) do
-                                    local entry = StorefrontRatings.liveRatings[k] or { up = 0, down = 0, wilson = 0 }
-                                    entry.downloads = tonumber(parsed.downloads) or entry.downloads
-                                    StorefrontRatings.liveRatings[k] = entry
-                                end
+                                local canon_k = tostring(repo_id)
+                                local num_k = tonumber(repo_id)
+                                local entry = StorefrontRatings.liveRatings[canon_k] or (num_k and StorefrontRatings.liveRatings[num_k]) or { up = 0, down = 0, wilson = 0 }
+                                entry.downloads = tonumber(parsed.downloads) or entry.downloads
+                                StorefrontRatings.liveRatings[canon_k] = entry
+                                if num_k then StorefrontRatings.liveRatings[num_k] = entry end
                                 saveLocalRatingsFile(StorefrontRatings.liveRatings)
                                 logger.info("StorefrontRatings: download tracked successfully", repo_id)
                                 if callback then callback(true, nil) end
@@ -893,11 +967,12 @@ function StorefrontRatings.trackDownload(item_or_id, item_kind, callback)
         -- Fallback to sync
         local ok, result = execute_sync()
         if ok then
-            for _, k in ipairs(candidate_keys) do
-                local entry = StorefrontRatings.liveRatings[k] or { up = 0, down = 0, wilson = 0 }
-                entry.downloads = tonumber(result.downloads) or entry.downloads
-                StorefrontRatings.liveRatings[k] = entry
-            end
+            local canon_k = tostring(repo_id)
+            local num_k = tonumber(repo_id)
+            local entry = StorefrontRatings.liveRatings[canon_k] or (num_k and StorefrontRatings.liveRatings[num_k]) or { up = 0, down = 0, wilson = 0 }
+            entry.downloads = tonumber(result.downloads) or entry.downloads
+            StorefrontRatings.liveRatings[canon_k] = entry
+            if num_k then StorefrontRatings.liveRatings[num_k] = entry end
             UIManager:scheduleIn(1, function() saveLocalRatingsFile(StorefrontRatings.liveRatings) end)
             logger.info("StorefrontRatings: download tracked successfully", repo_id)
             if callback then UIManager:scheduleIn(0, function() callback(true, nil) end) end

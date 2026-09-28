@@ -254,7 +254,12 @@ package.loaded["ui/widget/container/alphacontainer"] = {
     end
 }
 package.loaded["ui/widget/container/centercontainer"] = {
-    new = function(a, b) return { type = "CenterContainer", args = b or a } end
+    new = function(a, b)
+        local args = b or a or {}
+        local cc = { type = "CenterContainer", args = args, dimen = args.dimen or { w = 0, h = 0 } }
+        cc.getSize = function(self) return self.dimen or { w = 0, h = 0 } end
+        return cc
+    end
 }
 package.loaded["ui/widget/container/movablecontainer"] = {
     new = function(a, b) return { type = "MovableContainer", args = b or a } end
@@ -456,7 +461,17 @@ package.loaded["ui/widget/scrolltextwidget"] = {
     new = function(a, b) return { type = "ScrollTextWidget", args = b or a } end
 }
 package.loaded["ui/widget/inputdialog"] = {
-    new = function(a, b) return { type = "InputDialog", args = b or a } end
+    new = function(a, b)
+        local args = b or a or {}
+        local dlg = { type = "InputDialog", args = args }
+        for k, v in pairs(args) do dlg[k] = v end
+        dlg.onShowKeyboard = function() end
+        dlg.getInputText = function() return dlg.input or "" end
+        dlg.onCloseDialog = function()
+            if dlg.close_callback then dlg.close_callback() end
+        end
+        return dlg
+    end
 }
 package.loaded["ui/widget/multiinputdialog"] = {
     new = function(a, b) return { type = "MultiInputDialog", args = b or a } end
@@ -846,3 +861,11 @@ function _G.createMockPlugin()
     }
     return plugin
 end
+
+local spec_helper = {
+    setup = function() end,
+    teardown = function() end,
+    createMockPlugin = createMockPlugin,
+}
+
+return spec_helper

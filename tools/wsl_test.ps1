@@ -128,6 +128,13 @@ function Run-Workflow {
         Write-Host "Settings Tests FAILED." -ForegroundColor Red
         return $false
     }
+    Write-Host "Running Ratings System & Downward Override unit tests..."
+    $RatingsTestCmd = "cd $AppDir && LUA_PATH='{0}/?.lua;./?.lua;./?/init.lua;frontend/?.lua;frontend/?/init.lua;libs/?.lua;common/?.lua;common/?/init.lua;;' ./luajit {0}/tests/storefront_ratings_test.lua" -f $WSLDest
+    wsl bash -c `"$RatingsTestCmd`"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Ratings Tests FAILED." -ForegroundColor Red
+        return $false
+    }
     Write-Host "Running Notification Manager & UI unit tests..."
     $NotifTestCmd = "cd $AppDir && LUA_PATH='{0}/?.lua;./?.lua;./?/init.lua;frontend/?.lua;frontend/?/init.lua;libs/?.lua;common/?.lua;common/?/init.lua;;' ./luajit {0}/tests/storefront_notification_mgr_test.lua" -f $WSLDest
     wsl bash -c `"$NotifTestCmd`"

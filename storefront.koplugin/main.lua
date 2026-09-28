@@ -7638,6 +7638,7 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
     -- ---- Widget helpers ---------------------------------------------------
     local sc       = function(val) return Device.screen:scaleBySize(val) end
     local sw       = Device.screen:getWidth()
+    local sh       = Device.screen:getHeight()
     local gap      = sc(10)
     local card_pad = sc(5)
     local usable_w = available_list_width or (sw - sc(24))
@@ -8601,6 +8602,12 @@ function Storefront:softRefreshCurrentBrowserView()
     self._filtered_descriptors_cache = nil
     self._filtered_screensavers_cache = nil
     self.screensavers_cache = nil
+    pcall(function()
+        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+        if ok_ss and StorefrontScreensavers and StorefrontScreensavers.invalidateMemCache then
+            StorefrontScreensavers.invalidateMemCache()
+        end
+    end)
     self._cached_updates_count = nil
     self._cached_updates_gen = nil
     self._tab_menu_items_cache = nil
@@ -8657,9 +8664,22 @@ function Storefront:maybeCheckCatalogBackground()
 
     local Cache = require("storefront_cache")
     local current_tab = (self.browser_state and self.browser_state.tab) or "Plugins"
-    local check_kind = (current_tab == "Patches") and "patch" or "plugin"
-    local repo_count = Cache.countRepos(check_kind) or 0
-    local last_fetched = Cache.getLastFetched(check_kind) or 0
+    local check_kind = (current_tab == "Patches") and "patch" or (current_tab == "Screensavers" and "screensaver" or "plugin")
+    local repo_count = 0
+    local last_fetched = 0
+    if check_kind == "screensaver" then
+        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+        if ok_ss and StorefrontScreensavers then
+            local cat = StorefrontScreensavers.getCachedCatalog and StorefrontScreensavers.getCachedCatalog()
+            if type(cat) == "table" then
+                repo_count = #cat
+            end
+            last_fetched = StorefrontScreensavers.getLastFetched and StorefrontScreensavers.getLastFetched() or 0
+        end
+    else
+        repo_count = Cache.countRepos(check_kind) or 0
+        last_fetched = Cache.getLastFetched(check_kind) or 0
+    end
     local age = (last_fetched > 0) and (now - last_fetched) or 999999
 
     local needs_fetch = (last_fetched == 0 or repo_count == 0 or age > 3600)

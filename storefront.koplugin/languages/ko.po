@@ -3337,3 +3337,19 @@ msgstr "⚙ 설정"
 msgid "✓ Current"
 msgstr "✓ 현재"
 
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "커뮤니티 평가 및 통계"
+
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "평가 캐시를 삭제하시겠습니까?"
+
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "캐시된 커뮤니티 평가 및 다운로드 수가 삭제됩니다(%s)."
+
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "평가 캐시가 삭제되었습니다(%s 확보됨)."

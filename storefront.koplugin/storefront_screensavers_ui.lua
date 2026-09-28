@@ -55,7 +55,7 @@ local function getHttpModule(url)
     return require("socket.http")
 end
 
-local function requestWithRedirects(target_url, sink_fn)
+local function requestWithRedirects(target_url, sink_fn, extra_headers)
     local ok_su, socketutil = pcall(require, "socketutil")
     local ltn12 = require("ltn12")
     local current_url = target_url
@@ -69,6 +69,11 @@ local function requestWithRedirects(target_url, sink_fn)
             ["User-Agent"] = (ok_su and socketutil and socketutil.USER_AGENT) or "Mozilla/5.0 (compatible; KOReader-Storefront/1.0)",
             ["Accept"] = "application/json",
         }
+        if extra_headers then
+            for k, v in pairs(extra_headers) do
+                headers[k] = v
+            end
+        end
 
         local sink = sink_fn()
         if not sink then return false, 0, nil end
@@ -95,8 +100,8 @@ local function requestWithRedirects(target_url, sink_fn)
         end
 
         local code = tonumber(res_code) or 0
-        if ok_req and code == 200 then
-            return true, 200, response_headers
+        if ok_req and (code == 200 or code == 304) then
+            return true, code, response_headers
         elseif ok_req and (code == 301 or code == 302 or code == 303 or code == 307 or code == 308) then
             local loc = response_headers and (response_headers.location or response_headers.Location)
             if loc and loc ~= "" then
@@ -114,13 +119,44 @@ end
 
 local cached_catalog_mem = nil
 
+function StorefrontScreensavers.invalidateMemCache()
+    cached_catalog_mem = nil
+end
+
 function StorefrontScreensavers.clearCachedCatalog()
     cached_catalog_mem = nil
+    pcall(function()
+        local ok_net, CatalogClient = pcall(require, "storefront_net_catalog")
+        if ok_net and CatalogClient and CatalogClient.clearStoredScreensaverEtag then
+            CatalogClient.clearStoredScreensaverEtag()
+        end
+    end)
     local ok_ds, DataStorage = pcall(require, "datastorage")
     if ok_ds and DataStorage and DataStorage.getDataDir then
         local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
         pcall(os.remove, cat_file)
     end
+end
+
+function StorefrontScreensavers.getLastFetched()
+    local ok_net, CatalogClient = pcall(require, "storefront_net_catalog")
+    if ok_net and CatalogClient and CatalogClient.getLastFetchedScreensavers then
+        local t = CatalogClient.getLastFetchedScreensavers()
+        if t > 0 then return t end
+    end
+    local ok_ds, DataStorage = pcall(require, "datastorage")
+    if ok_ds and DataStorage and DataStorage.getDataDir then
+        local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
+        local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+        if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+        if ok_lfs and lfs and lfs.attributes then
+            local attr = lfs.attributes(cat_file)
+            if attr and attr.modification then
+                return attr.modification
+            end
+        end
+    end
+    return 0
 end
 
 function StorefrontScreensavers.getCachedCatalog()
@@ -154,6 +190,36 @@ function StorefrontScreensavers.getCachedCatalog()
 end
 
 function StorefrontScreensavers.fetchCatalog(callback)
+    local ok_net, CatalogClient = pcall(require, "storefront_net_catalog")
+    if ok_net and CatalogClient and CatalogClient.fetchScreensaverCatalog then
+        local data, err = CatalogClient.fetchScreensaverCatalog()
+        if data == "not_modified" then
+            local local_cached = StorefrontScreensavers.getCachedCatalog()
+            if local_cached then
+                if callback then callback(true, local_cached) end
+                return
+            end
+        elseif data and type(data) == "table" and #data > 0 then
+            for _, item in ipairs(data) do
+                StorefrontScreensavers.normalizeItem(item)
+            end
+            cached_catalog_mem = data
+            pcall(function()
+                local ok_ds, DataStorage = pcall(require, "datastorage")
+                if ok_ds and DataStorage and DataStorage.getDataDir then
+                    local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
+                    local f = io.open(cat_file, "w")
+                    if f then
+                        f:write(json.encode(data))
+                        f:close()
+                    end
+                end
+            end)
+            if callback then callback(true, data) end
+            return
+        end
+    end
+
     local ltn12 = require("ltn12")
     local urls_to_try = CATALOG_URL_CANDIDATES
 

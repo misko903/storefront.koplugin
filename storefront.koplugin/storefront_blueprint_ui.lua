@@ -336,7 +336,7 @@ function StorefrontBlueprintUI.showBlueprintsMenu(Storefront, on_close_callback)
         if on_close_callback then on_close_callback() end
     end
 
-    UIManager:show(overlay)
+    UIManager:show(overlay, "ui")
 end
 
 --- Shows the Export Blueprint dialog with custom options.
@@ -859,7 +859,7 @@ function StorefrontBlueprintUI.showExportDialog(Storefront, on_done)
             if on_done then on_done() end
         end
 
-        UIManager:show(overlay)
+        UIManager:show(overlay, "ui")
     end
 
     refresh()
@@ -1016,7 +1016,7 @@ function StorefrontBlueprintUI.showCloudShareDialog(Storefront, result, blueprin
         if on_done then on_done() end
     end
 
-    UIManager:show(overlay)
+    UIManager:show(overlay, "ui")
 end
 
 --- Shows the Enter Code Dialog to fetch a blueprint from the cloud.
@@ -1024,18 +1024,32 @@ end
 --- @param callback fun(blueprint: table?)
 function StorefrontBlueprintUI.showEnterCodeDialog(Storefront, callback)
     local input_dlg
+    local callback_fired = false
+    local function notify_callback(val)
+        if callback and not callback_fired then
+            callback_fired = true
+            UIManager:nextTick(function()
+                callback(val)
+            end)
+        end
+    end
+
     input_dlg = InputDialog:new{
         title = _("Enter Blueprint Code"),
         description = _("Enter the 6-character shortcode (e.g. A8K2M9) to download the setup:"),
         input = "",
         input_hint = "A8K2M9",
+        close_callback = function()
+            notify_callback(nil)
+        end,
         buttons = {
             {
                 {
                     text = _("Cancel"),
+                    id = "close",
                     callback = function()
                         UIManager:close(input_dlg)
-                        if callback then callback(nil) end
+                        notify_callback(nil)
                     end,
                 },
                 {
@@ -1045,7 +1059,7 @@ function StorefrontBlueprintUI.showEnterCodeDialog(Storefront, callback)
                         local code = input_dlg:getInputText()
                         UIManager:close(input_dlg)
                         if not code or code == "" then
-                            if callback then callback(nil) end
+                            notify_callback(nil)
                             UIManager:nextTick(function()
                                 StorefrontToast:new{ text = _("Please enter a valid code"), timeout = 2 }:show()
                             end)
@@ -1054,9 +1068,9 @@ function StorefrontBlueprintUI.showEnterCodeDialog(Storefront, callback)
                         StorefrontToast:new{ text = _("Fetching blueprint…"), timeout = 3 }:show()
                         BlueprintCloud.fetchBlueprint(code, function(ok, res)
                             if ok and res then
-                                if callback then callback(res) end
+                                notify_callback(res)
                             else
-                                if callback then callback(nil) end
+                                notify_callback(nil)
                                 UIManager:nextTick(function()
                                     StorefrontToast:new{ text = _("Download failed: ") .. tostring(res), timeout = 4 }:show()
                                 end)
@@ -1251,7 +1265,7 @@ function StorefrontBlueprintUI.showFilePickerDialog(Storefront, callback)
     for _, r in ipairs(focusable_rows) do r.show_parent = overlay end
     cancel_btn.show_parent = overlay
 
-    UIManager:show(overlay)
+    UIManager:show(overlay, "ui")
 end
 
 --- Shows the Diff & Batch Install Review Dialog.

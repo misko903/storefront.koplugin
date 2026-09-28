@@ -24,6 +24,7 @@ local storefront_theme = require("storefront_theme")
 local StorefrontToast = require("storefront_toast")
 local RepoContent = require("storefront_repo_content")
 local StorefrontScreensavers = require("storefront_screensavers_ui")
+local StorefrontRatings = require("storefront_ratings")
 
 local StorefrontClearCacheDialog = {}
 
@@ -99,9 +100,10 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
         local readme_stats = RepoContent.getReadmeCacheStats()
         local wiki_stats = RepoContent.getWikiCacheStats()
         local thumb_stats = StorefrontScreensavers.getThumbnailsCacheStats()
+        local ratings_stats = StorefrontRatings.getCacheStats and StorefrontRatings.getCacheStats() or { files = 0, bytes = 0 }
 
-        local total_files = readme_stats.files + wiki_stats.files + thumb_stats.files
-        local total_bytes = readme_stats.bytes + wiki_stats.bytes + thumb_stats.bytes
+        local total_files = readme_stats.files + wiki_stats.files + thumb_stats.files + ratings_stats.files
+        local total_bytes = readme_stats.bytes + wiki_stats.bytes + thumb_stats.bytes + ratings_stats.bytes
         local total_stats = { files = total_files, bytes = total_bytes }
 
         -- Title Widget
@@ -237,7 +239,9 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                 }
             end
 
-            local row_h = math.max(left_vg:getSize().h, right_action:getSize().h)
+            local left_h = (left_vg.getSize and left_vg:getSize().h) or action_btn_h
+            local right_h = (right_action.getSize and right_action:getSize().h) or action_btn_h
+            local row_h = math.max(left_h, right_h)
 
             local row_overlap = OverlapGroup:new{
                 dimen = Geom:new{ w = avail_w, h = row_h },
@@ -332,14 +336,15 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                         local r1 = RepoContent.clearReadmeCache()
                         local r2 = RepoContent.clearWikiCache()
                         local r3 = StorefrontScreensavers.clearThumbnailsCache()
+                        local r4 = StorefrontRatings.clearCache and StorefrontRatings.clearCache() or { removed = 0, bytes = 0 }
                         if StorefrontScreensavers.clearCachedCatalog then
                             StorefrontScreensavers.clearCachedCatalog()
                         end
                         if Storefront then
                             Storefront.screensavers_cache = nil
                         end
-                        local freed_bytes = (r1.bytes or 0) + (r2.bytes or 0) + (r3.bytes or 0)
-                        local freed_files = (r1.removed or 0) + (r2.removed or 0) + (r3.removed or 0)
+                        local freed_bytes = (r1.bytes or 0) + (r2.bytes or 0) + (r3.bytes or 0) + (r4.bytes or 0)
+                        local freed_files = (r1.removed or 0) + (r2.removed or 0) + (r3.removed or 0) + (r4.removed or 0)
                         refresh()
                         StorefrontToast.show(string.format(_("Cleared all caches (%s freed, %d files)."), formatSize(freed_bytes), freed_files), 3)
                     end
@@ -410,6 +415,25 @@ function StorefrontClearCacheDialog.show(Storefront, on_close_callback)
                         end
                         refresh()
                         StorefrontToast.show(string.format(_("Cleared screensaver thumbnails (%s freed)."), formatSize(res.bytes or 0)), 3)
+                    end
+                )
+            end,
+            false
+        ))
+
+        -- ROW 4: COMMUNITY RATINGS CACHE
+        table.insert(content_vg, create_cache_row(
+            _("Community ratings & stats"),
+            ratings_stats,
+            function()
+                showCustomConfirm(
+                    _("Clear Ratings Cache?"),
+                    string.format(_("This will delete cached community ratings and download counts (%s)."), formatSize(ratings_stats.bytes)),
+                    _("Clear"),
+                    function()
+                        local res = StorefrontRatings.clearCache and StorefrontRatings.clearCache() or { bytes = 0 }
+                        refresh()
+                        StorefrontToast.show(string.format(_("Cleared ratings cache (%s freed)."), formatSize(res.bytes or 0)), 3)
                     end
                 )
             end,

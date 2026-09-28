@@ -345,6 +345,106 @@ do
     check("LPgBack flipped back to Page 1", #multi_overlay.layout == 10)
 end
 
+-- 6. Test Enter Cloud Code Dialog Cancellation & Safe Menu Restoration
+do
+    _G.ui_tracker = { shown = {}, last_shown = nil, closed = {}, last_show_mode = nil }
+    local UIManager = require("ui/uimanager")
+
+    -- Hook UIManager.show to record refreshtype
+    local orig_show = UIManager.show
+    UIManager.show = function(self, widget, refreshtype, region, x, y)
+        local w = type(self) == "table" and widget or self
+        local mode = type(self) == "table" and refreshtype or region
+        _G.ui_tracker.last_show_mode = mode
+        return orig_show(self, widget, refreshtype, region, x, y)
+    end
+
+    local dummy_storefront = {
+        browser_state = { kind = "plugin" },
+        browserRefresh = function() end,
+        saveBrowserState = function() end,
+        getInstallRecordsMap = function() return {} end,
+        getPatchRecordsMap = function() return {} end,
+    }
+
+    StorefrontBlueprintUI.showBlueprintsMenu(dummy_storefront)
+    local bp_overlay = _G.ui_tracker.last_shown
+    check("Blueprints menu opened with 'ui' refresh mode", _G.ui_tracker.last_show_mode == "ui")
+    check("Blueprints menu has 5 rows", #bp_overlay.layout == 5)
+
+    -- Row 4 is Enter Cloud Code
+    local row4 = bp_overlay.layout[4][1]
+    row4.onTap()
+
+    -- Process nextTick to open InputDialog
+    if UIManager._next_tick_queue then
+        while #UIManager._next_tick_queue > 0 do
+            local task = table.remove(UIManager._next_tick_queue, 1)
+            task()
+        end
+    end
+
+    local input_dlg = _G.ui_tracker.last_shown
+    check("InputDialog opened", input_dlg and input_dlg.type == "InputDialog")
+    check("InputDialog has close_callback", type(input_dlg.close_callback) == "function")
+
+    -- Find Cancel button
+    local cancel_btn = nil
+    for _, row in ipairs(input_dlg.buttons or {}) do
+        for _, btn in ipairs(row) do
+            if btn.text and btn.text:find("Cancel") then
+                cancel_btn = btn
+                break
+            end
+        end
+    end
+    check("Cancel button exists on InputDialog", cancel_btn ~= nil)
+    check("Cancel button has id='close' for hardware Back / outside dismiss", cancel_btn and cancel_btn.id == "close")
+
+    -- Tap Cancel button
+    cancel_btn.callback()
+
+    -- Process nextTick to restore Blueprints menu
+    if UIManager._next_tick_queue then
+        while #UIManager._next_tick_queue > 0 do
+            local task = table.remove(UIManager._next_tick_queue, 1)
+            task()
+        end
+    end
+
+    local restored_overlay = _G.ui_tracker.last_shown
+    check("Blueprints menu restored after Cancel", restored_overlay ~= nil)
+    check("Restored menu has all 5 layout rows intact", restored_overlay and #restored_overlay.layout == 5)
+    check("Restored menu shown with 'ui' refresh mode", _G.ui_tracker.last_show_mode == "ui")
+
+    -- Test outside tap / hardware Back key dismissal via close_callback
+    row4 = restored_overlay.layout[4][1]
+    row4.onTap()
+    if UIManager._next_tick_queue then
+        while #UIManager._next_tick_queue > 0 do
+            local task = table.remove(UIManager._next_tick_queue, 1)
+            task()
+        end
+    end
+    input_dlg = _G.ui_tracker.last_shown
+    check("InputDialog opened second time", input_dlg and input_dlg.type == "InputDialog")
+
+    -- Trigger onCloseDialog / close_callback directly
+    input_dlg:onCloseDialog()
+    if UIManager._next_tick_queue then
+        while #UIManager._next_tick_queue > 0 do
+            local task = table.remove(UIManager._next_tick_queue, 1)
+            task()
+        end
+    end
+
+    local final_overlay = _G.ui_tracker.last_shown
+    check("Blueprints menu restored after outside dismiss", final_overlay and #final_overlay.layout == 5)
+
+    -- Restore orig_show
+    UIManager.show = orig_show
+end
+
 print(string.format("=== Single-Modal Settings & Blueprint Touch Tests Complete: %d Failures ===", failures))
 if failures > 0 then
     os.exit(1)

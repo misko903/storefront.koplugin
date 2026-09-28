@@ -3337,3 +3337,19 @@ msgstr "⚙ 设置"
 msgid "✓ Current"
 msgstr "✓ 当前版本"
 
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "社区评分与统计"
+
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "清除评分缓存？"
+
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "这将删除已缓存的社区评分和下载计数（%s）。"
+
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "已清除评分缓存（已释放 %s）。"

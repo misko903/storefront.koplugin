@@ -315,25 +315,30 @@ function SearchNet:init(Storefront)
                     local pt_count = Cache.countRepos("patch")
                     local f_count = Cache.countRepos("font")
 
-                    -- Fetch and cache screensavers feed
+                    -- Screensavers feed was updated in background via fetchAndUpdateCacheAsync
                     local s_count = 0
                     local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
-                    if ok_ss and StorefrontScreensavers and StorefrontScreensavers.fetchCatalog then
-                        pcall(function()
-                            StorefrontScreensavers.fetchCatalog(function(s_ok, s_catalog)
-                                if s_ok and type(s_catalog) == "table" then
-                                    s_count = #s_catalog
-                                    if sf then
-                                        sf.screensavers_cache = s_catalog
-                                    end
+                    if ok_ss and StorefrontScreensavers then
+                        if StorefrontScreensavers.getCachedCatalog then
+                            local cat = StorefrontScreensavers.getCachedCatalog()
+                            if type(cat) == "table" then
+                                s_count = #cat
+                                if sf then
+                                    sf.screensavers_cache = cat
                                 end
+                            end
+                        end
+                        if s_count == 0 and StorefrontScreensavers.fetchCatalog then
+                            pcall(function()
+                                StorefrontScreensavers.fetchCatalog(function(s_ok, s_catalog)
+                                    if s_ok and type(s_catalog) == "table" then
+                                        s_count = #s_catalog
+                                        if sf then
+                                            sf.screensavers_cache = s_catalog
+                                        end
+                                    end
+                                end)
                             end)
-                        end)
-                    end
-                    if s_count == 0 and ok_ss and StorefrontScreensavers and StorefrontScreensavers.getCachedCatalog then
-                        local cat = StorefrontScreensavers.getCachedCatalog()
-                        if type(cat) == "table" then
-                            s_count = #cat
                         end
                     end
 

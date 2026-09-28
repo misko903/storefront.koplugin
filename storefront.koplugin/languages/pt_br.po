@@ -3337,3 +3337,19 @@ msgstr "⚙ Configurações"
 msgid "✓ Current"
 msgstr "✓ Atual"
 
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Avaliações e estatísticas da comunidade"
+
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "Limpar cache de avaliações?"
+
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Isso excluirá as avaliações da comunidade e contagens de downloads em cache (%s)."
+
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Cache de avaliações limpo (%s liberados)."
