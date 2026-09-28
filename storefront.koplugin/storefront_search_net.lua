@@ -281,7 +281,7 @@ function SearchNet:init(Storefront)
         sf.is_refreshing = true
         sf.patch_cache = {}
         sf._repo_descriptors_cache = nil
-        StorefrontLogger.info(string.format("CACHE REFRESH starting (kind=%s)", tostring(kind)))
+        StorefrontLogger.info(string.format("CACHE REFRESH starting (tab=%s, refreshing all feeds)", tostring(kind)))
 
         local Toast = require("storefront_toast")
         local UIManager = require("ui/uimanager")
@@ -340,6 +340,10 @@ function SearchNet:init(Storefront)
                                 end)
                             end)
                         end
+                    end
+
+                    if s_count > 0 then
+                        StorefrontLogger.info(string.format("Storefront: screensavers feed verified (%d screensavers in catalog)", s_count))
                     end
 
                     local summary

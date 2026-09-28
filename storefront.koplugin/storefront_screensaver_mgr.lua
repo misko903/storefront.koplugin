@@ -420,20 +420,22 @@ function StorefrontScreensaverMgr.deleteLocalScreensaver(filepath)
 
         local ok, err = os.remove(filepath)
         if ok then
-            if is_active and current_settings.effective_mode == "single" then
-                local remaining = StorefrontScreensaverMgr.listLocalScreensavers()
-                if #remaining > 0 then
-                    StorefrontScreensaverMgr.setScreensaverMode("single", { file = remaining[1].filepath })
-                else
-                    StorefrontScreensaverMgr.setScreensaverMode("cover")
-                end
-            end
-            return true
+            return true, (is_active and current_settings.effective_mode == "single")
         else
             return false, err
         end
     end
     return false, "File not found"
+end
+
+function StorefrontScreensaverMgr.autoFallbackAfterDelete(was_active_single)
+    if not was_active_single then return end
+    local remaining = StorefrontScreensaverMgr.listLocalScreensavers()
+    if #remaining > 0 then
+        StorefrontScreensaverMgr.setScreensaverMode("single", { file = remaining[1].filepath })
+    else
+        StorefrontScreensaverMgr.setScreensaverMode("cover")
+    end
 end
 
 function StorefrontScreensaverMgr.downloadWallpaper(item, callback)

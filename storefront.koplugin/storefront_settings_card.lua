@@ -481,7 +481,8 @@ function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
                 end
                 closeDialog()
                 local browser_was_open = Storefront.browser_menu ~= nil
-                local kind = (Storefront.browser_state and Storefront.browser_state.kind) or "plugin"
+                local tab = (Storefront.browser_state and Storefront.browser_state.tab) or "Plugins"
+                local kind = (tab == "Screensavers" and "screensaver") or (Storefront.browser_state and Storefront.browser_state.kind) or "plugin"
                 local ok_nm, NetworkMgr2 = pcall(require, "ui/network/manager")
                 local do_refresh = function()
                     Storefront:refreshCache(kind, function()

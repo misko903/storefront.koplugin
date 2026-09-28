@@ -427,10 +427,17 @@ function StorefrontScreensaverGallery.show(Storefront, on_close_callback, on_set
                         ok_text = _("Remove"),
                         cancel_text = _("Cancel"),
                         ok_callback = function()
-                            StorefrontScreensaverMgr.deleteLocalScreensaver(current_item.filepath)
-                            refresh()
                             local StorefrontToast = require("storefront_toast")
-                            StorefrontToast.show(_("Wallpaper removed"), 2)
+                            local ok, was_active_single = StorefrontScreensaverMgr.deleteLocalScreensaver(current_item.filepath)
+                            if ok then
+                                StorefrontToast.show(_("Wallpaper removed"), 2)
+                                UIManager:nextTick(function()
+                                    StorefrontScreensaverMgr.autoFallbackAfterDelete(was_active_single)
+                                    refresh()
+                                end)
+                            else
+                                StorefrontToast.show(_("Could not remove wallpaper"), 2)
+                            end
                         end,
                     }
                 end)

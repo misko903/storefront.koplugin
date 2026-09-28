@@ -380,7 +380,15 @@ function CatalogClient.fetchScreensaverCatalogToFile(dest_path)
 
     local last_err = "No screensaver catalog URLs attempted"
     for _, target_url in ipairs(urls_to_try) do
+        local extra_headers = nil
+        if etag and etag ~= "" and target_url == DEFAULT_SCREENSAVER_CATALOG_URL then
+            extra_headers = { ["If-None-Match"] = etag }
+        end
+
         logger.info("Storefront: fetching screensaver catalog to file from", target_url)
+        if StorefrontLogger then
+            StorefrontLogger.info("Storefront: fetching screensavers catalog from " .. tostring(target_url) .. (extra_headers and " (with ETag)" or ""))
+        end
         local current_file = nil
         local sink_fn = function()
             if current_file then pcall(function() current_file:close() end) end
@@ -388,15 +396,11 @@ function CatalogClient.fetchScreensaverCatalogToFile(dest_path)
             local f, err = io.open(dest_path, "wb")
             if not f then
                 logger.err("Storefront: failed to open dest_path for screensaver writing", err)
+                if StorefrontLogger then StorefrontLogger.err("Storefront: failed to open dest_path for screensaver writing: " .. tostring(err)) end
                 return nil
             end
             current_file = f
             return require("socketutil").file_sink(f)
-        end
-
-        local extra_headers = nil
-        if etag and etag ~= "" and target_url == DEFAULT_SCREENSAVER_CATALOG_URL then
-            extra_headers = { ["If-None-Match"] = etag }
         end
 
         local ok, res_code, res_headers = requestWithRedirects(target_url, sink_fn, extra_headers)
@@ -406,17 +410,20 @@ function CatalogClient.fetchScreensaverCatalogToFile(dest_path)
         if ok and code == 304 then
             os.remove(dest_path)
             logger.info("Storefront: screensaver catalog unchanged (HTTP 304 Not Modified) from", target_url)
+            if StorefrontLogger then StorefrontLogger.info("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified)") end
             return true, "not_modified"
         elseif ok and code == 200 then
             local new_etag = res_headers and (res_headers.etag or res_headers.ETag or res_headers["etag"])
             if type(new_etag) == "string" and new_etag ~= "" then
                 CatalogClient.setStoredScreensaverEtag(new_etag)
             end
+            if StorefrontLogger then StorefrontLogger.info("Storefront: screensavers catalog downloaded successfully (HTTP 200)") end
             return true, "updated"
         else
             os.remove(dest_path)
             local err_str = tonumber(res_code) and ("HTTP " .. tostring(res_code)) or tostring(res_code)
             logger.warn("Storefront screensaver catalog fetch error from", target_url, err_str)
+            if StorefrontLogger then StorefrontLogger.warn("Storefront: screensavers catalog fetch error from " .. tostring(target_url) .. ": " .. tostring(err_str)) end
             last_err = err_str
         end
     end
@@ -450,10 +457,16 @@ function CatalogClient.fetchScreensaverCatalog(url_to_fetch)
             extra_headers = { ["If-None-Match"] = etag }
         end
 
+        logger.info("Storefront: fetching screensaver catalog from", target_url)
+        if StorefrontLogger then
+            StorefrontLogger.info("Storefront: fetching screensavers catalog from " .. tostring(target_url) .. (extra_headers and " (with ETag)" or ""))
+        end
+
         local ok, res_code, res_headers = requestWithRedirects(target_url, sink_fn, extra_headers)
         local code = tonumber(res_code) or 0
         if ok and code == 304 then
             logger.info("Storefront: screensaver catalog unchanged (HTTP 304) from", target_url)
+            if StorefrontLogger then StorefrontLogger.info("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified)") end
             return "not_modified", nil
         elseif ok and code == 200 then
             local new_etag = res_headers and (res_headers.etag or res_headers.ETag or res_headers["etag"])
@@ -463,12 +476,15 @@ function CatalogClient.fetchScreensaverCatalog(url_to_fetch)
             local body = table.concat(response_body)
             local ok_dec, parsed = pcall(json.decode, body)
             if ok_dec and type(parsed) == "table" and #parsed > 0 then
+                if StorefrontLogger then StorefrontLogger.info(string.format("Storefront: screensavers catalog downloaded and parsed (%d items)", #parsed)) end
                 return parsed, nil
             else
                 last_err = "Failed to parse screensaver catalog JSON"
+                if StorefrontLogger then StorefrontLogger.warn("Storefront: failed to parse screensaver catalog JSON") end
             end
         else
             last_err = tonumber(res_code) and ("HTTP " .. tostring(res_code)) or tostring(res_code)
+            if StorefrontLogger then StorefrontLogger.warn("Storefront: screensavers catalog fetch error from " .. tostring(target_url) .. ": " .. tostring(last_err)) end
         end
     end
     return nil, last_err
@@ -701,8 +717,11 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
     if not ok_ffi then ok_ffi, ffiutil = pcall(require, "ffiutil") end
 
     local target_url = url_to_fetch or CatalogClient.getCatalogUrl()
-    logger.info("Storefront: starting background catalog fetch from", target_url)
-    if StorefrontLogger then StorefrontLogger.info("Storefront: starting background catalog fetch from " .. tostring(target_url)) end
+    local ss_target_url = DEFAULT_SCREENSAVER_CATALOG_URL
+    logger.info("Storefront: starting background catalog fetch from", target_url, "and screensavers from", ss_target_url)
+    if StorefrontLogger then
+        StorefrontLogger.info(string.format("Storefront: starting background catalog fetch (catalog: %s, screensavers: %s)", tostring(target_url), tostring(ss_target_url)))
+    end
 
     local cache_dir = DataStorage:getDataDir() .. "/cache/Storefront"
     util.makePath(cache_dir)
@@ -841,15 +860,20 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                 end
             end
 
-            if (main_not_mod or main_proc_ok) and (ss_not_mod or ss_proc_ok) then
-                if child_write_fd then ffiutil.writeToFD(child_write_fd, "OK", true) end
-            elseif main_proc_ok or ss_proc_ok then
-                if child_write_fd then ffiutil.writeToFD(child_write_fd, "OK", true) end
+            local res_main = main_proc_ok and "updated" or (main_not_mod and "not_modified" or ("err:" .. tostring(dl_status_or_err)))
+            local res_ss = ss_proc_ok and "updated" or (ss_not_mod and "not_modified" or ("err:" .. tostring(ss_status_or_err)))
+
+            local result_msg
+            if main_not_mod and ss_not_mod then
+                result_msg = "OK_NOT_MODIFIED"
+            elseif main_proc_ok or ss_proc_ok or (main_not_mod and ss_proc_ok) or (main_proc_ok and ss_not_mod) then
+                result_msg = string.format("OK:main=%s,ss=%s", res_main, res_ss)
             elseif main_not_mod or ss_not_mod then
-                if child_write_fd then ffiutil.writeToFD(child_write_fd, "OK_NOT_MODIFIED", true) end
+                result_msg = string.format("OK_NOT_MODIFIED:main=%s,ss=%s", res_main, res_ss)
             else
-                if child_write_fd then ffiutil.writeToFD(child_write_fd, "ERR_DOWNLOAD: " .. tostring(dl_status_or_err), true) end
+                result_msg = "ERR_DOWNLOAD: " .. tostring(dl_status_or_err)
             end
+            if child_write_fd then ffiutil.writeToFD(child_write_fd, result_msg, true) end
         end, debug.traceback)
 
         if not ok then
@@ -939,24 +963,61 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
             local ok_swap_f = safeReplace(staging_fonts_file, final_fonts_file)
             local ok_swap_ss = safeReplace(staging_screensavers_file, final_screensavers_file)
 
-            if child_msg == "OK_NOT_MODIFIED" then
+            local is_ok_not_modified = (child_msg == "OK_NOT_MODIFIED" or child_msg:find("^OK_NOT_MODIFIED") ~= nil)
+            local is_ok = (child_msg == "OK" or child_msg:find("^OK") ~= nil)
+
+            if is_ok_not_modified and not (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss) then
                 CatalogClient.setLastFetchedScreensavers(os.time())
                 logger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)")
-                if StorefrontLogger then StorefrontLogger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)") end
-                if callback then callback(true, "not_modified") end
-            elseif child_msg == "OK" and (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss) then
-                if ok_swap_p or ok_swap_pt or ok_swap_f then
-                    Cache.invalidate()
-                end
-                if ok_swap_ss then
-                    CatalogClient.setLastFetchedScreensavers(os.time())
+                if StorefrontLogger then
+                    StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)")
+                    local s_count = 0
                     pcall(function()
                         local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
-                        if ok_ss and StorefrontScreensavers and StorefrontScreensavers.invalidateMemCache then
-                            StorefrontScreensavers.invalidateMemCache()
+                        if ok_ss and StorefrontScreensavers and StorefrontScreensavers.getCachedCatalog then
+                            local cat = StorefrontScreensavers.getCachedCatalog()
+                            if type(cat) == "table" then s_count = #cat end
                         end
                     end)
+                    StorefrontLogger.info(string.format("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified, %d screensavers cached)", s_count))
                 end
+                if callback then callback(true, "not_modified") end
+            elseif is_ok and (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss or is_ok_not_modified) then
+                if ok_swap_p or ok_swap_pt or ok_swap_f then
+                    Cache.invalidate()
+                    if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog cache updated and swapped into place") end
+                elseif child_msg:find("main=not_modified") or is_ok_not_modified then
+                    if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)") end
+                end
+
+                if ok_swap_ss then
+                    CatalogClient.setLastFetchedScreensavers(os.time())
+                    local s_count = 0
+                    pcall(function()
+                        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+                        if ok_ss and StorefrontScreensavers then
+                            StorefrontScreensavers.invalidateMemCache()
+                            local cat = StorefrontScreensavers.getCachedCatalog()
+                            if type(cat) == "table" then s_count = #cat end
+                        end
+                    end)
+                    if StorefrontLogger then StorefrontLogger.info(string.format("Storefront: screensavers catalog updated (%d screensavers cached)", s_count)) end
+                elseif child_msg:find("ss=not_modified") or is_ok_not_modified then
+                    CatalogClient.setLastFetchedScreensavers(os.time())
+                    local s_count = 0
+                    pcall(function()
+                        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+                        if ok_ss and StorefrontScreensavers and StorefrontScreensavers.getCachedCatalog then
+                            local cat = StorefrontScreensavers.getCachedCatalog()
+                            if type(cat) == "table" then s_count = #cat end
+                        end
+                    end)
+                    if StorefrontLogger then StorefrontLogger.info(string.format("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified, %d screensavers cached)", s_count)) end
+                elseif child_msg:find("ss=err") then
+                    local ss_err_part = child_msg:match("ss=err:([^,;]+)") or "unknown"
+                    if StorefrontLogger then StorefrontLogger.warn("Storefront: screensavers catalog update failed: " .. tostring(ss_err_part)) end
+                end
+
                 logger.info("Storefront: background catalog update finished and cache swap complete")
                 if StorefrontLogger then StorefrontLogger.info("Storefront: background catalog update finished and cache swap complete") end
                 if callback then callback(true, "updated") end
@@ -1067,6 +1128,10 @@ function CatalogClient.fetchAndUpdateCache(url_to_fetch)
 
     if main_not_mod and ss_not_mod then
         CatalogClient.setLastFetchedScreensavers(os.time())
+        if StorefrontLogger then
+            StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)")
+            StorefrontLogger.info("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified)")
+        end
         return true, "not_modified"
     end
 
@@ -1077,7 +1142,12 @@ function CatalogClient.fetchAndUpdateCache(url_to_fetch)
         if ok_b then updated = true end
     elseif catalog and catalog ~= "not_modified" then
         local ok, update_err = CatalogClient.updateCacheFromCatalog(catalog)
-        if ok then updated = true end
+        if ok then
+            updated = true
+            if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog cache updated and swapped into place") end
+        end
+    elseif main_not_mod then
+        if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)") end
     end
 
     if ss_data and ss_data ~= "not_modified" and type(ss_data) == "table" and #ss_data > 0 then
@@ -1096,7 +1166,15 @@ function CatalogClient.fetchAndUpdateCache(url_to_fetch)
                         StorefrontScreensavers.invalidateMemCache()
                     end
                 end)
+                if StorefrontLogger then
+                    StorefrontLogger.info(string.format("Storefront: screensavers catalog updated (%d screensavers cached)", #ss_data))
+                end
             end
+        end
+    elseif ss_not_mod then
+        CatalogClient.setLastFetchedScreensavers(os.time())
+        if StorefrontLogger then
+            StorefrontLogger.info("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified)")
         end
     end
 

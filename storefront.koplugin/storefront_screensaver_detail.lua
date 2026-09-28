@@ -460,7 +460,12 @@ function StorefrontScreensaverDetail:init()
                                     path_to_del = found_path
                                 end
                                 if path_to_del then
-                                    StorefrontScreensaverMgr.deleteLocalScreensaver(path_to_del)
+                                    local ok, was_active_single = StorefrontScreensaverMgr.deleteLocalScreensaver(path_to_del)
+                                    if ok then
+                                        UIManager:nextTick(function()
+                                            StorefrontScreensaverMgr.autoFallbackAfterDelete(was_active_single)
+                                        end)
+                                    end
                                 end
                                 Toast:new{ text = _("Wallpaper deleted from device."), timeout = 2 }:show()
                                 self:onClose()

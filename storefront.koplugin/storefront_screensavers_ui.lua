@@ -4,6 +4,8 @@ local DataStorage = require("datastorage")
 local UIManager = require("ui/uimanager")
 local Localization = require("localization_storefront")
 local _ = function(key, ...) return Localization:t(key, ...) end
+local ok_log, StorefrontLogger = pcall(require, "storefront_logger")
+if not ok_log then StorefrontLogger = nil end
 
 local StorefrontScreensavers = {}
 
@@ -190,6 +192,7 @@ function StorefrontScreensavers.getCachedCatalog()
 end
 
 function StorefrontScreensavers.fetchCatalog(callback)
+    if StorefrontLogger then StorefrontLogger.info("Storefront: fetching screensavers catalog feed") end
     local ok_net, CatalogClient = pcall(require, "storefront_net_catalog")
     if ok_net and CatalogClient and CatalogClient.fetchScreensaverCatalog then
         local data, err = CatalogClient.fetchScreensaverCatalog()
@@ -215,6 +218,7 @@ function StorefrontScreensavers.fetchCatalog(callback)
                     end
                 end
             end)
+            if StorefrontLogger then StorefrontLogger.info(string.format("Storefront: screensavers catalog cached (%d items)", #data)) end
             if callback then callback(true, data) end
             return
         end

@@ -76,5 +76,13 @@ class TestCatalogMinification(unittest.TestCase):
         self.assertIn("function StorefrontScreensavers.invalidateMemCache()", ss_content)
         self.assertIn("function StorefrontScreensavers.getLastFetched()", ss_content)
 
+        main_content = (self.plugin_dir / "main.lua").read_text(encoding="utf-8")
+        self.assertIn("screensaver_count", main_content)
+        self.assertIn("Cached: %d plugins, %d patches, %d fonts, %d screensavers", main_content)
+        self.assertIn("screensavers: %d [%ds old]", main_content)
+
+        search_content = (self.plugin_dir / "storefront_search_net.lua").read_text(encoding="utf-8")
+        self.assertIn("screensavers feed verified", search_content)
+
 if __name__ == "__main__":
     unittest.main()

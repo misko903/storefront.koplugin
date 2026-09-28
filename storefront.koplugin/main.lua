@@ -6128,8 +6128,8 @@ function Storefront:saveBrowserState(skip_flush)
         return
     end
     local state = {
-        kind = (self.browser_state.kind == "patch" and "patch") or (self.browser_state.kind == "font" and "font") or "plugin",
-        tab = self.browser_state.tab or (self.browser_state.kind == "patch" and "Patches" or (self.browser_state.kind == "font" and "Fonts" or "Plugins")),
+        kind = (self.browser_state.kind == "patch" and "patch") or (self.browser_state.kind == "font" and "font") or (self.browser_state.kind == "screensaver" and "screensaver") or "plugin",
+        tab = self.browser_state.tab or (self.browser_state.kind == "patch" and "Patches" or (self.browser_state.kind == "font" and "Fonts" or (self.browser_state.kind == "screensaver" and "Screensavers" or "Plugins"))),
         search_text = self.browser_state.search_text or "",
         owner = self.browser_state.owner or "",
         font_category = self.browser_state.font_category or "all",
@@ -6177,8 +6177,8 @@ function Storefront:ensureBrowserState()
         self:saveBrowserState()
         return
     end
-    self.browser_state.kind = (self.browser_state.kind == "patch" and "patch") or (self.browser_state.kind == "font" and "font") or "plugin"
-    self.browser_state.tab = self.browser_state.tab or (self.browser_state.kind == "patch" and "Patches" or (self.browser_state.kind == "font" and "Fonts" or "Plugins"))
+    self.browser_state.kind = (self.browser_state.kind == "patch" and "patch") or (self.browser_state.kind == "font" and "font") or (self.browser_state.kind == "screensaver" and "screensaver") or "plugin"
+    self.browser_state.tab = self.browser_state.tab or (self.browser_state.kind == "patch" and "Patches" or (self.browser_state.kind == "font" and "Fonts" or (self.browser_state.kind == "screensaver" and "Screensavers" or "Plugins")))
     if type(self.browser_state.search_text) ~= "string" then
         self.browser_state.search_text = ""
     end
@@ -8513,7 +8513,7 @@ function Storefront:browserSwitchTab(tab_name)
         end
     end
     self.browser_state.tab = tab_name
-    self.browser_state.kind = (tab_name == "Patches" and "patch") or (tab_name == "Fonts" and "font") or "plugin"
+    self.browser_state.kind = (tab_name == "Patches" and "patch") or (tab_name == "Fonts" and "font") or (tab_name == "Screensavers" and "screensaver") or "plugin"
     self.browser_state.page = 1
     self.browser_state.scroll_offset = nil
     self:resetFiltersForRefresh()
@@ -8537,14 +8537,16 @@ function Storefront:browserRefresh()
     end
     self:resetBrowserScrollState()
     self:resetFiltersForRefresh()
-    pcall(function()
-        local StorefrontScreensavers = require("storefront_screensavers_ui")
-        if StorefrontScreensavers and StorefrontScreensavers.clearCachedCatalog then
-            StorefrontScreensavers.clearCachedCatalog()
-        end
-    end)
-    self.screensavers_cache = nil
-    self._filtered_screensavers_cache = nil
+    if kind == "screensaver" or self.browser_state.tab == "Screensavers" then
+        pcall(function()
+            local StorefrontScreensavers = require("storefront_screensavers_ui")
+            if StorefrontScreensavers and StorefrontScreensavers.clearCachedCatalog then
+                StorefrontScreensavers.clearCachedCatalog()
+            end
+        end)
+        self.screensavers_cache = nil
+        self._filtered_screensavers_cache = nil
+    end
     NetworkMgr:runWhenOnline(function()
         self:refreshCache(kind, function(ok)
             self:softRefreshCurrentBrowserView()
@@ -8692,7 +8694,7 @@ function Storefront:maybeCheckCatalogBackground()
     self._last_catalog_check_time = now
 
     if needs_fetch then
-        local msg = string.format("Storefront: catalog cache is stale/unfetched (count: %d, %ds old), triggering background fetch", repo_count, age)
+        local msg = string.format("Storefront: catalog cache is stale/unfetched (kind: %s, count: %d, %ds old), triggering background fetch", check_kind, repo_count, age)
         logger.info(msg)
         StorefrontLogger.info(msg)
 
@@ -8714,7 +8716,7 @@ function Storefront:maybeCheckCatalogBackground()
             end
         end)
     else
-        local msg = string.format("Storefront: catalog cache is fresh (%ds old <= 3600s), skipping background fetch", age)
+        local msg = string.format("Storefront: catalog cache is fresh (kind: %s, %ds old <= 3600s), skipping background fetch", check_kind, age)
         logger.info(msg)
         StorefrontLogger.info(msg)
     end
@@ -9091,7 +9093,7 @@ function Storefront:showBrowser(kind)
         end,
         on_tab_switch = function(tab_name)
             self.browser_state.tab = tab_name
-            self.browser_state.kind = (tab_name == "Patches" and "patch") or (tab_name == "Fonts" and "font") or "plugin"
+            self.browser_state.kind = (tab_name == "Patches" and "patch") or (tab_name == "Fonts" and "font") or (tab_name == "Screensavers" and "screensaver") or "plugin"
             self.browser_state.page = 1
             self.browser_state.scroll_offset = nil
             self:saveBrowserState(true)
@@ -10288,7 +10290,17 @@ function Storefront:init()
     StorefrontLogger.reset()
     local mode_str = GitHub.isDirectApiEnabled() and "Direct API" or "Storefront Catalog"
     local plugin_count = Cache.countRepos and Cache.countRepos("plugin") or #Cache.listRepos("plugin")
-    StorefrontLogger.info(string.format("Storefront initialized (Mode: %s, Cached plugins: %d)", mode_str, plugin_count or 0))
+    local patch_count = Cache.countRepos and Cache.countRepos("patch") or 0
+    local font_count = Cache.countRepos and Cache.countRepos("font") or 0
+    local screensaver_count = 0
+    pcall(function()
+        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+        if ok_ss and StorefrontScreensavers and StorefrontScreensavers.getCachedCatalog then
+            local cat = StorefrontScreensavers.getCachedCatalog()
+            if type(cat) == "table" then screensaver_count = #cat end
+        end
+    end)
+    StorefrontLogger.info(string.format("Storefront initialized (Mode: %s, Cached: %d plugins, %d patches, %d fonts, %d screensavers)", mode_str, plugin_count or 0, patch_count or 0, font_count or 0, screensaver_count or 0))
     Storefront.instance = self
     self.cache_dir = ensureCacheDir()
     self:onDispatcherRegisterActions()
@@ -10445,13 +10457,23 @@ function Storefront:init()
         local last_fetched = (plugin_fetched > 0 and patch_fetched > 0) and math.min(plugin_fetched, patch_fetched) or 0
         local age = (last_fetched > 0) and (os.time() - last_fetched) or 999999
 
-        local needs_fetch = (last_fetched == 0 or plugin_count == 0 or patch_count == 0 or age > 3600)
+        local ss_count = 0
+        local ss_fetched = 0
+        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+        if ok_ss and StorefrontScreensavers then
+            local cat = StorefrontScreensavers.getCachedCatalog and StorefrontScreensavers.getCachedCatalog()
+            if type(cat) == "table" then ss_count = #cat end
+            ss_fetched = StorefrontScreensavers.getLastFetched and StorefrontScreensavers.getLastFetched() or 0
+        end
+        local ss_age = (ss_fetched > 0) and (os.time() - ss_fetched) or 999999
+
+        local needs_fetch = (last_fetched == 0 or plugin_count == 0 or patch_count == 0 or age > 3600 or ss_fetched == 0 or ss_count == 0 or ss_age > 3600)
         if Storefront.instance and needs_fetch then
             Storefront.instance._last_catalog_check_time = os.time()
         end
 
         if not GitHub.isDirectApiEnabled() and needs_fetch then
-            local msg = string.format("Storefront init: catalog cache is stale/unfetched (plugins: %d, patches: %d, %ds old), triggering background fetch", plugin_count, patch_count, age)
+            local msg = string.format("Storefront init: catalog cache is stale/unfetched (plugins: %d [%ds old], patches: %d, screensavers: %d [%ds old]), triggering background fetch", plugin_count, age, patch_count, ss_count, ss_age)
             logger.info(msg)
             StorefrontLogger.info(msg)
             local CatalogClient = require("storefront_net_catalog")
@@ -10513,7 +10535,7 @@ function Storefront:init()
                 end
             end)
         else
-            local msg = string.format("Storefront init: catalog cache is fresh (%ds old <= 3600s), skipping background fetch", age)
+            local msg = string.format("Storefront init: catalog cache is fresh (plugins/patches: %ds old, screensavers: %ds old <= 3600s), skipping background fetch", age, ss_age)
             logger.info(msg)
             StorefrontLogger.info(msg)
             pcall(function()

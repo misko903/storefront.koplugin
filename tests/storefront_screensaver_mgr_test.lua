@@ -238,4 +238,68 @@ describe("StorefrontScreensaverMgr", function()
             assert.is_false(StorefrontScreensaverMgr.isCustomScreensaverFolder())
         end)
     end)
+
+    describe("deleteLocalScreensaver", function()
+        it("returns true and false for non-active screensaver", function()
+            local removed = {}
+            local lfs = {
+                attributes = function(path, mode)
+                    if removed[path] then return nil end
+                    return { mode = "file" }
+                end
+            }
+            package.loaded["libs/libkoreader-lfs"] = lfs
+
+            local orig_remove = os.remove
+            os.remove = function(path)
+                removed[path] = true
+                return true
+            end
+
+            dummy_settings["screensaver_type"] = "document_cover"
+            dummy_settings["screensaver_file"] = "/other/wallpaper.jpg"
+
+            local ok, was_active = StorefrontScreensaverMgr.deleteLocalScreensaver("/test/forest.jpg")
+            assert.is_true(ok)
+            assert.is_false(was_active)
+
+            os.remove = orig_remove
+        end)
+
+        it("returns true and true for active single screensaver", function()
+            local removed = {}
+            local lfs = {
+                attributes = function(path, mode)
+                    if removed[path] then return nil end
+                    return { mode = "file" }
+                end
+            }
+            package.loaded["libs/libkoreader-lfs"] = lfs
+
+            local orig_remove = os.remove
+            os.remove = function(path)
+                removed[path] = true
+                return true
+            end
+
+            dummy_settings["screensaver_type"] = "document_cover"
+            dummy_settings["screensaver_mode"] = "single"
+            dummy_settings["screensaver_file"] = "/test/forest.jpg"
+
+            local ok, was_active = StorefrontScreensaverMgr.deleteLocalScreensaver("/test/forest.jpg")
+            assert.is_true(ok)
+            assert.is_true(was_active)
+
+            os.remove = orig_remove
+        end)
+
+        it("autoFallbackAfterDelete does nothing when was_active_single is false", function()
+            local called = false
+            local orig = StorefrontScreensaverMgr.setScreensaverMode
+            StorefrontScreensaverMgr.setScreensaverMode = function(...) called = true end
+            StorefrontScreensaverMgr.autoFallbackAfterDelete(false)
+            assert.is_false(called)
+            StorefrontScreensaverMgr.setScreensaverMode = orig
+        end)
+    end)
 end)
