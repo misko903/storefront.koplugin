@@ -513,6 +513,10 @@ msgstr "캐시 지우기"
 msgid "Clear README Cache?"
 msgstr "README 캐시를 지우시겠습니까?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "평가 캐시를 삭제하시겠습니까?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "썸네일 캐시를 삭제하시겠습니까?"
@@ -545,6 +549,10 @@ msgstr "Wiki 캐시 정리됨 (%s 확보)."
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "모든 캐시 정리됨 (%s, %d개 파일 확보)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "평가 캐시가 삭제되었습니다(%s 확보됨)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "스크린세이버 썸네일 정리됨 (%s 확보)."
@@ -572,6 +580,10 @@ msgstr "커밋: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "커뮤니티"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "커뮤니티 평가 및 통계"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "이 저장소의 릴리스 정보를 불러올 수 없습니다."
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "압축 파일에서 플러그인 폴더(_meta.lua)를 찾을 수 없습니다."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "배경화면을 제거할 수 없습니다"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "캐시된 모든 README 파일, Wiki 문서 및 스크린세이버 썸�
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "캐시된 README 마크다운 파일 및 다운로드된 이미지(%s)가 삭제됩니다."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "캐시된 커뮤니티 평가 및 다운로드 수가 삭제됩니다(%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "캐시된 스크린세이버 썸네일 미리보기(%s)가 삭제됩니다."
@@ -3337,19 +3357,3 @@ msgstr "⚙ 설정"
 msgid "✓ Current"
 msgstr "✓ 현재"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "커뮤니티 평가 및 통계"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "평가 캐시를 삭제하시겠습니까?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "캐시된 커뮤니티 평가 및 다운로드 수가 삭제됩니다(%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "평가 캐시가 삭제되었습니다(%s 확보됨)."

@@ -513,6 +513,10 @@ msgstr "Cache wissen"
 msgid "Clear README Cache?"
 msgstr "README-cache wissen?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "Beoordelingscache wissen?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "Miniaturen-cache wissen?"
@@ -545,6 +549,10 @@ msgstr "Wiki-cache gewist (%s vrijgemaakt)."
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "Alle caches gewist (%s, %d bestanden vrijgemaakt)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Beoordelingscache gewist (%s vrijgemaakt)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "Schermbeveiligingsminiaturen gewist (%s vrijgemaakt)."
@@ -572,6 +580,10 @@ msgstr "Commits: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "Gemeenschap"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Community-beoordelingen & statistieken"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "Kon geen releases ophalen voor deze repository."
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Kon pluginmap (_meta.lua) niet vinden in archief."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "Kan achtergrond niet verwijderen"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "Hiermee worden alle gecachte README-bestanden, wiki-artikelen en schermb
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "Hiermee worden gecachte README-markdownbestanden en gedownloade afbeeldingen (%s) verwijderd."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Hiermee verwijdert u gecachte community-beoordelingen en downloadaantallen (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "Hiermee worden gecachte schermbeveiligingminiatuurweergaven (%s) verwijderd."
@@ -3337,19 +3357,3 @@ msgstr "⚙ Instellingen"
 msgid "✓ Current"
 msgstr "✓ Huidige"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "Community-beoordelingen & statistieken"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "Beoordelingscache wissen?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "Hiermee verwijdert u gecachte community-beoordelingen en downloadaantallen (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "Beoordelingscache gewist (%s vrijgemaakt)."

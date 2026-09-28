@@ -513,6 +513,10 @@ msgstr "Önbelleği Temizle"
 msgid "Clear README Cache?"
 msgstr "README önbelleği temizlensin mi?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "Puanlama Önbelleği Temizlensin mi?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "Küçük resim önbelleği temizlensin mi?"
@@ -545,6 +549,10 @@ msgstr "Wiki önbelleği temizlendi (%s alan açıldı)."
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "Tüm önbellekler temizlendi (%s alan açıldı, %d dosya)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Puanlama önbelleği temizlendi (%s boşaltıldı)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "Ekran koruyucu küçük resimleri temizlendi (%s alan açıldı)."
@@ -572,6 +580,10 @@ msgstr "Commitler: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "Topluluk"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Topluluk puanları ve istatistikler"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "Bu depo için sürümler alınamadı."
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Arşivde eklenti klasörü (_meta.lua) bulunamadı."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "Duvar kağıdı kaldırılamadı"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "Bu işlem önbelleğe alınan tüm README dosyalarını, wiki makaleleri
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "Bu işlem önbelleğe alınan README markdown dosyalarını ve indirilen resimleri (%s) silecektir."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Bu işlem önbelleğe alınmış topluluk puanlarını ve indirme sayılarını siler (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "Bu işlem önbelleğe alınan ekran koruyucu küçük resim önizlemelerini (%s) silecektir."
@@ -3337,19 +3357,3 @@ msgstr "⚙ Ayarlar"
 msgid "✓ Current"
 msgstr "✓ Geçerli"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "Topluluk puanları ve istatistikler"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "Puanlama Önbelleği Temizlensin mi?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "Bu işlem önbelleğe alınmış topluluk puanlarını ve indirme sayılarını siler (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "Puanlama önbelleği temizlendi (%s boşaltıldı)."

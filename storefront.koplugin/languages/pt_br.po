@@ -513,6 +513,10 @@ msgstr "Limpar cache"
 msgid "Clear README Cache?"
 msgstr "Limpar cache do README?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "Limpar cache de avaliações?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "Limpar cache de miniaturas?"
@@ -545,6 +549,10 @@ msgstr "Cache da Wiki limpo (%s liberados)."
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "Todos os caches foram limpos (%s liberados, %d arquivos)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Cache de avaliações limpo (%s liberados)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "Miniaturas da proteção de tela limpas (%s liberados)."
@@ -572,6 +580,10 @@ msgstr "Commits: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "Comunidade"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Avaliações e estatísticas da comunidade"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "Não foi possível obter lançamentos para este repositório."
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Não foi possível localizar a pasta do plugin (_meta.lua) no arquivo."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "Não foi possível remover o papel de parede"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "Isso excluirá todos os arquivos README, artigos da wiki e miniaturas de
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "Isso excluirá os arquivos markdown README e as imagens baixadas em cache (%s)."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Isso excluirá as avaliações da comunidade e contagens de downloads em cache (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "Isso excluirá as prévias de miniaturas de descanso de tela em cache (%s)."
@@ -3337,19 +3357,3 @@ msgstr "⚙ Configurações"
 msgid "✓ Current"
 msgstr "✓ Atual"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "Avaliações e estatísticas da comunidade"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "Limpar cache de avaliações?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "Isso excluirá as avaliações da comunidade e contagens de downloads em cache (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "Cache de avaliações limpo (%s liberados)."

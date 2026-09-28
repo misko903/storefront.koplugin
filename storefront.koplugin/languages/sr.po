@@ -513,6 +513,10 @@ msgstr "Обриши кеш"
 msgid "Clear README Cache?"
 msgstr "Обрисати кеш за README?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "Обрисати кеш оцена?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "Обрисати кеш за умањене приказе?"
@@ -545,6 +549,10 @@ msgstr "Очишћена је Вики кеш меморија (ослобође
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "Очишћене су све кеш меморије (ослобођено %s, %d датотека)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Кеш оцена је обрисан (%s ослобођено)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "Очишћене су сличице чувара екрана (ослобођено %s)."
@@ -572,6 +580,10 @@ msgstr "Izmene: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "Заједница"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Оцене заједнице и статистика"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "Није могуће преузети издања за ово спре
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Nije moguće pronaći fasciklu priključka (_meta.lua) u arhivi."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "Није било могуће уклонити позадину"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "Ово ће обрисати све кеширане README датоте
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "Ово ће обрисати кеширане README датотеке и преузете слике (%s)."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Ово ће избрисати кеширане оцене заједнице и број преузимања (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "Ово ће обрисати кеширане умањене приказе чувара екрана (%s)."
@@ -3337,19 +3357,3 @@ msgstr "⚙ Подешавања"
 msgid "✓ Current"
 msgstr "✓ Trenutno"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "Оцене заједнице и статистика"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "Обрисати кеш оцена?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "Ово ће избрисати кеширане оцене заједнице и број преузимања (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "Кеш оцена је обрисан (%s ослобођено)."

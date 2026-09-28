@@ -513,6 +513,10 @@ msgstr "Borrar caché"
 msgid "Clear README Cache?"
 msgstr "¿Borrar caché de README?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "¿Borrar caché de valoraciones?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "¿Borrar caché de miniaturas?"
@@ -545,6 +549,10 @@ msgstr "Caché de Wiki borrada (%s liberados)."
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "Todas las cachés borradas (%s liberados, %d archivos)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Caché de valoraciones borrada (%s liberados)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "Miniaturas del salvapantallas borradas (%s liberados)."
@@ -572,6 +580,10 @@ msgstr "Cambios: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "Comunidad"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Valoraciones y estadísticas de la comunidad"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "No se pudieron obtener los lanzamientos de este repositorio."
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "No se pudo ubicar la carpeta del plugin (_meta.lua) en el archivo."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "No se pudo quitar el fondo de pantalla"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "Esto eliminará todos los archivos README, artículos wiki y miniaturas 
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "Esto eliminará los archivos Markdown de README y las imágenes descargadas en caché (%s)."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Esto eliminará las valoraciones comunitarias y recuentos de descargas en caché (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "Esto eliminará las vistas previas de miniaturas de fondos en caché (%s)."
@@ -3337,19 +3357,3 @@ msgstr "⚙ Ajustes"
 msgid "✓ Current"
 msgstr "✓ Actual"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "Valoraciones y estadísticas de la comunidad"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "¿Borrar caché de valoraciones?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "Esto eliminará las valoraciones comunitarias y recuentos de descargas en caché (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "Caché de valoraciones borrada (%s liberados)."

@@ -513,6 +513,10 @@ msgstr "Wyczyść pamięć podręczną"
 msgid "Clear README Cache?"
 msgstr "Wyczyścić pamięć podręczną README?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "Wyczyścić pamięć podręczną ocen?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "Wyczyścić pamięć podręczną miniatur?"
@@ -545,6 +549,10 @@ msgstr "Wyczyszczono pamięć podręczną Wiki (zwolniono %s)."
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "Wyczyszczono wszystkie pamięci podręczne (zwolniono %s, %d plików)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Wyczyszczono pamięć podręczną ocen (zwolniono %s)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "Wyczyszczono miniaturki wygaszacza (zwolniono %s)."
@@ -572,6 +580,10 @@ msgstr "Commity: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "Społeczność"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Oceny społeczności i statystyki"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "Nie udało się pobrać wydań dla tego repozytorium."
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Nie można zlokalizować folderu wtyczki (_meta.lua) w archiwum."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "Nie można usunąć tapety"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "Spowoduje to usunięcie wszystkich zbuforowanych plików README, artyku�
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "Spowoduje to usunięcie zbuforowanych plików markdown README i pobranych obrazów (%s)."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Spowoduje to usunięcie z pamięci podręcznej ocen społeczności i liczników pobrań (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "Spowoduje to usunięcie zbuforowanych podglądów miniatur wygaszacza ekranu (%s)."
@@ -3337,19 +3357,3 @@ msgstr "⚙ Ustawienia"
 msgid "✓ Current"
 msgstr "✓ Aktualna"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "Oceny społeczności i statystyki"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "Wyczyścić pamięć podręczną ocen?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "Spowoduje to usunięcie z pamięci podręcznej ocen społeczności i liczników pobrań (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "Wyczyszczono pamięć podręczną ocen (zwolniono %s)."

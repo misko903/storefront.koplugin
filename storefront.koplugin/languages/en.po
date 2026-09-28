@@ -494,6 +494,9 @@ msgstr "Could not fetch releases for this repository."
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Could not locate plugin folder (_meta.lua) in archive."
 
+msgid "Could not remove wallpaper"
+msgstr "Could not remove wallpaper"
+
 msgid "Cover"
 msgstr "Cover"
 

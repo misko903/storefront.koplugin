@@ -513,6 +513,10 @@ msgstr "مسح الذاكرة المؤقتة"
 msgid "Clear README Cache?"
 msgstr "مسح ذاكرة README المؤقتة؟"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "مسح ذاكرة التخزين المؤقت للتقييمات؟"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "مسح ذاكرة الصور المصغرة المؤقتة؟"
@@ -545,6 +549,10 @@ msgstr "تم مسح ذاكرة التخزين المؤقت لـ Wiki (تم تح�
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "تم مسح جميع الذاكرات المؤقتة (تم تحرير %s، %d ملفات)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "تم مسح ذاكرة التخزين المؤقت للتقييمات (تم تحرير %s)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "تم مسح مصغرات شاشة التوقف (تم تحرير %s)."
@@ -572,6 +580,10 @@ msgstr "التغييرات: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "المجتمع"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "تقييمات وإحصاءات المجتمع"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "تعذر جلب الإصدارات لهذا المستودع."
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "تعذر العثور على مجلد الإضافة (_meta.lua) في الأرشيف."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "تعذر إزالة خلفية الشاشة"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "سيؤدي هذا إلى حذف جميع ملفات README ومقالا�
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "سيؤدي هذا إلى حذف ملفات Markdown لـ README والصور المحملة المخزنة مؤقتًا (%s)."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "سيؤدي هذا إلى حذف تقييمات المجتمع وأعداد التنزيل المخزنة مؤقتًا (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "سيؤدي هذا إلى حذف معاينات الصور المصغرة لشاشات التوقف المخزنة مؤقتًا (%s)."
@@ -3337,19 +3357,3 @@ msgstr "⚙ الإعدادات"
 msgid "✓ Current"
 msgstr "✓ الحالي"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "تقييمات وإحصاءات المجتمع"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "مسح ذاكرة التخزين المؤقت للتقييمات؟"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "سيؤدي هذا إلى حذف تقييمات المجتمع وأعداد التنزيل المخزنة مؤقتًا (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "تم مسح ذاكرة التخزين المؤقت للتقييمات (تم تحرير %s)."

@@ -513,6 +513,10 @@ msgstr "Очистити кеш"
 msgid "Clear README Cache?"
 msgstr "Очистити кеш README?"
 
+# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
+msgid "Clear Ratings Cache?"
+msgstr "Очистити кеш оцінок?"
+
 # en-hash: 95ba1adacfca638552f18e47e554e862
 msgid "Clear Thumbnail Cache?"
 msgstr "Очистити кеш мініатюр?"
@@ -545,6 +549,10 @@ msgstr "Кеш Вікі очищено (звільнено %s)."
 msgid "Cleared all caches (%s freed, %d files)."
 msgstr "Усі кеші очищено (звільнено %s, %d файлів)."
 
+# en-hash: bc65074a011515ebf17e3273a55c8448
+msgid "Cleared ratings cache (%s freed)."
+msgstr "Кеш оцінок очищено (звільнено %s)."
+
 # en-hash: ee67ba4390450a1a5e45ac52eeeb86fc
 msgid "Cleared screensaver thumbnails (%s freed)."
 msgstr "Очищено ескізи заставок (звільнено %s)."
@@ -572,6 +580,10 @@ msgstr "Коміти: %s → %s"
 # en-hash: 7d61983c34edc2a8cabbea71c4732f62
 msgid "Community"
 msgstr "Спільнота"
+
+# en-hash: 9cedfac6974498d338454e2afbd909b0
+msgid "Community ratings & stats"
+msgstr "Оцінки спільноти та статистика"
 
 # en-hash: fdd273d186bb6db8f5f2c72285324aec
 msgid "Config files only"
@@ -644,6 +656,10 @@ msgstr "Не вдалося отримати релізи для цього ре
 # en-hash: 7ebb1e00943becb4ef83e628f1a9b592
 msgid "Could not locate plugin folder (_meta.lua) in archive."
 msgstr "Не вдалося знайти папку плагіна (_meta.lua) в архіві."
+
+# en-hash: 4cde8e56b42ef01d45d676895e1f08cf
+msgid "Could not remove wallpaper"
+msgstr "Не вдалося видалити шпалери"
 
 # en-hash: c795dfff10a7c952f4c5438951e9ece9
 msgid "Cover"
@@ -2609,6 +2625,10 @@ msgstr "Це видалить усі кешовані файли README, ста�
 msgid "This will delete cached README markdown files and downloaded images (%s)."
 msgstr "Це видалить кешовані файли README та завантажені зображення (%s)."
 
+# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
+msgid "This will delete cached community ratings and download counts (%s)."
+msgstr "Це видалить кешовані оцінки спільноти та лічильники завантажень (%s)."
+
 # en-hash: 440ae88b9bb5677227f33ae07af37e1a
 msgid "This will delete cached screensaver thumbnail previews (%s)."
 msgstr "Це видалить кешовані мініатюри заставок (%s)."
@@ -3337,19 +3357,3 @@ msgstr "⚙ Налаштування"
 msgid "✓ Current"
 msgstr "✓ Поточний"
 
-
-# en-hash: 9cedfac6974498d338454e2afbd909b0
-msgid "Community ratings & stats"
-msgstr "Оцінки спільноти та статистика"
-
-# en-hash: 2f7ed07b616b1d5c87a556d2f66034ec
-msgid "Clear Ratings Cache?"
-msgstr "Очистити кеш оцінок?"
-
-# en-hash: 28d92b65fa8d74b81d03f8fdf4010107
-msgid "This will delete cached community ratings and download counts (%s)."
-msgstr "Це видалить кешовані оцінки спільноти та лічильники завантажень (%s)."
-
-# en-hash: bc65074a011515ebf17e3273a55c8448
-msgid "Cleared ratings cache (%s freed)."
-msgstr "Кеш оцінок очищено (звільнено %s)."
