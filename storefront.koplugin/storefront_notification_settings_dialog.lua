@@ -71,12 +71,14 @@ local function sc(val)
     return (Device.screen and Device.screen.scaleBySize and Device.screen:scaleBySize(val)) or val
 end
 
-local FREQUENCIES = {
-    { key = "hourly", label = _("Every hour") },
-    { key = "daily",  label = _("Every day") },
-    { key = "weekly", label = _("Every week") },
-    { key = "monthly", label = _("Every month") },
-}
+local function getFrequencies()
+    return {
+        { key = "hourly", label = _("Every hour") },
+        { key = "daily",  label = _("Every day") },
+        { key = "weekly", label = _("Every week") },
+        { key = "monthly", label = _("Every month") },
+    }
+end
 
 --- Shows the notification settings sub-dialog.
 ---@param Storefront table Storefront instance
@@ -167,7 +169,7 @@ function StorefrontNotificationSettingsDialog.show(Storefront, on_close_callback
         -- SECTION 1: FREQUENCY
         table.insert(content_vg, create_section_header(_("Frequency")))
 
-        for _, item in ipairs(FREQUENCIES) do
+        for _, item in ipairs(getFrequencies()) do
             local is_selected = (item.key == current_freq)
             local radio_symbol = is_selected and "●" or "○"
 

@@ -189,6 +189,32 @@ do
     local overlay_dbg = _G.ui_tracker.last_shown
     check("Testing section is shown when debug config updated (7 rows)", overlay_dbg and #overlay_dbg.layout == 7)
     _G.G_storefront_debug_notifications = nil
+
+    -- Verify frequency options dynamically translate when language changes
+    local Localization = require("localization_storefront")
+    local orig_lang = Localization.current_language
+    local orig_translations = Localization.translations
+    Localization.current_language = "es"
+    Localization.translations = {
+        ["Notification Settings"] = "Ajustes de notificaciones",
+        ["Frequency"] = "Frecuencia",
+        ["Every hour"] = "Cada hora",
+        ["Every day"] = "Cada día",
+        ["Every week"] = "Cada semana",
+        ["Every month"] = "Cada mes",
+        ["Snooze Options"] = "Opciones de posposición",
+        ["Close"] = "Cerrar",
+    }
+    NotificationSettingsDialog.show(dummy_sf)
+    local overlay_es = _G.ui_tracker.last_shown
+    local first_row_item = overlay_es and overlay_es.layout and overlay_es.layout[1] and overlay_es.layout[1][1]
+    local frame = first_row_item and first_row_item.frame
+    local row_content = frame and frame.args and frame.args[1]
+    local label_widget = row_content and (row_content[3] or (row_content.args and row_content.args[3]))
+    local label_text = label_widget and (label_widget.text or (label_widget.args and label_widget.args.text))
+    check("Frequency options dynamically translate on language change (hourly -> 'Cada hora')", label_text == "Cada hora")
+    Localization.current_language = orig_lang
+    Localization.translations = orig_translations
 end
 
 -- 7. Test Notification UI Dialog (Design B)
