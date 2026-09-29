@@ -33,6 +33,16 @@ local function sc(val)
     return (Screen and Screen.scaleBySize and Screen:scaleBySize(val)) or val
 end
 
+local function getFrequencyLabel(freq)
+    local freq_labels = {
+        hourly = _("Hourly"),
+        daily = _("Daily"),
+        weekly = _("Weekly"),
+        monthly = _("Monthly"),
+    }
+    return freq_labels[freq] or _("Weekly")
+end
+
 local _asset_path_cache = {}
 local function getAssetPath(filename)
     if not filename or filename == "" then return nil end
@@ -409,7 +419,7 @@ function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
 
             -- Category 3: Notifications
             local NotificationMgr = require("storefront_notification_mgr")
-            local notif_status = NotificationMgr.isEnabled() and (NotificationMgr.getFrequency():gsub("^%l", string.upper)) or _("Off")
+            local notif_status = NotificationMgr.isEnabled() and getFrequencyLabel(NotificationMgr.getFrequency()) or _("Off")
             local notif_widget = TextWidget:new{
                 text = notif_status .. " ›",
                 face = Font:getFace("cfont", subtext_font_size),
@@ -640,13 +650,7 @@ function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
             end)
 
             -- Row 2: Frequency & Settings
-            local freq_labels = {
-                hourly = _("Hourly"),
-                daily = _("Daily"),
-                weekly = _("Weekly"),
-                monthly = _("Monthly"),
-            }
-            local current_freq_label = (freq_labels[NotificationMgr.getFrequency()] or _("Weekly")) .. " ›"
+            local current_freq_label = getFrequencyLabel(NotificationMgr.getFrequency()) .. " ›"
             local freq_widget = TextWidget:new{
                 text = current_freq_label,
                 face = Font:getFace("cfont", subtext_font_size),

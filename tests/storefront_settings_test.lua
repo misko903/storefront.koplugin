@@ -65,6 +65,74 @@ do
     end
 end
 
+-- 2b. Test StorefrontSettingsCard localized notification frequency labels
+do
+    local NotificationMgr = require("storefront_notification_mgr")
+    local Localization = require("localization_storefront")
+    local candidate_paths = {
+        "storefront.koplugin/storefront.koplugin",
+        "storefront.koplugin",
+        "..",
+        ".",
+    }
+    for _, cand in ipairs(candidate_paths) do
+        local f = io.open(cand .. "/languages/en.po", "r")
+        if f then
+            f:close()
+            Localization:init(cand)
+            break
+        end
+    end
+    local dummy_sf = {
+        browser_state = { kind = "plugin" },
+        browserRefresh = function() end,
+        saveBrowserState = function() end,
+        getInstallRecordsMap = function() return {} end,
+        getPatchRecordsMap = function() return {} end,
+    }
+
+    NotificationMgr.setEnabled(true)
+    NotificationMgr.setFrequency("daily")
+
+    -- In English
+    Localization.current_language = "en"
+    Localization:loadTranslations()
+    _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
+    StorefrontSettingsCard.show(dummy_sf)
+    local overlay_en = _G.ui_tracker.last_shown
+    local notif_row_en = overlay_en and overlay_en.layout and overlay_en.layout[3] and overlay_en.layout[3][1]
+    local notif_hg_en = notif_row_en and notif_row_en.frame and notif_row_en.frame.args and notif_row_en.frame.args[1]
+    local right_widget_en = notif_hg_en and notif_hg_en[#notif_hg_en]
+    check("Settings card displays 'Daily ›' in English", right_widget_en and right_widget_en.text == "Daily ›")
+
+    -- In Polish
+    Localization.current_language = "pl"
+    Localization:loadTranslations()
+    _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
+    StorefrontSettingsCard.show(dummy_sf)
+    local overlay_pl = _G.ui_tracker.last_shown
+    local notif_row_pl = overlay_pl and overlay_pl.layout and overlay_pl.layout[3] and overlay_pl.layout[3][1]
+    local notif_hg_pl = notif_row_pl and notif_row_pl.frame and notif_row_pl.frame.args and notif_row_pl.frame.args[1]
+    local right_widget_pl = notif_hg_pl and notif_hg_pl[#notif_hg_pl]
+    check("Settings card displays 'Codziennie ›' in Polish", right_widget_pl and right_widget_pl.text == "Codziennie ›")
+
+    -- When disabled in Polish
+    NotificationMgr.setEnabled(false)
+    _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
+    StorefrontSettingsCard.show(dummy_sf)
+    local overlay_pl_off = _G.ui_tracker.last_shown
+    local notif_row_off = overlay_pl_off and overlay_pl_off.layout and overlay_pl_off.layout[3] and overlay_pl_off.layout[3][1]
+    local notif_hg_off = notif_row_off and notif_row_off.frame and notif_row_off.frame.args and notif_row_off.frame.args[1]
+    local right_widget_off = notif_hg_off and notif_hg_off[#notif_hg_off]
+    check("Settings card displays 'Wyłączone ›' when notifications disabled in Polish", right_widget_off and right_widget_off.text == "Wyłączone ›")
+
+    -- Reset
+    NotificationMgr.setEnabled(true)
+    NotificationMgr.setFrequency("weekly")
+    Localization.current_language = "en"
+    Localization:loadTranslations()
+end
+
 -- 3. Test tapping the settings button from StorefrontBrowserDialog
 do
     _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }

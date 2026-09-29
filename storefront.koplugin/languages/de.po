@@ -2519,7 +2519,7 @@ msgstr "Sortierung"
 
 # en-hash: fb61758d0f0fda4ba867c3d5a46c16a7
 msgid "Sources"
-msgstr "Sources"
+msgstr "Quellen"
 
 # en-hash: fa3aff3c185c6dc7754235f397c2099a
 msgid "Stable"
@@ -2811,7 +2811,7 @@ msgstr "Aktualisiert: %s"
 
 # en-hash: 9ac41b6a577daadd588f0fcde0071e8b
 msgid "Updates"
-msgstr "Updates"
+msgstr "Aktualisierungen"
 
 # en-hash: 7a1861cda946de73714affbeb669eba4
 msgid "Updates Ignored"

@@ -1,6 +1,6 @@
 local ok_loc, Localization = pcall(require, "localization_storefront")
 if ok_loc and Localization then
-    Localization:init()
+    Localization:ensureInit()
 end
 local _ = function(key, ...)
     if ok_loc and Localization then
