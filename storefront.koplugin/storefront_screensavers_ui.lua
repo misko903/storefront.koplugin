@@ -408,7 +408,7 @@ function StorefrontScreensavers.fetchThumbnail(item, callback)
 
     -- Use matching extension from URL or category
     local raw_url = tostring(item.thumbnailUrl or ""):lower()
-    local ext = (is_transparent or raw_url:find("%.png")) and ".png" or ".jpg"
+    local ext = (item.ext == "png" or is_transparent or raw_url:find("%.png")) and ".png" or ".jpg"
     local thumb_path = cache_dir .. "/" .. tostring(item.id) .. ext
 
     if lfs and lfs.attributes and lfs.attributes(thumb_path, "mode") == "file" then
@@ -671,14 +671,51 @@ function StorefrontScreensavers.createCoverImageWidget(file_path, target_w, targ
     local crop_x = math.max(0, math.floor((scaled_bb:getWidth() - target_w) / 2))
     local crop_y = math.max(0, math.floor((scaled_bb:getHeight() - target_h) / 2))
 
-    -- Create destination buffer matching source buffer color type
-    local bb_type = (scaled_bb.getType and scaled_bb:getType()) or Blitbuffer.TYPE_BPP24
-    local dest_bb = Blitbuffer.new(target_w, target_h, bb_type)
+    -- Detect whether the source buffer carries an alpha channel.
+    -- TYPE_BB8A=2 (8-bit gray + alpha), TYPE_BBRGB32=5 (RGB + alpha)
+    local src_type = (scaled_bb.getType and scaled_bb:getType()) or 0
+    local has_alpha = (src_type == 2 or src_type == 5)
+
+    -- Always use a plain 8-bit grayscale destination (native e-ink format)
+    local dest_bb = Blitbuffer.new(target_w, target_h, Blitbuffer.TYPE_BB8 or 1)
     pcall(function() dest_bb:fill(Blitbuffer.COLOR_WHITE) end)
 
-    pcall(function()
-        dest_bb:blitFrom(scaled_bb, 0, 0, crop_x, crop_y, target_w, target_h)
-    end)
+    if has_alpha then
+        -- Draw a checkerboard pattern so transparent areas are visually distinct.
+        -- Two grays that are subtle on e-ink: white (0xFF) and light-gray (0xDD).
+        local tile = 6  -- checkerboard tile size in pixels
+        local color_a = Blitbuffer.COLOR_WHITE
+        local color_b = Blitbuffer.COLOR_GRAY_D  -- 0xDD, a soft light gray
+        pcall(function()
+            local y = 0
+            while y < target_h do
+                local row_flip = math.floor(y / tile) % 2
+                local x = 0
+                while x < target_w do
+                    local col_flip = math.floor(x / tile) % 2
+                    local w = math.min(tile - (x % tile), target_w - x)
+                    local h = math.min(tile - (y % tile), target_h - y)
+                    local c = ((row_flip + col_flip) % 2 == 0) and color_a or color_b
+                    dest_bb:paintRect(x, y, w, h, c)
+                    x = x + w
+                end
+                y = y + math.min(tile - (y % tile), target_h - y)
+            end
+        end)
+        -- Alpha-composite the image over the checkerboard
+        pcall(function()
+            if dest_bb.alphablitFrom then
+                dest_bb:alphablitFrom(scaled_bb, 0, 0, crop_x, crop_y, target_w, target_h)
+            else
+                dest_bb:blitFrom(scaled_bb, 0, 0, crop_x, crop_y, target_w, target_h)
+            end
+        end)
+    else
+        -- Fully opaque source — plain flat copy is faster
+        pcall(function()
+            dest_bb:blitFrom(scaled_bb, 0, 0, crop_x, crop_y, target_w, target_h)
+        end)
+    end
 
     if scaled_bb.free then
         pcall(function() scaled_bb:free() end)
@@ -691,6 +728,7 @@ function StorefrontScreensavers.createCoverImageWidget(file_path, target_w, targ
         height = target_h,
     }
 end
+
 
 function StorefrontScreensavers.getThumbnailsCacheStats()
     local cache_dir = DataStorage:getDataDir() .. "/cache/storefront_thumbs"
