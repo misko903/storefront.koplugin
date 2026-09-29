@@ -467,7 +467,13 @@ function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
 
             -- Row 2: Refresh Catalog
             local is_refreshing = Storefront.isRefreshing and Storefront:isRefreshing()
-            local ts = Cache.getLastFetched(current_kind)
+            local ts
+            if current_view == "screensavers" then
+                local ok_ss_ui, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+                ts = (ok_ss_ui and StorefrontScreensavers and StorefrontScreensavers.getLastFetched and StorefrontScreensavers.getLastFetched()) or 0
+            else
+                ts = Cache.getLastFetched(current_kind)
+            end
             local meta_text = is_refreshing and _("Refreshing…") or (ts and ts > 0 and formatDateTime(ts) or _("Never"))
             local meta_widget = TextWidget:new{
                 text = meta_text,

@@ -18,11 +18,23 @@ local CATALOG_URL_CANDIDATES = {
     "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/screensavers.json",
 }
 
+local READERBACKDROP_CATALOG_URL_CANDIDATES = {
+    "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/readerbackdrop.lite.json",
+    "https://ultimatejimmy.github.io/storefront-screensavers/readerbackdrop.lite.json",
+    "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/readerbackdrop.json",
+    "https://ultimatejimmy.github.io/storefront-screensavers/readerbackdrop.json",
+}
+
 local BASE_IMAGE_URL = "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/images"
 
 function StorefrontScreensavers.normalizeItem(item)
     if not item or type(item) ~= "table" then return item end
     if not item.id then return item end
+    local id_str = tostring(item.id)
+    if not item.source or item.source == "" then
+        item.source = id_str:find("^rb%-") and "ReaderBackdrop" or "Storefront"
+    end
+    local is_remote = (item.source == "ReaderBackdrop") or (item.fullUrl and tostring(item.fullUrl):find("^https?://") ~= nil)
     local ext = item.ext
     if not ext or ext == "" then
         if item.fullUrl and tostring(item.fullUrl):lower():find("%.png") then
@@ -38,13 +50,21 @@ function StorefrontScreensavers.normalizeItem(item)
     end
     item.ext = ext
     if not item.fullUrl or item.fullUrl == "" then
-        item.fullUrl = string.format("%s/%s.%s", BASE_IMAGE_URL, tostring(item.id), ext)
+        item.fullUrl = string.format("%s/%s.%s", BASE_IMAGE_URL, id_str, ext)
     end
     if not item.thumbnailUrl or item.thumbnailUrl == "" then
-        item.thumbnailUrl = string.format("%s/thumbnails/%s.%s", BASE_IMAGE_URL, tostring(item.id), ext)
+        if is_remote and item.fullUrl and item.fullUrl ~= "" then
+            item.thumbnailUrl = item.fullUrl
+        else
+            item.thumbnailUrl = string.format("%s/thumbnails/%s.%s", BASE_IMAGE_URL, id_str, ext)
+        end
     end
     if not item.pluginThumbnailUrl or item.pluginThumbnailUrl == "" then
-        item.pluginThumbnailUrl = string.format("%s/thumbnails/plugin/%s.%s", BASE_IMAGE_URL, tostring(item.id), ext)
+        if is_remote and item.thumbnailUrl and item.thumbnailUrl ~= "" then
+            item.pluginThumbnailUrl = item.thumbnailUrl
+        else
+            item.pluginThumbnailUrl = string.format("%s/thumbnails/plugin/%s.%s", BASE_IMAGE_URL, id_str, ext)
+        end
     end
     return item
 end
@@ -136,8 +156,79 @@ function StorefrontScreensavers.clearCachedCatalog()
     local ok_ds, DataStorage = pcall(require, "datastorage")
     if ok_ds and DataStorage and DataStorage.getDataDir then
         local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
+        local rb_file = DataStorage:getDataDir() .. "/cache/storefront_readerbackdrop_catalog.json"
         pcall(os.remove, cat_file)
+        pcall(os.remove, rb_file)
     end
+end
+
+local function loadCatalogFile(file_path, default_source)
+    local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+    if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+    if ok_lfs and lfs and lfs.attributes and lfs.attributes(file_path, "mode") == "file" then
+        local f = io.open(file_path, "r")
+        if f then
+            local content = f:read("*a")
+            f:close()
+            if content and content ~= "" then
+                local ok_j, parsed = pcall(json.decode, content)
+                if ok_j and type(parsed) == "table" and #parsed > 0 then
+                    for _, item in ipairs(parsed) do
+                        if default_source and (not item.source or item.source == "") then
+                            item.source = default_source
+                        end
+                        StorefrontScreensavers.normalizeItem(item)
+                    end
+                    return parsed
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function mergeCatalogs(sf_list, rb_list)
+    local merged = {}
+    local seen_ids = {}
+    if sf_list then
+        for _, item in ipairs(sf_list) do
+            if item.id and not seen_ids[item.id] then
+                seen_ids[item.id] = true
+                if not item.source or item.source == "" then item.source = "Storefront" end
+                table.insert(merged, item)
+            end
+        end
+    end
+    if rb_list then
+        for _, item in ipairs(rb_list) do
+            if item.id and not seen_ids[item.id] then
+                seen_ids[item.id] = true
+                if not item.source or item.source == "" then item.source = "ReaderBackdrop" end
+                table.insert(merged, item)
+            end
+        end
+    end
+    return merged
+end
+
+local function fetchCandidateList(urls_to_try)
+    local ltn12 = require("ltn12")
+    for _, target_url in ipairs(urls_to_try) do
+        local response_body = {}
+        local sink_fn = function()
+            response_body = {}
+            return ltn12.sink.table(response_body)
+        end
+        local ok, code = requestWithRedirects(target_url, sink_fn)
+        if ok and code == 200 then
+            local body_str = table.concat(response_body)
+            local parsed_ok, data = pcall(json.decode, body_str)
+            if parsed_ok and type(data) == "table" and #data > 0 then
+                return data, body_str
+            end
+        end
+    end
+    return nil, nil
 end
 
 function StorefrontScreensavers.getLastFetched()
@@ -167,97 +258,105 @@ function StorefrontScreensavers.getCachedCatalog()
     end
     local ok_ds, DataStorage = pcall(require, "datastorage")
     if ok_ds and DataStorage and DataStorage.getDataDir then
-        local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
-        local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
-        if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
-        if ok_lfs and lfs and lfs.attributes and lfs.attributes(cat_file, "mode") == "file" then
-            local f = io.open(cat_file, "r")
-            if f then
-                local content = f:read("*a")
-                f:close()
-                if content and content ~= "" then
-                    local ok_j, parsed = pcall(json.decode, content)
-                    if ok_j and type(parsed) == "table" then
-                        for _, item in ipairs(parsed) do
-                            StorefrontScreensavers.normalizeItem(item)
-                        end
-                        cached_catalog_mem = parsed
-                        return parsed
-                    end
-                end
-            end
+        local data_dir = DataStorage:getDataDir()
+        local sf_file = data_dir .. "/cache/storefront_screensavers_catalog.json"
+        local rb_file = data_dir .. "/cache/storefront_readerbackdrop_catalog.json"
+        local sf_items = loadCatalogFile(sf_file, "Storefront")
+        local rb_items = loadCatalogFile(rb_file, "ReaderBackdrop")
+        if (sf_items and #sf_items > 0) or (rb_items and #rb_items > 0) then
+            local merged = mergeCatalogs(sf_items, rb_items)
+            cached_catalog_mem = merged
+            return merged
         end
     end
     return nil
 end
 
 function StorefrontScreensavers.fetchCatalog(callback)
-    if StorefrontLogger then StorefrontLogger.info("Storefront: fetching screensavers catalog feed") end
+    if StorefrontLogger then StorefrontLogger.info("Storefront: fetching screensavers catalog feed (Storefront + ReaderBackdrop)") end
+
+    local ok_ds, DataStorage = pcall(require, "datastorage")
+    local data_dir = (ok_ds and DataStorage and DataStorage.getDataDir) and DataStorage:getDataDir() or "/tmp"
+
+    local sf_items = nil
+    local rb_items = nil
+
+    -- 1. Fetch Storefront catalog
     local ok_net, CatalogClient = pcall(require, "storefront_net_catalog")
     if ok_net and CatalogClient and CatalogClient.fetchScreensaverCatalog then
         local data, err = CatalogClient.fetchScreensaverCatalog()
         if data == "not_modified" then
-            local local_cached = StorefrontScreensavers.getCachedCatalog()
-            if local_cached then
-                if callback then callback(true, local_cached) end
-                return
-            end
+            local sf_file = data_dir .. "/cache/storefront_screensavers_catalog.json"
+            sf_items = loadCatalogFile(sf_file, "Storefront")
         elseif data and type(data) == "table" and #data > 0 then
             for _, item in ipairs(data) do
+                item.source = "Storefront"
                 StorefrontScreensavers.normalizeItem(item)
             end
-            cached_catalog_mem = data
+            sf_items = data
             pcall(function()
-                local ok_ds, DataStorage = pcall(require, "datastorage")
-                if ok_ds and DataStorage and DataStorage.getDataDir then
-                    local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
-                    local f = io.open(cat_file, "w")
-                    if f then
-                        f:write(json.encode(data))
-                        f:close()
-                    end
+                local cat_file = data_dir .. "/cache/storefront_screensavers_catalog.json"
+                local f = io.open(cat_file, "w")
+                if f then
+                    f:write(json.encode(data))
+                    f:close()
                 end
             end)
-            if StorefrontLogger then StorefrontLogger.info(string.format("Storefront: screensavers catalog cached (%d items)", #data)) end
-            if callback then callback(true, data) end
-            return
         end
     end
 
-    local ltn12 = require("ltn12")
-    local urls_to_try = CATALOG_URL_CANDIDATES
-
-    for _, target_url in ipairs(urls_to_try) do
-        local response_body = {}
-        local sink_fn = function()
-            response_body = {}
-            return ltn12.sink.table(response_body)
-        end
-
-        local ok, code = requestWithRedirects(target_url, sink_fn)
-        if ok and code == 200 then
-            local body_str = table.concat(response_body)
-            local parsed_ok, data = pcall(json.decode, body_str)
-            if parsed_ok and type(data) == "table" and #data > 0 then
-                for _, item in ipairs(data) do
-                    StorefrontScreensavers.normalizeItem(item)
-                end
-                cached_catalog_mem = data
-                pcall(function()
-                    local ok_ds, DataStorage = pcall(require, "datastorage")
-                    if ok_ds and DataStorage and DataStorage.getDataDir then
-                        local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
-                        local f = io.open(cat_file, "w")
-                        if f then
-                            f:write(body_str)
-                            f:close()
-                        end
-                    end
-                end)
-                if callback then callback(true, data) end
-                return
+    if not sf_items then
+        local data, body_str = fetchCandidateList(CATALOG_URL_CANDIDATES)
+        if data and type(data) == "table" and #data > 0 then
+            for _, item in ipairs(data) do
+                item.source = "Storefront"
+                StorefrontScreensavers.normalizeItem(item)
             end
+            sf_items = data
+            pcall(function()
+                local cat_file = data_dir .. "/cache/storefront_screensavers_catalog.json"
+                local f = io.open(cat_file, "w")
+                if f then
+                    f:write(body_str or json.encode(data))
+                    f:close()
+                end
+            end)
+        else
+            local sf_file = data_dir .. "/cache/storefront_screensavers_catalog.json"
+            sf_items = loadCatalogFile(sf_file, "Storefront")
         end
+    end
+
+    -- 2. Fetch ReaderBackdrop catalog
+    local rb_data, rb_body_str = fetchCandidateList(READERBACKDROP_CATALOG_URL_CANDIDATES)
+    if rb_data and type(rb_data) == "table" and #rb_data > 0 then
+        for _, item in ipairs(rb_data) do
+            item.source = "ReaderBackdrop"
+            StorefrontScreensavers.normalizeItem(item)
+        end
+        rb_items = rb_data
+        pcall(function()
+            local rb_file = data_dir .. "/cache/storefront_readerbackdrop_catalog.json"
+            local f = io.open(rb_file, "w")
+            if f then
+                f:write(rb_body_str or json.encode(rb_data))
+                f:close()
+            end
+        end)
+    else
+        local rb_file = data_dir .. "/cache/storefront_readerbackdrop_catalog.json"
+        rb_items = loadCatalogFile(rb_file, "ReaderBackdrop")
+    end
+
+    if (sf_items and #sf_items > 0) or (rb_items and #rb_items > 0) then
+        local merged = mergeCatalogs(sf_items, rb_items)
+        cached_catalog_mem = merged
+        if StorefrontLogger then
+            StorefrontLogger.info(string.format("Storefront: screensavers catalog merged (%d total: %d Storefront, %d ReaderBackdrop)",
+                #merged, sf_items and #sf_items or 0, rb_items and #rb_items or 0))
+        end
+        if callback then callback(true, merged) end
+        return
     end
 
     local local_cached = StorefrontScreensavers.getCachedCatalog()

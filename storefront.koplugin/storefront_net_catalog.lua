@@ -57,6 +57,10 @@ local FALLBACK_SCREENSAVER_CATALOG_URL = "https://raw.githubusercontent.com/ulti
 local SCREENSAVER_CATALOG_ETAG_KEY = "screensaver_catalog_etag"
 local SCREENSAVER_CATALOG_LAST_FETCHED_KEY = "screensaver_catalog_last_fetched"
 
+-- ReaderBackdrop catalog URLs (raw first for reliability)
+local DEFAULT_RB_CATALOG_URL = "https://raw.githubusercontent.com/ultimatejimmy/storefront-screensavers/main/readerbackdrop.lite.json"
+local FALLBACK_RB_CATALOG_URL = "https://ultimatejimmy.github.io/storefront-screensavers/readerbackdrop.lite.json"
+
 function CatalogClient.getStoredScreensaverEtag()
     local saved = StorefrontSettings:readSetting(SCREENSAVER_CATALOG_ETAG_KEY)
     if type(saved) == "string" and saved ~= "" then
@@ -431,6 +435,52 @@ function CatalogClient.fetchScreensaverCatalogToFile(dest_path)
     return false, last_err
 end
 
+function CatalogClient.fetchReaderBackdropCatalogToFile(dest_path)
+    local urls_to_try = {
+        DEFAULT_RB_CATALOG_URL,
+        FALLBACK_RB_CATALOG_URL,
+    }
+
+    local last_err = "No ReaderBackdrop catalog URLs attempted"
+    for _, target_url in ipairs(urls_to_try) do
+        logger.info("Storefront: fetching ReaderBackdrop catalog to file from", target_url)
+        if StorefrontLogger then
+            StorefrontLogger.info("Storefront: fetching ReaderBackdrop catalog from " .. tostring(target_url))
+        end
+        local current_file = nil
+        local sink_fn = function()
+            if current_file then pcall(function() current_file:close() end) end
+            os.remove(dest_path)
+            local f, err = io.open(dest_path, "wb")
+            if not f then
+                logger.err("Storefront: failed to open dest_path for RB catalog writing", err)
+                return nil
+            end
+            current_file = f
+            return require("socketutil").file_sink(f)
+        end
+
+        local ok, res_code, _ = requestWithRedirects(target_url, sink_fn, nil)
+        if current_file then pcall(function() current_file:close() end); current_file = nil end
+
+        local code = tonumber(res_code) or 0
+        if ok and code == 200 then
+            if StorefrontLogger then StorefrontLogger.info("Storefront: ReaderBackdrop catalog downloaded successfully (HTTP 200)") end
+            return true, "updated"
+        else
+            os.remove(dest_path)
+            local err_str = tonumber(res_code) and ("HTTP " .. tostring(res_code)) or tostring(res_code)
+            logger.warn("Storefront: ReaderBackdrop catalog fetch error from", target_url, err_str)
+            if StorefrontLogger then StorefrontLogger.warn("Storefront: ReaderBackdrop catalog fetch error from " .. tostring(target_url) .. ": " .. tostring(err_str)) end
+            last_err = err_str
+        end
+    end
+
+    return false, last_err
+end
+
+
+
 function CatalogClient.fetchScreensaverCatalog(url_to_fetch)
     local urls_to_try = {
         url_to_fetch or DEFAULT_SCREENSAVER_CATALOG_URL,
@@ -731,17 +781,20 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
     local staging_patches_file = cache_dir .. "/storefront_patches.json.tmp"
     local staging_fonts_file = cache_dir .. "/storefront_fonts.json.tmp"
     local staging_screensavers_file = cache_dir .. "/storefront_screensavers_catalog.json.tmp"
+    local staging_rb_file = cache_dir .. "/storefront_readerbackdrop_catalog.json.tmp"
 
     local final_plugins_file = cache_dir .. "/storefront_plugins.json"
     local final_patches_file = cache_dir .. "/storefront_patches.json"
     local final_fonts_file = cache_dir .. "/storefront_fonts.json"
     local final_screensavers_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
+    local final_rb_file = DataStorage:getDataDir() .. "/cache/storefront_readerbackdrop_catalog.json"
 
     os.remove(staging_raw_catalog)
     os.remove(staging_plugins_file)
     os.remove(staging_patches_file)
     os.remove(staging_fonts_file)
     os.remove(staging_screensavers_file)
+    os.remove(staging_rb_file)
 
     if not (ok_ffi and ffiutil and ffiutil.runInSubProcess) then
         logger.warn("Storefront: ffiutil.runInSubProcess unavailable, falling back to sync catalog fetch")
@@ -784,6 +837,22 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
             end
         end
 
+        -- Sync-fetch ReaderBackdrop catalog
+        pcall(function()
+            local ok_rb, rb_status = CatalogClient.fetchReaderBackdropCatalogToFile(final_rb_file)
+            if ok_rb and rb_status == "updated" then
+                updated = true
+                CatalogClient.setLastFetchedScreensavers(os.time())
+                pcall(function()
+                    local ok_ss_ui, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+                    if ok_ss_ui and StorefrontScreensavers and StorefrontScreensavers.invalidateMemCache then
+                        StorefrontScreensavers.invalidateMemCache()
+                    end
+                end)
+                if StorefrontLogger then StorefrontLogger.info("Storefront: ReaderBackdrop catalog synced (sync fallback)") end
+            end
+        end)
+
         if updated or main_not_mod or ss_not_mod then
             if callback then callback(true, updated and "updated" or "not_modified") end
         else
@@ -798,11 +867,13 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
         local ok, err = xpcall(function()
             local ok_dl, dl_status_or_err = CatalogClient.fetchCatalogToFile(target_url, staging_raw_catalog)
             local ok_ss, ss_status_or_err = CatalogClient.fetchScreensaverCatalogToFile(staging_screensavers_file)
+            local ok_rb, rb_status_or_err = CatalogClient.fetchReaderBackdropCatalogToFile(staging_rb_file)
 
             local main_not_mod = (ok_dl and dl_status_or_err == "not_modified")
             local ss_not_mod = (ok_ss and ss_status_or_err == "not_modified")
 
-            if main_not_mod and ss_not_mod then
+            if main_not_mod and ss_not_mod and ok_rb then
+                -- RB doesn't use ETags, always returns "updated" or error; only need main+ss not_modified
                 if child_write_fd then ffiutil.writeToFD(child_write_fd, "OK_NOT_MODIFIED", true) end
                 return
             end
@@ -860,16 +931,36 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                 end
             end
 
+            -- Validate RB staging file
+            local rb_proc_ok = false
+            if ok_rb and rb_status_or_err == "updated" then
+                local f_rb = io.open(staging_rb_file, "rb")
+                if f_rb then
+                    local rb_content = f_rb:read("*all")
+                    f_rb:close()
+                    local ok_dec_rb, parsed_rb = pcall(json.decode, rb_content)
+                    if ok_dec_rb and type(parsed_rb) == "table" and #parsed_rb > 0 then
+                        rb_proc_ok = true
+                        if StorefrontLogger then
+                            StorefrontLogger.info(string.format("Storefront: ReaderBackdrop catalog validated (%d items)", #parsed_rb))
+                        end
+                    else
+                        os.remove(staging_rb_file)
+                    end
+                end
+            end
+
             local res_main = main_proc_ok and "updated" or (main_not_mod and "not_modified" or ("err:" .. tostring(dl_status_or_err)))
             local res_ss = ss_proc_ok and "updated" or (ss_not_mod and "not_modified" or ("err:" .. tostring(ss_status_or_err)))
+            local res_rb = rb_proc_ok and "updated" or ("err:" .. tostring(rb_status_or_err))
 
             local result_msg
             if main_not_mod and ss_not_mod then
                 result_msg = "OK_NOT_MODIFIED"
-            elseif main_proc_ok or ss_proc_ok or (main_not_mod and ss_proc_ok) or (main_proc_ok and ss_not_mod) then
-                result_msg = string.format("OK:main=%s,ss=%s", res_main, res_ss)
+            elseif main_proc_ok or ss_proc_ok or rb_proc_ok or (main_not_mod and ss_proc_ok) or (main_proc_ok and ss_not_mod) then
+                result_msg = string.format("OK:main=%s,ss=%s,rb=%s", res_main, res_ss, res_rb)
             elseif main_not_mod or ss_not_mod then
-                result_msg = string.format("OK_NOT_MODIFIED:main=%s,ss=%s", res_main, res_ss)
+                result_msg = string.format("OK_NOT_MODIFIED:main=%s,ss=%s,rb=%s", res_main, res_ss, res_rb)
             else
                 result_msg = "ERR_DOWNLOAD: " .. tostring(dl_status_or_err)
             end
@@ -962,11 +1053,12 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
             local ok_swap_pt = safeReplace(staging_patches_file, final_patches_file)
             local ok_swap_f = safeReplace(staging_fonts_file, final_fonts_file)
             local ok_swap_ss = safeReplace(staging_screensavers_file, final_screensavers_file)
+            local ok_swap_rb = safeReplace(staging_rb_file, final_rb_file)
 
             local is_ok_not_modified = (child_msg == "OK_NOT_MODIFIED" or child_msg:find("^OK_NOT_MODIFIED") ~= nil)
             local is_ok = (child_msg == "OK" or child_msg:find("^OK") ~= nil)
 
-            if is_ok_not_modified and not (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss) then
+            if is_ok_not_modified and not (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss or ok_swap_rb) then
                 CatalogClient.setLastFetchedScreensavers(os.time())
                 logger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)")
                 if StorefrontLogger then
@@ -982,7 +1074,7 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     StorefrontLogger.info(string.format("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified, %d screensavers cached)", s_count))
                 end
                 if callback then callback(true, "not_modified") end
-            elseif is_ok and (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss or is_ok_not_modified) then
+            elseif is_ok and (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss or ok_swap_rb or is_ok_not_modified) then
                 if ok_swap_p or ok_swap_pt or ok_swap_f then
                     Cache.invalidate()
                     if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog cache updated and swapped into place") end
@@ -990,7 +1082,7 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)") end
                 end
 
-                if ok_swap_ss then
+                if ok_swap_ss or ok_swap_rb then
                     CatalogClient.setLastFetchedScreensavers(os.time())
                     local s_count = 0
                     pcall(function()
@@ -1018,6 +1110,13 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     if StorefrontLogger then StorefrontLogger.warn("Storefront: screensavers catalog update failed: " .. tostring(ss_err_part)) end
                 end
 
+                if ok_swap_rb then
+                    if StorefrontLogger then StorefrontLogger.info("Storefront: ReaderBackdrop catalog swapped into final location") end
+                elseif child_msg:find("rb=err") then
+                    local rb_err_part = child_msg:match("rb=err:([^,;]+)") or "unknown"
+                    if StorefrontLogger then StorefrontLogger.warn("Storefront: ReaderBackdrop catalog update failed: " .. tostring(rb_err_part)) end
+                end
+
                 logger.info("Storefront: background catalog update finished and cache swap complete")
                 if StorefrontLogger then StorefrontLogger.info("Storefront: background catalog update finished and cache swap complete") end
                 if callback then callback(true, "updated") end
@@ -1027,6 +1126,7 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                 os.remove(staging_fonts_file)
                 os.remove(staging_raw_catalog)
                 os.remove(staging_screensavers_file)
+                os.remove(staging_rb_file)
 
                 local err_msg = "Catalog async fetch failed (msg: " .. tostring(child_msg) .. ")"
                 logger.warn("Storefront " .. err_msg .. ", preserving existing catalog cache")

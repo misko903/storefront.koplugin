@@ -6173,6 +6173,10 @@ function Storefront:ensureBrowserState()
             show_filter_bar_patches = false,
             show_filter_bar_fonts = false,
             show_filter_bar_installed = true,
+            screensaver_sources = {
+                storefront = true,
+                readerbackdrop = true,
+            },
         }
         self:saveBrowserState()
         return
@@ -6208,6 +6212,12 @@ function Storefront:ensureBrowserState()
     end
     if type(self.browser_state.show_filter_bar_installed) ~= "boolean" then
         self.browser_state.show_filter_bar_installed = true
+    end
+    if type(self.browser_state.screensaver_sources) ~= "table" then
+        self.browser_state.screensaver_sources = {
+            storefront = true,
+            readerbackdrop = true,
+        }
     end
 end
 
@@ -7620,12 +7630,28 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
     local StorefrontScreensavers = require("storefront_screensavers_ui")
     local ok_ratings, StorefrontRatings = pcall(require, "storefront_ratings")
 
-    -- Fetch catalog (cached after first call)
+    -- Fetch catalog (cached after first call).
+    -- Important: if the ReaderBackdrop cache file doesn't exist yet we must
+    -- call fetchCatalog even when the Storefront catalog is already loaded —
+    -- otherwise RB wallpapers are silently omitted.
     if not self.screensavers_cache then
+        local rb_file_exists = false
+        pcall(function()
+            local ok_ds, DataStorage = pcall(require, "datastorage")
+            if ok_ds and DataStorage and DataStorage.getDataDir then
+                local rb_path = DataStorage:getDataDir() .. "/cache/storefront_readerbackdrop_catalog.json"
+                local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+                if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+                if ok_lfs and lfs and lfs.attributes and lfs.attributes(rb_path, "mode") == "file" then
+                    rb_file_exists = true
+                end
+            end
+        end)
         local local_mem = StorefrontScreensavers.getCachedCatalog and StorefrontScreensavers.getCachedCatalog()
-        if local_mem and #local_mem > 0 then
+        if local_mem and #local_mem > 0 and rb_file_exists then
             self.screensavers_cache = local_mem
         else
+            -- Either nothing cached yet, or the RB file is missing — fetch both feeds
             pcall(function()
                 StorefrontScreensavers.fetchCatalog(function(ok, catalog)
                     self.screensavers_cache = catalog
@@ -7690,8 +7716,10 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
         table.sort(cat_keys)
         cats_key = table.concat(cat_keys, ",")
     end
-    local ss_cache_key = string.format("%s|%s|%s|%s|%s|%d",
-        tostring(ss_cat), cats_key, tostring(ss_sort),
+    local active_sources = self.browser_state.screensaver_sources or { storefront = true, readerbackdrop = true }
+    local src_key_str = string.format("sf:%s,rb:%s", tostring(active_sources.storefront ~= false), tostring(active_sources.readerbackdrop ~= false))
+    local ss_cache_key = string.format("%s|%s|%s|%s|%s|%s|%d",
+        src_key_str, tostring(ss_cat), cats_key, tostring(ss_sort),
         tostring(raw_search), tostring(raw_owner), #catalog)
 
     local filtered
@@ -7702,6 +7730,19 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
         for cat_idx, entry in ipairs(catalog) do
             entry._catalog_index = entry._catalog_index or cat_idx
             local pass = true
+
+            -- 0. Source filter
+            local s = (entry.source or "Storefront"):lower()
+            local is_rb = s:find("reader") ~= nil
+            if is_rb then
+                if active_sources.readerbackdrop == false then
+                    pass = false
+                end
+            else
+                if active_sources.storefront == false then
+                    pass = false
+                end
+            end
             -- 1. Category filter
             if type(ss_cats) == "table" and next(ss_cats) and not ss_cats["all"] then
                 local mapped_cats = StorefrontUtils.getMappedScreensaverCategories(entry.category)
@@ -8009,6 +8050,9 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
             or tostring(dl_count)
 
         local display_cat = table.concat(StorefrontUtils.getMappedScreensaverCategories(entry.category), ", ")
+        if entry.source == "ReaderBackdrop" then
+            display_cat = display_cat .. " · RB"
+        end
         local meta_items = {
             TextWidget:new{
                 text      = display_cat,
