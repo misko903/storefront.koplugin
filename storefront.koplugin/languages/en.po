@@ -1535,6 +1535,9 @@ msgstr "README files & images"
 msgid "Rate Wallpaper"
 msgstr "Rate Wallpaper"
 
+msgid "ReaderBackdrop (Community)"
+msgstr "ReaderBackdrop (Community)"
+
 msgid "Reading Passage Specimen"
 msgstr "Reading Passage Specimen"
 
@@ -1886,6 +1889,9 @@ msgstr "Sort: Z-A"
 msgid "Sorting"
 msgstr "Sorting"
 
+msgid "Sources"
+msgstr "Sources"
+
 msgid "Stable"
 msgstr "Stable"
 
@@ -1900,6 +1906,9 @@ msgstr "Status: Up to date"
 
 msgid "Status: Update available"
 msgstr "Status: Update available"
+
+msgid "Storefront (Curated)"
+msgstr "Storefront (Curated)"
 
 msgid "Storefront cache refreshed."
 msgstr "Storefront cache refreshed."

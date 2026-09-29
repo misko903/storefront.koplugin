@@ -153,6 +153,13 @@ local function runTests()
     local ok_bp_suite, bp_err = pcall(dofile, script_dir .. "storefront_blueprint_test.lua")
     assertTest(ok_bp_suite, "Blueprint Test Suite Execution", bp_err)
 
+    -- ----------------------------------------------------
+    -- TEST 7: Dual Source Screensaver Suite Run
+    -- ----------------------------------------------------
+    print("\n--- TEST 7: Dual Source Screensaver Suite ---")
+    local ok_ds_suite, ds_err = pcall(dofile, script_dir .. "storefront_dual_source_test.lua")
+    assertTest(ok_ds_suite, "Dual Source Screensaver Suite Execution", ds_err)
+
     print("\n==================================================")
     print(string.format("  SUMMARY: %d Passed, %d Failed", passed, failed))
     print("==================================================")

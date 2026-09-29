@@ -2045,6 +2045,10 @@ msgstr "File & gambar README"
 msgid "Rate Wallpaper"
 msgstr "Nilai Wallpaper"
 
+# en-hash: 69c5012837c93f492f74b4433044e009
+msgid "ReaderBackdrop (Community)"
+msgstr "ReaderBackdrop (Komunitas)"
+
 # en-hash: 172bdcbf3c1298405f3292de568e54f0
 msgid "Reading Passage Specimen"
 msgstr "Spesimen Bacaan"
@@ -2513,6 +2517,10 @@ msgstr "Urut: Z-A"
 msgid "Sorting"
 msgstr "Pengurutan"
 
+# en-hash: fb61758d0f0fda4ba867c3d5a46c16a7
+msgid "Sources"
+msgstr "Sumber"
+
 # en-hash: fa3aff3c185c6dc7754235f397c2099a
 msgid "Stable"
 msgstr "Stabil"
@@ -2532,6 +2540,10 @@ msgstr "Status: Terbaru"
 # en-hash: 70460461d97894427b6bbdb4a7ec6c69
 msgid "Status: Update available"
 msgstr "Status: Pembaruan tersedia"
+
+# en-hash: 696b31d8a8d2dd5377c9c3951af4b93d
+msgid "Storefront (Curated)"
+msgstr "Storefront (Kurasi)"
 
 # en-hash: 7ade5d484a71e39d2c37c5eb72d01b80
 msgid "Storefront cache refreshed."
