@@ -8056,7 +8056,7 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
                 text      = cat_text,
                 face      = meta_face,
                 fgcolor   = Blitbuffer.Color8(110),
-                max_width = math.floor(inner_w * (is_rb and 0.38 or 0.48)),
+                max_width = math.floor(inner_w * 0.38),
             },
         }
 
@@ -8069,6 +8069,15 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
                 face    = meta_face,
                 bold    = true,
                 fgcolor = Blitbuffer.Color8(80),
+            })
+        else
+            table.insert(meta_items, HorizontalSpan:new{ width = sc(2) })
+            table.insert(meta_items, TextWidget:new{ text = "·", face = meta_face, fgcolor = Blitbuffer.Color8(140) })
+            table.insert(meta_items, HorizontalSpan:new{ width = sc(2) })
+            table.insert(meta_items, ImageWidget:new{
+                file = getAssetPath("zap-filled.svg"),
+                width = sc(11), height = sc(11),
+                scale_factor = 0, is_icon = true, alpha = true,
             })
         end
 
