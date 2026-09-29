@@ -395,23 +395,26 @@ function StorefrontScreensavers.fetchCatalog(callback)
     if callback then callback(false, fallback) end
 end
 
-function StorefrontScreensavers.fetchThumbnail(item, callback)
+function StorefrontScreensavers.getThumbnailPath(item)
     local cache_dir = DataStorage:getDataDir() .. "/cache/storefront_thumbs"
-    local lfs = require("libs/libkoreader-lfs")
-    if lfs and lfs.attributes and not lfs.attributes(cache_dir) then
-        lfs.mkdir(cache_dir)
-    end
-
-    -- Safely check if item is in Transparent category
     local cat_str = type(item.category) == "table" and table.concat(item.category, " ") or tostring(item.category or "")
     local is_transparent = cat_str:lower():find("transparent", 1, true) ~= nil
-
-    -- Use matching extension from URL or category
     local raw_url = tostring(item.thumbnailUrl or ""):lower()
     local ext = (item.ext == "png" or is_transparent or raw_url:find("%.png")) and ".png" or ".jpg"
-    local thumb_path = cache_dir .. "/" .. tostring(item.id) .. ext
+    return cache_dir .. "/" .. tostring(item.id) .. ext, is_transparent
+end
 
-    if lfs and lfs.attributes and lfs.attributes(thumb_path, "mode") == "file" then
+function StorefrontScreensavers.fetchThumbnail(item, callback)
+    local cache_dir = DataStorage:getDataDir() .. "/cache/storefront_thumbs"
+    local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+    if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+    if ok_lfs and lfs and lfs.attributes and not lfs.attributes(cache_dir) then
+        pcall(lfs.mkdir, cache_dir)
+    end
+
+    local thumb_path, is_transparent = StorefrontScreensavers.getThumbnailPath(item)
+
+    if ok_lfs and lfs and lfs.attributes and lfs.attributes(thumb_path, "mode") == "file" then
         if callback then callback(thumb_path) end
         return thumb_path
     end
@@ -449,6 +452,73 @@ function StorefrontScreensavers.fetchThumbnail(item, callback)
 
     item._thumb_failed = true
     return nil
+end
+
+function StorefrontScreensavers.fetchThumbnailAsync(item)
+    local cache_dir = DataStorage:getDataDir() .. "/cache/storefront_thumbs"
+    local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
+    if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
+    if ok_lfs and lfs and lfs.attributes and not lfs.attributes(cache_dir) then
+        pcall(lfs.mkdir, cache_dir)
+    end
+
+    local thumb_path, is_transparent = StorefrontScreensavers.getThumbnailPath(item)
+
+    if ok_lfs and lfs and lfs.attributes and lfs.attributes(thumb_path, "mode") == "file" then
+        return nil, nil, thumb_path
+    end
+
+    local ok_ffi, ffiutil = pcall(require, "ffi/util")
+    if not ok_ffi then ok_ffi, ffiutil = pcall(require, "ffiutil") end
+    local can_fork = ok_ffi and ffiutil and ffiutil.runInSubProcess and ffiutil.isSubProcessDone
+
+    local fetch_url = (is_transparent and item.pluginThumbnailUrl) or item.thumbnailUrl
+    if not fetch_url or item._thumb_failed then return nil, nil, nil end
+
+    if not can_fork then
+        local res = StorefrontScreensavers.fetchThumbnail(item)
+        return nil, nil, res
+    end
+
+    local pid, parent_read_fd = ffiutil.runInSubProcess(function(pid, child_write_fd)
+        local ok, path_or_err = pcall(function()
+            local ltn12 = require("ltn12")
+            local img_data = {}
+            local sink_fn = function()
+                img_data = {}
+                return ltn12.sink.table(img_data)
+            end
+            local ok_req, code = requestWithRedirects(fetch_url, sink_fn)
+            if (not ok_req or code ~= 200) and is_transparent and item.pluginThumbnailUrl and item.thumbnailUrl and item.thumbnailUrl ~= fetch_url then
+                ok_req, code = requestWithRedirects(item.thumbnailUrl, sink_fn)
+            end
+            if ok_req and code == 200 then
+                local tmp_path = thumb_path .. ".tmp"
+                local file = io.open(tmp_path, "wb")
+                if file then
+                    file:write(table.concat(img_data))
+                    file:close()
+                    os.remove(thumb_path)
+                    local ok_ren = os.rename(tmp_path, thumb_path)
+                    if ok_ren then
+                        return thumb_path
+                    end
+                end
+            end
+            return nil
+        end)
+        local msg = (ok and path_or_err) and ("OK:" .. tostring(path_or_err)) or "ERR"
+        if child_write_fd then
+            ffiutil.writeToFD(child_write_fd, msg, true)
+        end
+    end, true)
+
+    if not pid then
+        local res = StorefrontScreensavers.fetchThumbnail(item)
+        return nil, nil, res
+    end
+
+    return pid, parent_read_fd, nil
 end
 
 StorefrontScreensavers.requestWithRedirects = requestWithRedirects

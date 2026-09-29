@@ -8049,18 +8049,28 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
             and string.format("%.1fk", dl_count / 1000):gsub("%.0k", "k")
             or tostring(dl_count)
 
-        local display_cat = table.concat(StorefrontUtils.getMappedScreensaverCategories(entry.category), ", ")
-        if entry.source == "ReaderBackdrop" then
-            display_cat = display_cat .. " · RB"
-        end
+        local cat_text = table.concat(StorefrontUtils.getMappedScreensaverCategories(entry.category), ", ")
+        local is_rb = (entry.source == "ReaderBackdrop")
         local meta_items = {
             TextWidget:new{
-                text      = display_cat,
+                text      = cat_text,
                 face      = meta_face,
                 fgcolor   = Blitbuffer.Color8(110),
-                max_width = math.floor(inner_w * 0.40),
+                max_width = math.floor(inner_w * (is_rb and 0.38 or 0.48)),
             },
         }
+
+        if is_rb then
+            table.insert(meta_items, HorizontalSpan:new{ width = sc(2) })
+            table.insert(meta_items, TextWidget:new{ text = "·", face = meta_face, fgcolor = Blitbuffer.Color8(140) })
+            table.insert(meta_items, HorizontalSpan:new{ width = sc(2) })
+            table.insert(meta_items, TextWidget:new{
+                text    = "RB",
+                face    = meta_face,
+                bold    = true,
+                fgcolor = Blitbuffer.Color8(80),
+            })
+        end
 
         if has_rating then
             local icon_file = (user_vote == "down") and getAssetPath("thumbs-down-filled.svg")
@@ -8219,57 +8229,130 @@ function Storefront:buildScreensaverEntries(available_list_height, available_lis
 
     if #missing_cards > 0 then
         local UIManager = require("ui/uimanager")
-        local function processQueue(idx)
-            if self_ref._ss_thumb_task_id ~= task_id then return end
-            if not self_ref.browser_menu or (self_ref.browser_state and self_ref.browser_state.tab ~= "Screensavers") then return end
-            if idx > #missing_cards then return end
+        local ok_ffi, ffiutil = pcall(require, "ffi/util")
+        if not ok_ffi then ok_ffi, ffiutil = pcall(require, "ffiutil") end
 
-            local card = missing_cards[idx]
-            local entry = card._entry
-            local c_inner_w = card._inner_w
-            local c_img_h = card._img_h
+        local queue_idx = 1
+        local current_worker = nil
 
-            -- Download thumbnail on next tick
-            UIManager:nextTick(function()
-                if self_ref._ss_thumb_task_id ~= task_id then return end
-                if not self_ref.browser_menu or (self_ref.browser_state and self_ref.browser_state.tab ~= "Screensavers") then return end
-
-                local thumb_path = nil
-                local ok_fetch, res = pcall(function()
-                    return StorefrontScreensavers.fetchThumbnail(entry)
+        local function cleanupWorker(worker)
+            if not worker then return end
+            if worker.pid and ok_ffi and ffiutil and ffiutil.terminateSubProcess then
+                pcall(ffiutil.terminateSubProcess, worker.pid)
+            end
+            if worker.fd and ok_ffi and ffiutil then
+                pcall(function()
+                    local read_func = ffiutil.readAllFromFD or ffiutil.readFromFD
+                    if read_func then read_func(worker.fd) end
                 end)
-                if ok_fetch and res then
-                    thumb_path = res
-                end
-
-                if self_ref._ss_thumb_task_id ~= task_id then return end
-                if not self_ref.browser_menu or (self_ref.browser_state and self_ref.browser_state.tab ~= "Screensavers") then return end
-
-                if thumb_path and card and card._img_widget then
-                    local ok_cov, res_cov = pcall(function()
-                        return StorefrontScreensavers.createCoverImageWidget(thumb_path, c_inner_w, c_img_h)
-                    end)
-                    if ok_cov and res_cov then
-                        card._img_widget[1] = res_cov
-                        if self_ref.browser_menu then
-                            UIManager:setDirty(self_ref.browser_menu, "ui")
-                        end
-                    else
-                        pcall(os.remove, thumb_path)
-                    end
-                end
-
-                -- Proceed sequentially to the next card in queue
-                UIManager:nextTick(function()
-                    processQueue(idx + 1)
-                end)
-            end)
+            end
         end
 
-        -- Start queue
-        UIManager:nextTick(function()
-            processQueue(1)
-        end)
+        local function applyThumbnail(card, path, inner_w, img_h)
+            if not (card and card._img_widget and path) then return end
+            local ok_cov, res_cov = pcall(StorefrontScreensavers.createCoverImageWidget, path, inner_w, img_h)
+            if ok_cov and res_cov then
+                card._img_widget[1] = res_cov
+                if self_ref.browser_menu then
+                    UIManager:setDirty(self_ref.browser_menu, "ui")
+                end
+            else
+                pcall(os.remove, path)
+            end
+        end
+
+        local pollQueue
+        pollQueue = function()
+            -- Abort if page changed or user navigated away
+            if self_ref._ss_thumb_task_id ~= task_id or not self_ref.browser_menu or (self_ref.browser_state and self_ref.browser_state.tab ~= "Screensavers") then
+                if current_worker then
+                    cleanupWorker(current_worker)
+                    current_worker = nil
+                end
+                return
+            end
+
+            -- 1. Check if the active worker has finished
+            if current_worker then
+                local pid = current_worker.pid
+                local done = false
+                if ok_ffi and ffiutil and ffiutil.isSubProcessDone then
+                    done = ffiutil.isSubProcessDone(pid)
+                else
+                    done = true
+                end
+
+                if done then
+                    local read_func = ok_ffi and ffiutil and (ffiutil.readAllFromFD or ffiutil.readFromFD)
+                    local msg = nil
+                    if read_func and current_worker.fd then
+                        pcall(function() msg = read_func(current_worker.fd) end)
+                    end
+                    local thumb_path = current_worker.thumb_path
+                    if (msg and msg:find("^OK")) or (thumb_path and ok_lfs and lfs and lfs.attributes and lfs.attributes(thumb_path, "mode") == "file") then
+                        applyThumbnail(current_worker.card, thumb_path, current_worker.inner_w, current_worker.img_h)
+                    else
+                        if current_worker.entry then
+                            current_worker.entry._thumb_failed = true
+                        end
+                    end
+                    current_worker = nil
+                else
+                    -- Still in flight: poll again in 150ms without blocking UI
+                    UIManager:scheduleIn(0.15, pollQueue)
+                    return
+                end
+            end
+
+            -- 2. Dispatch next card in queue (1 worker at a time for low memory / Kindle safety)
+            while queue_idx <= #missing_cards and not current_worker do
+                local card = missing_cards[queue_idx]
+                queue_idx = queue_idx + 1
+
+                local entry = card._entry
+                local c_inner_w = card._inner_w
+                local c_img_h = card._img_h
+                local t_path, _ = StorefrontScreensavers.getThumbnailPath and StorefrontScreensavers.getThumbnailPath(entry)
+
+                if StorefrontScreensavers.fetchThumbnailAsync then
+                    local pid, fd, direct_path = StorefrontScreensavers.fetchThumbnailAsync(entry)
+                    if direct_path then
+                        applyThumbnail(card, direct_path, c_inner_w, c_img_h)
+                    elseif pid and fd then
+                        current_worker = {
+                            pid = pid,
+                            fd = fd,
+                            card = card,
+                            entry = entry,
+                            inner_w = c_inner_w,
+                            img_h = c_img_h,
+                            thumb_path = t_path,
+                        }
+                        -- Poll for completion after 150ms
+                        UIManager:scheduleIn(0.15, pollQueue)
+                        return
+                    else
+                        local res = StorefrontScreensavers.fetchThumbnail(entry)
+                        if res then
+                            applyThumbnail(card, res, c_inner_w, c_img_h)
+                        end
+                    end
+                else
+                    local res = StorefrontScreensavers.fetchThumbnail(entry)
+                    if res then
+                        applyThumbnail(card, res, c_inner_w, c_img_h)
+                    end
+                end
+            end
+
+            -- 3. If there are still items or active worker, keep polling
+            if current_worker or queue_idx <= #missing_cards then
+                UIManager:scheduleIn(0.15, pollQueue)
+            end
+        end
+
+        -- Start the non-blocking loop
+        UIManager:nextTick(pollQueue)
     end
 
     return {
