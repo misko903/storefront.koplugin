@@ -806,6 +806,10 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
 
         if main_not_mod and ss_not_mod then
             CatalogClient.setLastFetchedScreensavers(os.time())
+            local ok_c, Cache = pcall(require, "storefront_cache")
+            if ok_c and Cache and Cache.touchLastFetched then
+                Cache.touchLastFetched(os.time())
+            end
             logger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)")
             if StorefrontLogger then StorefrontLogger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)") end
             if callback then callback(true, "not_modified") end
@@ -1060,6 +1064,10 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
 
             if is_ok_not_modified and not (ok_swap_p or ok_swap_pt or ok_swap_f or ok_swap_ss or ok_swap_rb) then
                 CatalogClient.setLastFetchedScreensavers(os.time())
+                local ok_c, Cache = pcall(require, "storefront_cache")
+                if ok_c and Cache and Cache.touchLastFetched then
+                    Cache.touchLastFetched(os.time())
+                end
                 logger.info("Storefront: catalog unchanged (HTTP 304 Not Modified)")
                 if StorefrontLogger then
                     StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)")
@@ -1079,6 +1087,10 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     Cache.invalidate()
                     if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog cache updated and swapped into place") end
                 elseif child_msg:find("main=not_modified") or is_ok_not_modified then
+                    local ok_c, Cache = pcall(require, "storefront_cache")
+                    if ok_c and Cache and Cache.touchLastFetched then
+                        Cache.touchLastFetched(os.time())
+                    end
                     if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)") end
                 end
 
@@ -1228,6 +1240,10 @@ function CatalogClient.fetchAndUpdateCache(url_to_fetch)
 
     if main_not_mod and ss_not_mod then
         CatalogClient.setLastFetchedScreensavers(os.time())
+        local ok_c, Cache = pcall(require, "storefront_cache")
+        if ok_c and Cache and Cache.touchLastFetched then
+            Cache.touchLastFetched(os.time())
+        end
         if StorefrontLogger then
             StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)")
             StorefrontLogger.info("Storefront: screensavers catalog unchanged (HTTP 304 Not Modified)")
@@ -1247,6 +1263,10 @@ function CatalogClient.fetchAndUpdateCache(url_to_fetch)
             if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog cache updated and swapped into place") end
         end
     elseif main_not_mod then
+        local ok_c, Cache = pcall(require, "storefront_cache")
+        if ok_c and Cache and Cache.touchLastFetched then
+            Cache.touchLastFetched(os.time())
+        end
         if StorefrontLogger then StorefrontLogger.info("Storefront: main catalog unchanged (HTTP 304 Not Modified)") end
     end
 

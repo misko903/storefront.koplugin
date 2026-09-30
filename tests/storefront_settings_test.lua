@@ -100,7 +100,7 @@ do
     _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
     StorefrontSettingsCard.show(dummy_sf)
     local overlay_en = _G.ui_tracker.last_shown
-    local notif_row_en = overlay_en and overlay_en.layout and overlay_en.layout[3] and overlay_en.layout[3][1]
+    local notif_row_en = overlay_en and overlay_en.layout and overlay_en.layout[4] and overlay_en.layout[4][1]
     local notif_hg_en = notif_row_en and notif_row_en.frame and notif_row_en.frame.args and notif_row_en.frame.args[1]
     local right_widget_en = notif_hg_en and notif_hg_en[#notif_hg_en]
     check("Settings card displays 'Daily ›' in English", right_widget_en and right_widget_en.text == "Daily ›")
@@ -111,7 +111,7 @@ do
     _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
     StorefrontSettingsCard.show(dummy_sf)
     local overlay_pl = _G.ui_tracker.last_shown
-    local notif_row_pl = overlay_pl and overlay_pl.layout and overlay_pl.layout[3] and overlay_pl.layout[3][1]
+    local notif_row_pl = overlay_pl and overlay_pl.layout and overlay_pl.layout[4] and overlay_pl.layout[4][1]
     local notif_hg_pl = notif_row_pl and notif_row_pl.frame and notif_row_pl.frame.args and notif_row_pl.frame.args[1]
     local right_widget_pl = notif_hg_pl and notif_hg_pl[#notif_hg_pl]
     check("Settings card displays 'Codziennie ›' in Polish", right_widget_pl and right_widget_pl.text == "Codziennie ›")
@@ -121,7 +121,7 @@ do
     _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
     StorefrontSettingsCard.show(dummy_sf)
     local overlay_pl_off = _G.ui_tracker.last_shown
-    local notif_row_off = overlay_pl_off and overlay_pl_off.layout and overlay_pl_off.layout[3] and overlay_pl_off.layout[3][1]
+    local notif_row_off = overlay_pl_off and overlay_pl_off.layout and overlay_pl_off.layout[4] and overlay_pl_off.layout[4][1]
     local notif_hg_off = notif_row_off and notif_row_off.frame and notif_row_off.frame.args and notif_row_off.frame.args[1]
     local right_widget_off = notif_hg_off and notif_hg_off[#notif_hg_off]
     check("Settings card displays 'Wyłączone ›' when notifications disabled in Polish", right_widget_off and right_widget_off.text == "Wyłączone ›")
@@ -458,6 +458,83 @@ do
     Cache.getRepoByName = old_getRepoByName
     InstallStore.setPreReleaseAllowed("test_prerel.koplugin", false)
     InstallStore.remove("test_prerel.koplugin")
+end
+
+-- 9. Test Refresh Catalog at top level of settings card & screensaver last fetched handling
+do
+    local CatalogClient = require("storefront_net_catalog")
+    local StorefrontScreensavers = require("storefront_screensavers_ui")
+    local Cache = require("storefront_cache")
+
+    -- 9a. Verify Cache.setLastFetched and Cache.touchLastFetched
+    local test_ts = 1700000000
+    Cache.touchLastFetched(test_ts)
+    check("Cache.touchLastFetched sets plugin fetched_at", Cache.getLastFetched("plugin") == test_ts)
+    check("Cache.touchLastFetched sets patch fetched_at", Cache.getLastFetched("patch") == test_ts)
+    check("Cache.touchLastFetched sets font fetched_at", Cache.getLastFetched("font") == test_ts)
+
+    -- 9b. Verify StorefrontScreensavers.getLastFetched with setting and file fallbacks
+    CatalogClient.setLastFetchedScreensavers(test_ts)
+    check("StorefrontScreensavers.getLastFetched returns saved timestamp", StorefrontScreensavers.getLastFetched() == test_ts)
+
+    -- Test readerbackdrop file modification fallback when setting is 0
+    CatalogClient.setLastFetchedScreensavers(0)
+    local DataStorage = require("datastorage")
+    local data_dir = DataStorage:getDataDir()
+    pcall(lfs.mkdir, data_dir .. "/cache")
+    local rb_file = data_dir .. "/cache/storefront_readerbackdrop_catalog.json"
+    local f = io.open(rb_file, "w")
+    if f then
+        f:write('[]')
+        f:close()
+    end
+    local rb_ts = StorefrontScreensavers.getLastFetched()
+    check("StorefrontScreensavers.getLastFetched falls back to ReaderBackdrop file timestamp", rb_ts > 0)
+    pcall(os.remove, rb_file)
+
+    -- 9c. Verify StorefrontSettingsCard renders Refresh Catalog as Row 1 at root level
+    _G.ui_tracker = { shown = {}, last_shown = nil, closed = {} }
+    local refresh_called = false
+    local dummy_sf_ss = {
+        browser_state = { kind = "screensaver", tab = "Screensavers" },
+        browserRefresh = function() end,
+        saveBrowserState = function() end,
+        getInstallRecordsMap = function() return {} end,
+        getPatchRecordsMap = function() return {} end,
+        refreshCache = function(self, kind, cb)
+            refresh_called = true
+            if cb then cb(true) end
+        end,
+    }
+
+    CatalogClient.setLastFetchedScreensavers(1700000000)
+    StorefrontSettingsCard.show(dummy_sf_ss)
+    local overlay = _G.ui_tracker.last_shown
+    check("Settings card displays overlay for screensaver tab", overlay ~= nil)
+
+    -- Row 1 is Refresh Catalog
+    local row1 = overlay and overlay.layout and overlay.layout[1] and overlay.layout[1][1]
+    check("Settings card root Row 1 exists", row1 ~= nil)
+    local row1_hg = row1 and row1.frame and row1.frame.args and row1.frame.args[1]
+    local row1_label_text = nil
+    local row1_val = nil
+    if row1_hg then
+        for _, elem in ipairs(row1_hg) do
+            if elem and elem.type == "TextBoxWidget" and elem.args then
+                row1_label_text = elem.args.text
+            elseif elem and elem.text then
+                row1_val = elem
+            end
+        end
+    end
+    check("Settings card root Row 1 is 'Refresh catalog'", row1_label_text == "Refresh catalog")
+    check("Settings card root Row 1 displays timestamp (not 'Never')", row1_val and row1_val.text ~= "Never" and row1_val.text:find("1700000000") == nil)
+
+    -- Row 1 callback triggers refreshCache
+    if row1 and row1.callback then
+        row1.callback()
+        check("Tapping Refresh catalog row triggers refreshCache", refresh_called == true)
+    end
 end
 
 print(string.format("=== Settings Regression Tests Complete: %d Failures ===", failures))

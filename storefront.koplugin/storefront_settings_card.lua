@@ -282,6 +282,27 @@ local function buildSettingRow(dialog_w, row_pad_h, row_pad_v, ui_font_size, ico
     return item
 end
 
+local function getCatalogLastFetched(Storefront, current_kind)
+    local tab = (Storefront.browser_state and Storefront.browser_state.tab) or "Plugins"
+    local kind = current_kind or (Storefront.browser_state and Storefront.browser_state.kind) or "plugin"
+    local ts = 0
+    if kind == "screensaver" or tab == "Screensavers" then
+        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+        ts = (ok_ss and StorefrontScreensavers and StorefrontScreensavers.getLastFetched and StorefrontScreensavers.getLastFetched()) or 0
+    else
+        ts = Cache.getLastFetched(kind) or 0
+    end
+    if not ts or ts <= 0 then
+        local ok_ss, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
+        local ss_ts = (ok_ss and StorefrontScreensavers and StorefrontScreensavers.getLastFetched and StorefrontScreensavers.getLastFetched()) or 0
+        local p_ts = Cache.getLastFetched("plugin") or 0
+        local pt_ts = Cache.getLastFetched("patch") or 0
+        local f_ts = Cache.getLastFetched("font") or 0
+        ts = math.max(ss_ts, p_ts, pt_ts, f_ts)
+    end
+    return ts
+end
+
 --- Main Settings Card dialog with in-place subviews (single modal dialog).
 --- Views: "root", "catalog", "screensavers", "notifications".
 function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
@@ -386,6 +407,41 @@ function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
         }
 
         if current_view == "root" then
+            -- Row 1: Refresh Catalog
+            local is_refreshing = Storefront.isRefreshing and Storefront:isRefreshing()
+            local ts = getCatalogLastFetched(Storefront, current_kind)
+            local meta_text = is_refreshing and _("Refreshing…") or (ts and ts > 0 and formatDateTime(ts) or _("Never"))
+            local meta_widget = TextWidget:new{
+                text = meta_text,
+                face = Font:getFace("cfont", subtext_font_size),
+                fgcolor = storefront_theme.color_label_dim,
+            }
+            add_row(content_vg, "rotate-cw.svg", _("Refresh catalog"), meta_widget, function()
+                if Storefront.isRefreshing and Storefront:isRefreshing() then
+                    InfoMessage:new{ text = _("Catalog refresh is already in progress."), timeout = 3 }:show()
+                    return
+                end
+                closeDialog()
+                local browser_was_open = Storefront.browser_menu ~= nil
+                local tab = (Storefront.browser_state and Storefront.browser_state.tab) or "Plugins"
+                local kind = (tab == "Screensavers" and "screensaver") or (Storefront.browser_state and Storefront.browser_state.kind) or "plugin"
+                local ok_nm, NetworkMgr2 = pcall(require, "ui/network/manager")
+                local do_refresh = function()
+                    if Storefront and type(Storefront.refreshCache) == "function" then
+                        Storefront:refreshCache(kind, function()
+                            if browser_was_open and type(Storefront.softRefreshCurrentBrowserView) == "function" then
+                                Storefront:softRefreshCurrentBrowserView()
+                            end
+                        end)
+                    end
+                end
+                if ok_nm and NetworkMgr2 and type(NetworkMgr2.runWhenOnline) == "function" then
+                    NetworkMgr2:runWhenOnline(do_refresh)
+                else
+                    do_refresh()
+                end
+            end)
+
             -- Category 1: Catalog & Search
             local catalog_mode = GitHubClient.getCatalogMode()
             local catalog_mode_label = (catalog_mode == "static") and "Storefront" or _("GitHub API")
@@ -475,46 +531,7 @@ function StorefrontSettingsCard.show(Storefront, initial_view, on_close)
                 renderView("catalog")
             end)
 
-            -- Row 2: Refresh Catalog
-            local is_refreshing = Storefront.isRefreshing and Storefront:isRefreshing()
-            local ts
-            if current_view == "screensavers" then
-                local ok_ss_ui, StorefrontScreensavers = pcall(require, "storefront_screensavers_ui")
-                ts = (ok_ss_ui and StorefrontScreensavers and StorefrontScreensavers.getLastFetched and StorefrontScreensavers.getLastFetched()) or 0
-            else
-                ts = Cache.getLastFetched(current_kind)
-            end
-            local meta_text = is_refreshing and _("Refreshing…") or (ts and ts > 0 and formatDateTime(ts) or _("Never"))
-            local meta_widget = TextWidget:new{
-                text = meta_text,
-                face = Font:getFace("cfont", subtext_font_size),
-                fgcolor = storefront_theme.color_label_dim,
-            }
-            add_row(content_vg, "rotate-cw.svg", _("Refresh catalog"), meta_widget, function()
-                if Storefront.isRefreshing and Storefront:isRefreshing() then
-                    InfoMessage:new{ text = _("Catalog refresh is already in progress."), timeout = 3 }:show()
-                    return
-                end
-                closeDialog()
-                local browser_was_open = Storefront.browser_menu ~= nil
-                local tab = (Storefront.browser_state and Storefront.browser_state.tab) or "Plugins"
-                local kind = (tab == "Screensavers" and "screensaver") or (Storefront.browser_state and Storefront.browser_state.kind) or "plugin"
-                local ok_nm, NetworkMgr2 = pcall(require, "ui/network/manager")
-                local do_refresh = function()
-                    Storefront:refreshCache(kind, function()
-                        if browser_was_open then
-                            Storefront:softRefreshCurrentBrowserView()
-                        end
-                    end)
-                end
-                if ok_nm and NetworkMgr2 and type(NetworkMgr2.runWhenOnline) == "function" then
-                    NetworkMgr2:runWhenOnline(do_refresh)
-                else
-                    do_refresh()
-                end
-            end)
-
-            -- Row 3: Clear Cache
+            -- Row 2: Clear Cache
             local cache_arrow = TextWidget:new{
                 text = "›",
                 face = Font:getFace("cfont", subtext_font_size),

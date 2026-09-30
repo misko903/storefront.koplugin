@@ -35,6 +35,7 @@ do
         saveBrowserState = function() end,
         getInstallRecordsMap = function() return {} end,
         getPatchRecordsMap = function() return {} end,
+        refreshCache = function(self, kind, cb) if cb then cb(true) end end,
     }
 
     StorefrontSettingsCard.show(dummy_storefront, function()
@@ -46,15 +47,17 @@ do
     check("Initial layout has category rows and close button", #overlay.layout >= 6)
 
     -- Identify category rows in root
-    local catalog_row = overlay.layout[1][1]
-    local screensaver_row = overlay.layout[2][1]
-    local notif_row = overlay.layout[3][1]
-    local blueprints_row = overlay.layout[4][1]
-    local about_row = overlay.layout[5][1]
-    local close_btn = overlay.layout[6][1]
+    local refresh_row = overlay.layout[1][1]
+    local catalog_row = overlay.layout[2][1]
+    local screensaver_row = overlay.layout[3][1]
+    local notif_row = overlay.layout[4][1]
+    local blueprints_row = overlay.layout[5][1]
+    local about_row = overlay.layout[6][1]
+    local close_btn = overlay.layout[7][1]
 
     check("Root rows have onTap callback", type(catalog_row.onTap) == "function")
     check("Root rows have ges_events.Tap", catalog_row.ges_events and catalog_row.ges_events.Tap ~= nil)
+    check("Root refresh row has onTap callback", type(refresh_row.onTap) == "function")
     check("Root close button has callback", type(close_btn.callback) == "function")
 
     -- Tap Catalog & Search row -> navigate to catalog in-place
@@ -63,8 +66,8 @@ do
     check("Clean overlay shown for subview", overlay ~= nil)
     check("Close callback was not called during subview navigation", close_count == 0)
 
-    -- In catalog subview: layout should have 5 setting rows + 1 action buttons row (Back & Close)
-    check("Catalog subview layout has rows + action buttons row", #overlay.layout == 6)
+    -- In catalog subview: layout should have 4 setting rows + 1 action buttons row (Back & Close)
+    check("Catalog subview layout has rows + action buttons row", #overlay.layout == 5)
     local back_btn = overlay.layout[#overlay.layout][1]
     local close_sub_btn = overlay.layout[#overlay.layout][2]
     check("Catalog has Back button", back_btn.text and back_btn.text:find("Back") ~= nil)
@@ -78,7 +81,7 @@ do
     check("Returned to root view with Close button", overlay.layout[#overlay.layout][1].text and overlay.layout[#overlay.layout][1].text:find("Close") ~= nil)
 
     -- Tap Notifications row -> navigate to notifications in-place
-    overlay.layout[3][1].onTap()
+    overlay.layout[4][1].onTap()
     overlay = _G.ui_tracker.last_shown
     check("In notifications subview", #overlay.layout == 3) -- 2 rows + 1 action buttons row
     local notif_back = overlay.layout[#overlay.layout][1]
@@ -91,7 +94,7 @@ do
     check("Close callback still not invoked", close_count == 0)
 
     -- Tap Screensavers row -> navigate to screensavers in-place
-    overlay.layout[2][1].onTap()
+    overlay.layout[3][1].onTap()
     overlay = _G.ui_tracker.last_shown
     check("In screensavers subview", #overlay.layout == 3)
     local ss_back = overlay.layout[#overlay.layout][1]

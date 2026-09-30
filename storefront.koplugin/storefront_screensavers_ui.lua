@@ -239,14 +239,20 @@ function StorefrontScreensavers.getLastFetched()
     end
     local ok_ds, DataStorage = pcall(require, "datastorage")
     if ok_ds and DataStorage and DataStorage.getDataDir then
-        local cat_file = DataStorage:getDataDir() .. "/cache/storefront_screensavers_catalog.json"
+        local data_dir = DataStorage:getDataDir()
+        local sf_file = data_dir .. "/cache/storefront_screensavers_catalog.json"
+        local rb_file = data_dir .. "/cache/storefront_readerbackdrop_catalog.json"
         local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
         if not ok_lfs then ok_lfs, lfs = pcall(require, "lfs") end
         if ok_lfs and lfs and lfs.attributes then
-            local attr = lfs.attributes(cat_file)
-            if attr and attr.modification then
-                return attr.modification
-            end
+            local t_sf = 0
+            local t_rb = 0
+            local attr_sf = lfs.attributes(sf_file)
+            if attr_sf and attr_sf.modification then t_sf = attr_sf.modification end
+            local attr_rb = lfs.attributes(rb_file)
+            if attr_rb and attr_rb.modification then t_rb = attr_rb.modification end
+            local max_t = math.max(t_sf, t_rb)
+            if max_t > 0 then return max_t end
         end
     end
     return 0
@@ -351,6 +357,10 @@ function StorefrontScreensavers.fetchCatalog(callback)
     if (sf_items and #sf_items > 0) or (rb_items and #rb_items > 0) then
         local merged = mergeCatalogs(sf_items, rb_items)
         cached_catalog_mem = merged
+        local ok_net, CatalogClient = pcall(require, "storefront_net_catalog")
+        if ok_net and CatalogClient and CatalogClient.setLastFetchedScreensavers then
+            CatalogClient.setLastFetchedScreensavers(os.time())
+        end
         if StorefrontLogger then
             StorefrontLogger.info(string.format("Storefront: screensavers catalog merged (%d total: %d Storefront, %d ReaderBackdrop)",
                 #merged, sf_items and #sf_items or 0, rb_items and #rb_items or 0))

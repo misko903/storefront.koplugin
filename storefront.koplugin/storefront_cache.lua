@@ -335,10 +335,31 @@ end
 function Cache.getLastFetched(kind)
     kind = kind or "plugin"
     Cache.init()
-    if Cache.countRepos(kind) == 0 then
-        return 0
-    end
     return _data[kind] and _data[kind].fetched_at or 0
+end
+
+function Cache.setLastFetched(kind, timestamp)
+    kind = kind or "plugin"
+    Cache.init()
+    timestamp = tonumber(timestamp) or os.time()
+    if _data[kind] then
+        _data[kind].fetched_at = timestamp
+        local file_map = {
+            plugin = PLUGINS_FILE,
+            patch = PATCHES_FILE,
+            font = FONTS_FILE,
+        }
+        if file_map[kind] then
+            writeJsonFile(file_map[kind], _data[kind])
+        end
+    end
+end
+
+function Cache.touchLastFetched(timestamp)
+    timestamp = tonumber(timestamp) or os.time()
+    for _, k in ipairs({"plugin", "patch", "font"}) do
+        Cache.setLastFetched(k, timestamp)
+    end
 end
 
 function Cache.countRepos(kind)
