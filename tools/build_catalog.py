@@ -324,7 +324,7 @@ def main():
         clean_name = name[:-9] if name.endswith(".koplugin") else name
         clean_key = f"{owner}/{clean_name}" if owner and name else ""
 
-        return (
+        live_info = (
             ratings_data.get(r_id)
             or (isinstance(r_id, str) and r_id.isdigit() and ratings_data.get(int(r_id)))
             or (isinstance(r_id, int) and ratings_data.get(str(r_id)))
@@ -336,6 +336,7 @@ def main():
             or (clean_key and ratings_data.get(clean_key.lower()))
             or {}
         )
+        return live_info
 
     for item in plugins + patches:
         r_info = get_rating_for_item(item)

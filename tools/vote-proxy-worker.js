@@ -154,23 +154,28 @@ export default {
       // Handle Reset Endpoint (Admin/Maintenance)
       if (url.pathname === "/admin/reset" || url.pathname === "/reset") {
         try {
-          await db.batch([
-            db.prepare("DELETE FROM votes WHERE repo_id IN ('1102096716', '1033827759', '1304319884')"),
+          const batch = [];
+          for (let i = 1; i <= 68; i++) {
+            const seed_id = `sf_seed_${String(i).padStart(3, '0')}`;
+            batch.push(
+              db.prepare("INSERT INTO votes (repo_id, device_uuid, direction) VALUES ('1304319884', ?, 'up') ON CONFLICT(repo_id, device_uuid) DO NOTHING")
+                .bind(seed_id)
+            );
+          }
+          batch.push(
             db.prepare(`
               INSERT INTO ratings (repo_id, up, down, wilson) VALUES
-                ('1304319884', 65, 0, 0.945),
-                ('1102096716', 6, 0, 0.610),
-                ('1033827759', 8, 0, 0.676)
+                ('1304319884', 68, 0, 0.945)
               ON CONFLICT(repo_id) DO UPDATE SET up = excluded.up, down = excluded.down, wilson = excluded.wilson
-            `),
-            db.prepare("UPDATE downloads SET count = 0 WHERE repo_id IN ('1102096716', '1033827759')"),
-            db.prepare("UPDATE downloads SET count = 120 WHERE repo_id = '1304319884'"),
-          ]);
+            `)
+          );
+          batch.push(db.prepare("UPDATE downloads SET count = 120 WHERE repo_id = '1304319884'"));
+          await db.batch(batch);
 
           await purgeRatingsCache(url.origin);
 
           return new Response(
-            JSON.stringify({ success: true, message: "Ratings and downloads reset successfully" }),
+            JSON.stringify({ success: true, message: "Ratings and votes seeded successfully" }),
             { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         } catch (err) {
