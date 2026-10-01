@@ -8850,7 +8850,7 @@ function Storefront:maybeCheckCatalogBackground()
                 logger.warn("Storefront: background catalog update failed: " .. tostring(status_or_err))
                 StorefrontLogger.warn("Storefront: background catalog update failed: " .. tostring(status_or_err))
             end
-        end)
+        end, true)
     else
         local msg = string.format("Storefront: catalog cache is fresh (kind: %s, %ds old <= 3600s), skipping background fetch", check_kind, age)
         logger.info(msg)
@@ -10564,12 +10564,19 @@ function Storefront:init()
         end
     end
 
-    -- Trigger non-blocking silent catalog update on startup if online and cache is older than 1 hour (3600s)
+    -- Trigger non-blocking silent catalog update on startup (deferred by 60s so it doesn't collide with KOReader startup)
     -- NOTE: We intentionally do NOT use NetworkMgr:runWhenOnline here because that prompts the user
     -- to enable wifi when offline. This is a background operation; silently skip if not connected.
-    UIManager:nextTick(function()
-        local ok_nm, NetworkMgr = pcall(require, "ui/network/manager")
-        if not (ok_nm and NetworkMgr) then return end
+    UIManager:scheduleIn(60, function()
+        local ok_nm, NotificationMgr = pcall(require, "storefront_notification_mgr")
+        if ok_nm and NotificationMgr and not NotificationMgr.isEnabled() then
+            logger.info("Storefront init: skipping background catalog update — notifications disabled")
+            if StorefrontLogger then StorefrontLogger.info("Storefront init: skipping background catalog update — notifications disabled") end
+            return
+        end
+
+        local ok_net, NetworkMgr = pcall(require, "ui/network/manager")
+        if not (ok_net and NetworkMgr) then return end
 
         -- Silently check connectivity without prompting
         local is_online = false
@@ -10582,6 +10589,15 @@ function Storefront:init()
         end
         if not is_online then
             logger.info("Storefront init: skipping background catalog update — not online")
+            return
+        end
+
+        local StorefrontUtils = require("storefront_utils")
+        local is_low, avail_kb = StorefrontUtils.isLowMemory(30 * 1024)
+        if is_low then
+            local msg = string.format("Storefront init: available memory is critically low (%d KB < 30 MB), skipping background catalog update to prevent OOM", avail_kb or 0)
+            logger.warn(msg)
+            if StorefrontLogger then StorefrontLogger.warn(msg) end
             return
         end
 
@@ -10664,12 +10680,12 @@ function Storefront:init()
                                         CatalogClient.loadBundledCatalog()
                                     end
                                 end
-                            end)
+                            end, true)
                         end
                         UIManager:scheduleIn(60, _catalog_retry_timer_fn)
                     end
                 end
-            end)
+            end, true)
         else
             local msg = string.format("Storefront init: catalog cache is fresh (plugins/patches: %ds old, screensavers: %ds old <= 3600s), skipping background fetch", age, ss_age)
             logger.info(msg)
@@ -10732,7 +10748,7 @@ function Storefront:scheduleNotificationTimer()
                             end
                         end)
                     end
-                end)
+                end, true)
             end
         end)
         if Storefront.instance and Storefront.instance.scheduleNotificationTimer then
@@ -10758,7 +10774,7 @@ function Storefront:onNetworkConnected()
                     end
                 end)
             end
-        end)
+        end, true)
     end
 end
 

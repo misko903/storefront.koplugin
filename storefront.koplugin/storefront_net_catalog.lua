@@ -579,58 +579,7 @@ function CatalogClient.processCatalogDataToStaging(catalog_data, staging_plugins
         return false, "invalid catalog format"
     end
     
-    local plugins = catalog_data.plugins or {}
-    local patches = catalog_data.patches or {}
     local fetched_at = os.time()
-
-    -- Patches: if remote catalog feed has 0 patches, preserve existing cached patches or bundled patches!
-    if #patches == 0 then
-        local bundled_path = CatalogClient.getBundledCatalogPath()
-        if bundled_path then
-            local bf = io.open(bundled_path, "rb")
-            if bf then
-                local bc = bf:read("*all")
-                bf:close()
-                local ok_b, bundled = pcall(json.decode, bc)
-                if ok_b and type(bundled) == "table" and type(bundled.patches) == "table" and #bundled.patches > 0 then
-                    patches = bundled.patches
-                end
-            end
-        end
-        if #patches == 0 then
-            local cache_dir = DataStorage:getDataDir() .. "/cache/Storefront"
-            local existing_patches_file = cache_dir .. "/storefront_patches.json"
-            local ef = io.open(existing_patches_file, "rb")
-            if ef then
-                local ec = ef:read("*all")
-                ef:close()
-                local ok_e, existing = pcall(json.decode, ec)
-                if ok_e and type(existing) == "table" and type(existing.repos) == "table" and #existing.repos > 0 then
-                    patches = existing.repos
-                end
-            end
-        end
-    end
-
-    -- Fonts are always sourced from the local bundled catalog.json, not the remote feed.
-    -- The remote catalog (ultimatejimmy.github.io) only contains plugins and patches.
-    local fonts = {}
-    local bundled_path = CatalogClient.getBundledCatalogPath()
-    if bundled_path then
-        local bf = io.open(bundled_path, "rb")
-        if bf then
-            local bc = bf:read("*all")
-            bf:close()
-            local ok_b, bundled = pcall(json.decode, bc)
-            if ok_b and type(bundled) == "table" and type(bundled.fonts) == "table" then
-                fonts = bundled.fonts
-            end
-        end
-    end
-    -- Fall back to fonts in the remote data if bundled has none (shouldn't normally happen)
-    if #fonts == 0 then
-        fonts = catalog_data.fonts or {}
-    end
 
     local function getOwnerLogin(owner)
         if type(owner) == "string" then return owner
@@ -639,6 +588,8 @@ function CatalogClient.processCatalogDataToStaging(catalog_data, staging_plugins
         return ""
     end
 
+    -- 1. Plugins Stage: process and write first, then release
+    local plugins = catalog_data.plugins or {}
     local plugin_list = {}
     for _, repo in ipairs(plugins) do
         local version = repo.version or (repo.latest_release and repo.latest_release.tag_name) or repo.release_tag_name or repo.tag_name
@@ -657,6 +608,56 @@ function CatalogClient.processCatalogDataToStaging(catalog_data, staging_plugins
             fetched_at = fetched_at,
             data = repo,
         })
+    end
+    catalog_data.plugins = nil
+    plugins = nil
+
+    local plugin_data = { fetched_at = fetched_at, repos = plugin_list }
+    local ok_p, ser_p = pcall(json.encode, plugin_data)
+    plugin_list = nil
+    plugin_data = nil
+    if not ok_p then return false, "plugin json encode failed" end
+    local fp, err_p = io.open(staging_plugins_file, "w")
+    if not fp then return false, "failed to write staging plugins" end
+    fp:write(ser_p)
+    fp:close()
+    ser_p = nil
+    collectgarbage("collect")
+
+    -- 2. Patches Stage: process and write second, then release
+    local patches = catalog_data.patches or {}
+    if #patches == 0 then
+        local bundled_path = CatalogClient.getBundledCatalogPath()
+        if bundled_path then
+            local bf = io.open(bundled_path, "rb")
+            if bf then
+                local bc = bf:read("*all")
+                bf:close()
+                local ok_b, bundled = pcall(json.decode, bc)
+                bc = nil
+                if ok_b and type(bundled) == "table" and type(bundled.patches) == "table" and #bundled.patches > 0 then
+                    patches = bundled.patches
+                end
+                bundled = nil
+                collectgarbage("collect")
+            end
+        end
+        if #patches == 0 then
+            local cache_dir = DataStorage:getDataDir() .. "/cache/Storefront"
+            local existing_patches_file = cache_dir .. "/storefront_patches.json"
+            local ef = io.open(existing_patches_file, "rb")
+            if ef then
+                local ec = ef:read("*all")
+                ef:close()
+                local ok_e, existing = pcall(json.decode, ec)
+                ec = nil
+                if ok_e and type(existing) == "table" and type(existing.repos) == "table" and #existing.repos > 0 then
+                    patches = existing.repos
+                end
+                existing = nil
+                collectgarbage("collect")
+            end
+        end
     end
 
     local patch_list = {}
@@ -695,64 +696,100 @@ function CatalogClient.processCatalogDataToStaging(catalog_data, staging_plugins
         end
         table.insert(patch_list, record)
     end
+    catalog_data.patches = nil
+    patches = nil
 
-    local font_list = {}
-    for _, repo in ipairs(fonts) do
-        table.insert(font_list, {
-            repo_id = tonumber(repo.id or repo.repo_id) or 0,
-            kind = "font",
-            name = tostring(repo.name or ""),
-            font_family = tostring(repo.font_family or repo.name or ""),
-            font_file = tostring(repo.font_file or ""),
-            owner = getOwnerLogin(repo.owner),
-            full_name = tostring(repo.full_name or ""),
-            description = repo.description ~= json.null and tostring(repo.description or "") or "",
-            category = tostring(repo.category or "Serif"),
-            license = tostring(repo.license or "OFL"),
-            stars = tonumber(repo.stargazers_count) or tonumber(repo.stars) or 0,
-            download_url = tostring(repo.download_url or ""),
-            html_url = tostring(repo.html_url or ""),
-            fetched_at = fetched_at,
-            data = repo,
-        })
-    end
-
-    local plugin_data = { fetched_at = fetched_at, repos = plugin_list }
     local patch_data = { fetched_at = fetched_at, repos = patch_list }
-    local font_data = { fetched_at = fetched_at, repos = font_list }
-
-    local ok_p, ser_p = pcall(json.encode, plugin_data)
-    if not ok_p then return false, "plugin json encode failed" end
-    local fp, err_p = io.open(staging_plugins_file, "w")
-    if not fp then return false, "failed to write staging plugins" end
-    fp:write(ser_p)
-    fp:close()
-
     local ok_pt, ser_pt = pcall(json.encode, patch_data)
+    patch_list = nil
+    patch_data = nil
     if not ok_pt then return false, "patch json encode failed" end
     local fpt, err_pt = io.open(staging_patches_file, "w")
     if not fpt then return false, "failed to write staging patches" end
     fpt:write(ser_pt)
     fpt:close()
+    ser_pt = nil
+    collectgarbage("collect")
+
+    -- 3. Fonts Stage: process and write third, then release
+    local fonts = {}
+    local bundled_path = CatalogClient.getBundledCatalogPath()
+    if bundled_path then
+        local bf = io.open(bundled_path, "rb")
+        if bf then
+            local bc = bf:read("*all")
+            bf:close()
+            local ok_b, bundled = pcall(json.decode, bc)
+            bc = nil
+            if ok_b and type(bundled) == "table" and type(bundled.fonts) == "table" then
+                fonts = bundled.fonts
+            end
+            bundled = nil
+            collectgarbage("collect")
+        end
+    end
+    if #fonts == 0 then
+        fonts = catalog_data.fonts or {}
+    end
+    catalog_data.fonts = nil
 
     if staging_fonts_file then
+        local font_list = {}
+        for _, repo in ipairs(fonts) do
+            table.insert(font_list, {
+                repo_id = tonumber(repo.id or repo.repo_id) or 0,
+                kind = "font",
+                name = tostring(repo.name or ""),
+                font_family = tostring(repo.font_family or repo.name or ""),
+                font_file = tostring(repo.font_file or ""),
+                owner = getOwnerLogin(repo.owner),
+                full_name = tostring(repo.full_name or ""),
+                description = repo.description ~= json.null and tostring(repo.description or "") or "",
+                category = tostring(repo.category or "Serif"),
+                license = tostring(repo.license or "OFL"),
+                stars = tonumber(repo.stargazers_count) or tonumber(repo.stars) or 0,
+                download_url = tostring(repo.download_url or ""),
+                html_url = tostring(repo.html_url or ""),
+                fetched_at = fetched_at,
+                data = repo,
+            })
+        end
+        fonts = nil
+
+        local font_data = { fetched_at = fetched_at, repos = font_list }
         local ok_f, ser_f = pcall(json.encode, font_data)
+        font_list = nil
+        font_data = nil
         if not ok_f then return false, "font json encode failed" end
         local ff, err_f = io.open(staging_fonts_file, "w")
         if not ff then return false, "failed to write staging fonts" end
         ff:write(ser_f)
         ff:close()
+        ser_f = nil
+        collectgarbage("collect")
     end
 
     return true, nil
 end
 
-function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
+function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback, is_background)
     local GitHub = require("storefront_net_github")
     if GitHub and GitHub.isDirectApiEnabled and GitHub.isDirectApiEnabled() then
         logger.info("Storefront: skipping background catalog update because Direct API mode is active")
         if callback then callback(false, "Direct API mode active") end
         return
+    end
+
+    if is_background then
+        local StorefrontUtils = require("storefront_utils")
+        local is_low, avail_kb = StorefrontUtils.isLowMemory(30 * 1024)
+        if is_low then
+            local msg = string.format("Storefront: available memory is critically low (%d KB < 30 MB), skipping background catalog fetch to prevent OOM", avail_kb or 0)
+            logger.warn(msg)
+            if StorefrontLogger then StorefrontLogger.warn(msg) end
+            if callback then callback(false, "low_memory") end
+            return
+        end
     end
 
     if CatalogClient._async_pid then
@@ -869,6 +906,7 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
     -- Run download AND JSON decoding AND disk writing inside child subprocess
     local pid, parent_read_fd = ffiutil.runInSubProcess(function(pid, child_write_fd)
         local ok, err = xpcall(function()
+            collectgarbage("collect")
             local ok_dl, dl_status_or_err = CatalogClient.fetchCatalogToFile(target_url, staging_raw_catalog)
             local ok_ss, ss_status_or_err = CatalogClient.fetchScreensaverCatalogToFile(staging_screensavers_file)
             local ok_rb, rb_status_or_err = CatalogClient.fetchReaderBackdropCatalogToFile(staging_rb_file)
@@ -896,6 +934,7 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                             dl_status_or_err = "updated"
                         end
                         bf:close()
+                        collectgarbage("collect")
                     end
                 end
             end
@@ -909,8 +948,13 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     os.remove(staging_raw_catalog)
 
                     local ok_dec, parsed = pcall(json.decode, content)
+                    content = nil
+                    collectgarbage("collect")
+
                     if ok_dec and type(parsed) == "table" then
                         local ok_proc, proc_err = CatalogClient.processCatalogDataToStaging(parsed, staging_plugins_file, staging_patches_file, staging_fonts_file)
+                        parsed = nil
+                        collectgarbage("collect")
                         if ok_proc then
                             main_proc_ok = true
                         else
@@ -927,11 +971,14 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     local ss_content = f_ss:read("*all")
                     f_ss:close()
                     local ok_dec_ss, parsed_ss = pcall(json.decode, ss_content)
+                    ss_content = nil
                     if ok_dec_ss and type(parsed_ss) == "table" and #parsed_ss > 0 then
                         ss_proc_ok = true
                     else
                         os.remove(staging_screensavers_file)
                     end
+                    parsed_ss = nil
+                    collectgarbage("collect")
                 end
             end
 
@@ -943,6 +990,7 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     local rb_content = f_rb:read("*all")
                     f_rb:close()
                     local ok_dec_rb, parsed_rb = pcall(json.decode, rb_content)
+                    rb_content = nil
                     if ok_dec_rb and type(parsed_rb) == "table" and #parsed_rb > 0 then
                         rb_proc_ok = true
                         if StorefrontLogger then
@@ -951,8 +999,12 @@ function CatalogClient.fetchAndUpdateCacheAsync(url_to_fetch, callback)
                     else
                         os.remove(staging_rb_file)
                     end
+                    parsed_rb = nil
+                    collectgarbage("collect")
                 end
             end
+
+            collectgarbage("collect")
 
             local res_main = main_proc_ok and "updated" or (main_not_mod and "not_modified" or ("err:" .. tostring(dl_status_or_err)))
             local res_ss = ss_proc_ok and "updated" or (ss_not_mod and "not_modified" or ("err:" .. tostring(ss_status_or_err)))

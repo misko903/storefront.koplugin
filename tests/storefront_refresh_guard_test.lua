@@ -1,7 +1,10 @@
 -- storefront_refresh_guard_test.lua
 -- Unit tests for Refresh Safeguarding & In-Flight Background Refresh Detection
 
-package.path = "plugins/storefront.koplugin/?.lua;storefront.koplugin/?.lua;../?.lua;?.lua;" .. package.path
+local script_dir = debug.getinfo(1, "S").source:match("^@?(.*[/\\])") or "./"
+package.path = script_dir .. "../storefront.koplugin/?.lua;" .. script_dir .. "?.lua;" .. script_dir .. "../?.lua;" .. package.path
+
+require("spec_helper")
 
 local failures = 0
 local function check(label, condition)
