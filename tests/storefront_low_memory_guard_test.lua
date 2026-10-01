@@ -225,6 +225,24 @@ do
     end
 end
 
+-- ----------------------------------------------------
+-- Test 6: ReaderBackdrop ETag storage and clear
+-- ----------------------------------------------------
+do
+    CatalogClient.clearStoredReaderBackdropEtag()
+    check("getStoredReaderBackdropEtag is nil initially", CatalogClient.getStoredReaderBackdropEtag() == nil)
+
+    CatalogClient.setStoredReaderBackdropEtag("rb_etag_12345")
+    check("getStoredReaderBackdropEtag returns saved etag", CatalogClient.getStoredReaderBackdropEtag() == "rb_etag_12345")
+
+    CatalogClient.clearStoredScreensaverEtag()
+    check("clearStoredScreensaverEtag also clears readerbackdrop etag", CatalogClient.getStoredReaderBackdropEtag() == nil)
+
+    CatalogClient.setStoredReaderBackdropEtag("rb_etag_abc")
+    CatalogClient.clearStoredReaderBackdropEtag()
+    check("clearStoredReaderBackdropEtag clears readerbackdrop etag", CatalogClient.getStoredReaderBackdropEtag() == nil)
+end
+
 print("=== Low-Memory Guard & Catalog Staging Tests Summary ===")
 print(string.format("Total Failures: %d", failures))
 if failures > 0 then

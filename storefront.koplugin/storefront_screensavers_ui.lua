@@ -149,8 +149,13 @@ function StorefrontScreensavers.clearCachedCatalog()
     cached_catalog_mem = nil
     pcall(function()
         local ok_net, CatalogClient = pcall(require, "storefront_net_catalog")
-        if ok_net and CatalogClient and CatalogClient.clearStoredScreensaverEtag then
-            CatalogClient.clearStoredScreensaverEtag()
+        if ok_net and CatalogClient then
+            if CatalogClient.clearStoredScreensaverEtag then
+                CatalogClient.clearStoredScreensaverEtag()
+            end
+            if CatalogClient.clearStoredReaderBackdropEtag then
+                CatalogClient.clearStoredReaderBackdropEtag()
+            end
         end
     end)
     local ok_ds, DataStorage = pcall(require, "datastorage")
